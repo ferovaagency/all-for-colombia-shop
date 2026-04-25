@@ -115,6 +115,7 @@ function RootComponent() {
       <WhatsAppButton />
       <AIChatWidget />
       <SocialProofPopup />
+      <DiscountWheel />
       <CookieBanner />
       <Toaster richColors position="top-right" />
     </>
