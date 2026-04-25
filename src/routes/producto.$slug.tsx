@@ -245,19 +245,25 @@ function ProductDetailPage() {
           <h1 className="text-3xl md:text-4xl font-bold mb-2">{product.name}</h1>
           {product.sku && <p className="text-sm text-muted-foreground mb-4">SKU: {product.sku}</p>}
 
-          <div className="flex items-baseline gap-3 mb-6">
-            <span className="text-3xl font-bold text-primary">{formatCOP(finalPrice)}</span>
-            {hasDiscount && (
-              <>
-                <span className="text-xl line-through text-muted-foreground">
-                  {formatCOP(product.price ?? 0)}
-                </span>
-                <span className="bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded">
-                  OFERTA
-                </span>
-              </>
-            )}
-          </div>
+          {inStock ? (
+            <div className="flex items-baseline gap-3 mb-6 flex-wrap">
+              <span className="text-3xl font-bold text-primary">{formatCOP(finalPrice)}</span>
+              {hasDiscount && (
+                <>
+                  <span className="text-xl line-through text-muted-foreground">
+                    {formatCOP(product.price ?? 0)}
+                  </span>
+                  <span className="bg-destructive/10 text-destructive text-sm font-bold px-2 py-1 rounded">
+                    -{Math.round((1 - (product.sale_price as number) / (product.price as number)) * 100)}%
+                  </span>
+                </>
+              )}
+            </div>
+          ) : (
+            <p className="text-base text-muted-foreground italic mb-6">
+              Consulte disponibilidad y precio
+            </p>
+          )}
 
           {product.short_description && (
             <p className="text-muted-foreground mb-6">{product.short_description}</p>
