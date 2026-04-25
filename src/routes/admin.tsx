@@ -249,10 +249,94 @@ function AdminPage() {
         <TabsContent value="blog" className="mt-6">
           <SimpleList items={posts} cols={["title", "slug", "category", "published"]} />
         </TabsContent>
+
+        <TabsContent value="conversations" className="mt-6">
+          <div className="bg-card border rounded-xl overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Sesión</TableHead>
+                  <TableHead>Mensajes</TableHead>
+                  <TableHead>Página</TableHead>
+                  <TableHead>Última actualización</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {conversations.map((c) => {
+                  const msgs = Array.isArray(c.messages) ? c.messages : [];
+                  return (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-mono text-xs">{c.session_id?.slice(0, 24)}</TableCell>
+                      <TableCell>{msgs.length}</TableCell>
+                      <TableCell className="text-xs max-w-[240px] truncate">{c.page_url || "—"}</TableCell>
+                      <TableCell className="text-xs">
+                        {c.updated_at ? new Date(c.updated_at).toLocaleString("es-CO") : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Button size="sm" variant="outline" onClick={() => setViewingConv(c)}>
+                          Ver detalle
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {conversations.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      Sin conversaciones todavía
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
       </Tabs>
 
       <EditProductDialog product={editing} onClose={() => setEditing(null)} onSaved={reload} />
+      <ConversationDialog conversation={viewingConv} onClose={() => setViewingConv(null)} />
     </div>
+  );
+}
+
+function ConversationDialog({ conversation, onClose }: { conversation: any | null; onClose: () => void }) {
+  const msgs: { role: string; content: string }[] = Array.isArray(conversation?.messages)
+    ? conversation.messages
+    : [];
+  return (
+    <Dialog open={!!conversation} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Conversación con Al</DialogTitle>
+        </DialogHeader>
+        {conversation && (
+          <div className="text-xs text-muted-foreground space-y-0.5 mb-2">
+            <div>Sesión: <span className="font-mono">{conversation.session_id}</span></div>
+            <div>Página: {conversation.page_url || "—"}</div>
+            <div>Actualizada: {conversation.updated_at ? new Date(conversation.updated_at).toLocaleString("es-CO") : "—"}</div>
+          </div>
+        )}
+        <div className="flex-1 overflow-y-auto space-y-2 bg-muted/30 rounded-lg p-3">
+          {msgs.map((m, i) => (
+            <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
+              <div
+                className={
+                  m.role === "user"
+                    ? "max-w-[80%] bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-3 py-2 text-sm"
+                    : "max-w-[80%] bg-card border rounded-2xl rounded-tl-sm px-3 py-2 text-sm whitespace-pre-wrap"
+                }
+              >
+                {m.content}
+              </div>
+            </div>
+          ))}
+          {msgs.length === 0 && (
+            <p className="text-center text-sm text-muted-foreground py-4">Sin mensajes</p>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
