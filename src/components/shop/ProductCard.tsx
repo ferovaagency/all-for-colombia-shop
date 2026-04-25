@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
 
@@ -17,12 +17,22 @@ type Product = {
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
   const finalPrice = product.sale_price ?? product.price ?? 0;
-  const hasDiscount = product.sale_price && product.price && product.sale_price < product.price;
+  const hasDiscount =
+    !!product.sale_price && !!product.price && product.sale_price < product.price;
+  const discountPct = hasDiscount
+    ? Math.round((1 - (product.sale_price as number) / (product.price as number)) * 100)
+    : 0;
+  const hasStock =
+    product.stock !== null && product.stock !== undefined && product.stock > 0;
   const img = product.images?.[0];
 
   return (
     <article className="group bg-card border rounded-xl overflow-hidden hover:shadow-elevated transition-smooth flex flex-col">
-      <Link to="/producto/$slug" params={{ slug: product.slug }} className="relative block aspect-square bg-muted overflow-hidden">
+      <Link
+        to="/producto/$slug"
+        params={{ slug: product.slug }}
+        className="relative block aspect-square bg-muted overflow-hidden"
+      >
         {img ? (
           <img
             src={img}
@@ -35,9 +45,14 @@ export function ProductCard({ product }: { product: Product }) {
             Sin imagen
           </div>
         )}
-        {hasDiscount && (
+        {hasDiscount && hasStock && (
           <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded">
-            OFERTA
+            -{discountPct}%
+          </span>
+        )}
+        {!hasStock && (
+          <span className="absolute top-2 left-2 bg-muted text-muted-foreground text-xs font-bold px-2 py-1 rounded border">
+            Agotado
           </span>
         )}
       </Link>
@@ -51,44 +66,62 @@ export function ProductCard({ product }: { product: Product }) {
         {product.sku && <p className="text-xs text-muted-foreground mb-2">SKU: {product.sku}</p>}
 
         <div className="mt-auto">
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-lg font-bold text-primary">{formatCOP(finalPrice)}</span>
-            {hasDiscount && (
-              <span className="text-sm line-through text-muted-foreground">{formatCOP(product.price!)}</span>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              className="flex-1 bg-primary"
-              onClick={() =>
-                add({
-                  id: product.id,
-                  slug: product.slug,
-                  name: product.name,
-                  price: finalPrice,
-                  image: img,
-                  sku: product.sku ?? undefined,
-                })
-              }
-            >
-              <ShoppingCart className="h-4 w-4 mr-1" />
-              Agregar
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              asChild
-            >
-              <a
-                href={whatsappUrl(`Hola, quiero cotizar: ${product.name} (${product.slug})`)}
-                target="_blank"
-                rel="noopener noreferrer"
+          {hasStock ? (
+            <div className="space-y-2">
+              {hasDiscount ? (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-lg font-bold text-primary">
+                    {formatCOP(product.sale_price as number)}
+                  </span>
+                  <span className="text-sm text-muted-foreground line-through">
+                    {formatCOP(product.price as number)}
+                  </span>
+                  <span className="text-xs bg-destructive/10 text-destructive px-1.5 py-0.5 rounded font-semibold">
+                    -{discountPct}%
+                  </span>
+                </div>
+              ) : (
+                product.price != null && (
+                  <p className="text-lg font-bold text-primary">{formatCOP(product.price)}</p>
+                )
+              )}
+              <Button
+                size="sm"
+                className="w-full bg-primary"
+                onClick={() =>
+                  add({
+                    id: product.id,
+                    slug: product.slug,
+                    name: product.name,
+                    price: finalPrice,
+                    image: img,
+                    sku: product.sku ?? undefined,
+                  })
+                }
               >
-                Cotizar
-              </a>
-            </Button>
-          </div>
+                <ShoppingCart className="h-4 w-4 mr-1" />
+                Agregar al carrito
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground italic">
+                Consulte disponibilidad y precio
+              </p>
+              <Button size="sm" variant="outline" className="w-full" asChild>
+                <a
+                  href={whatsappUrl(
+                    `Hola, quisiera cotizar: ${product.name} (SKU: ${product.sku || "N/A"})`,
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="h-4 w-4 mr-1" />
+                  Cotizar por WhatsApp
+                </a>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </article>
