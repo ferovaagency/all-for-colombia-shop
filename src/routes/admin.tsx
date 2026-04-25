@@ -110,6 +110,9 @@ function AdminPage() {
           <TabsTrigger value="brands">Marcas ({brands.length})</TabsTrigger>
           <TabsTrigger value="customers">Clientes ({customers.length})</TabsTrigger>
           <TabsTrigger value="blog">Blog ({posts.length})</TabsTrigger>
+          <TabsTrigger value="conversations">
+            <MessageSquare className="h-3.5 w-3.5 mr-1" /> Conversaciones IA ({conversations.length})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="mt-6">
