@@ -159,54 +159,84 @@ export function DiscountWheel() {
             <h2 className="text-xl font-bold mb-1">¡Gira la ruleta!</h2>
             <p className="text-sm text-white/80 mb-6">Toca el botón para ver qué te tocó.</p>
 
-            <div className="relative mx-auto mb-6 w-[280px] h-[280px]">
-              {/* Pointer */}
-              <div
-                className="absolute left-1/2 -translate-x-1/2 -top-2 z-20"
-                style={{
-                  width: 0,
-                  height: 0,
-                  borderLeft: "12px solid transparent",
-                  borderRight: "12px solid transparent",
-                  borderTop: "20px solid #fff",
-                  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
-                }}
-              />
-              {/* Wheel */}
-              <div
-                className="absolute inset-0 rounded-full border-4 border-white shadow-elevated"
-                style={{
-                  transform: `rotate(${rotation}deg)`,
-                  transition: spinning
-                    ? "transform 4s cubic-bezier(0.17, 0.67, 0.21, 0.99)"
-                    : "none",
-                  background: `conic-gradient(${SEGMENTS.map((_, i) => {
-                    const start = i * SEGMENT_DEG;
-                    const end = (i + 1) * SEGMENT_DEG;
-                    return `${COLORS[i % COLORS.length]} ${start}deg ${end}deg`;
-                  }).join(", ")})`,
-                }}
+            <div className="relative mx-auto mb-6 w-[300px] h-[300px]">
+              {(() => {
+                const SEG_COUNT = SEGMENTS.length;
+                const RADIUS = 140;
+                const CENTER = 150;
+                const colors = ["#020f1e", "#568baf", "#3e4653", "#000e1e", "#568baf", "#cccfd5"];
+                const textColors = ["#ffffff", "#ffffff", "#ffffff", "#568baf", "#ffffff", "#020f1e"];
+                const angle = (2 * Math.PI) / SEG_COUNT;
+                return (
+                  <svg
+                    viewBox="0 0 300 300"
+                    className="absolute inset-0"
+                    style={{
+                      transform: `rotate(${rotation}deg)`,
+                      transition: spinning
+                        ? "transform 4s cubic-bezier(0.17, 0.67, 0.21, 0.99)"
+                        : "none",
+                      filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.25))",
+                    }}
+                  >
+                    {SEGMENTS.map((seg, i) => {
+                      const startAngle = i * angle - Math.PI / 2;
+                      const endAngle = startAngle + angle;
+                      const midAngle = startAngle + angle / 2;
+                      const x1 = CENTER + RADIUS * Math.cos(startAngle);
+                      const y1 = CENTER + RADIUS * Math.sin(startAngle);
+                      const x2 = CENTER + RADIUS * Math.cos(endAngle);
+                      const y2 = CENTER + RADIUS * Math.sin(endAngle);
+                      const textR = RADIUS * 0.62;
+                      const textX = CENTER + textR * Math.cos(midAngle);
+                      const textY = CENTER + textR * Math.sin(midAngle);
+                      const textRotation = (midAngle * 180) / Math.PI + 90;
+                      const lines = seg.label.split(" ");
+                      return (
+                        <g key={i}>
+                          <path
+                            d={`M ${CENTER} ${CENTER} L ${x1} ${y1} A ${RADIUS} ${RADIUS} 0 0 1 ${x2} ${y2} Z`}
+                            fill={colors[i]}
+                            stroke="#ffffff"
+                            strokeWidth="2"
+                          />
+                          <text
+                            x={textX}
+                            y={textY}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fill={textColors[i]}
+                            fontSize="11"
+                            fontWeight="bold"
+                            transform={`rotate(${textRotation}, ${textX}, ${textY})`}
+                          >
+                            {lines.length > 1 ? (
+                              <>
+                                <tspan x={textX} dy="-0.4em">{lines[0].slice(0, 8)}</tspan>
+                                <tspan x={textX} dy="1.1em">{lines.slice(1).join(" ").slice(0, 8)}</tspan>
+                              </>
+                            ) : (
+                              seg.label.slice(0, 8)
+                            )}
+                          </text>
+                        </g>
+                      );
+                    })}
+                    <circle cx={CENTER} cy={CENTER} r="30" fill="#ffffff" stroke="#568baf" strokeWidth="3" />
+                    <text x={CENTER} y={CENTER} textAnchor="middle" dominantBaseline="middle" fontSize="22">
+                      🎯
+                    </text>
+                  </svg>
+                );
+              })()}
+              {/* Pointer (fixed, doesn't rotate) */}
+              <svg
+                viewBox="0 0 300 300"
+                className="absolute inset-0 pointer-events-none"
+                style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}
               >
-                {SEGMENTS.map((seg, i) => {
-                  const angle = i * SEGMENT_DEG + SEGMENT_DEG / 2;
-                  return (
-                    <div
-                      key={i}
-                      className="absolute left-1/2 top-1/2 origin-[0_0] text-white text-[11px] font-bold uppercase tracking-wide"
-                      style={{
-                        transform: `rotate(${angle}deg) translate(0, -110px) rotate(90deg)`,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      <span className="inline-block -translate-x-1/2">{seg.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              {/* Hub */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white shadow-lg z-10 flex items-center justify-center">
-                <Gift className="h-5 w-5 text-primary" />
-              </div>
+                <polygon points="150,5 140,28 160,28" fill="#568baf" stroke="#ffffff" strokeWidth="2" />
+              </svg>
             </div>
 
             <Button
