@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowRight, Search, Sparkles, Truck, ShieldCheck, Building2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, ChevronLeft, ChevronRight, Search, Sparkles, Truck, ShieldCheck, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/ProductCard";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,13 +19,47 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const CATEGORY_ICONS: Record<string, string> = {
-  tecnologia: "💻",
-  hogar: "🏠",
-  "equipos-corporativos": "🏢",
-  "aires-acondicionados": "❄️",
-  ploters: "🖨️",
-  otros: "📦",
+type HeroSlide = {
+  image: string | null;
+  title: string;
+  subtitle: string;
+  cta: string;
+  ctaLink: string;
+  badge?: string;
+};
+
+const HERO_SLIDES: HeroSlide[] = [
+  {
+    image: null,
+    title: "Todo lo que necesitas para tu hogar y empresa",
+    subtitle: "Tecnología, hogar, equipos corporativos y más. Entrega a todo Colombia.",
+    cta: "Ver productos",
+    ctaLink: "/tienda",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1920&q=80",
+    title: "Equipos corporativos con precios especiales",
+    subtitle: "Compras por volumen. Facturación y soporte incluido.",
+    cta: "Cotizar ahora",
+    ctaLink: "/ventas-corporativas",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920&q=80",
+    badge: "NUEVO",
+    title: "Aires acondicionados para tu empresa",
+    subtitle: "Las mejores marcas. Entrega a todo Colombia.",
+    cta: "Ver aires",
+    ctaLink: "/tienda",
+  },
+];
+
+const CATEGORY_IMAGES: Record<string, string> = {
+  tecnologia: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80",
+  hogar: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400&q=80",
+  "equipos-corporativos": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80",
+  "aires-acondicionados": "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&q=80",
+  ploters: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
+  otros: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80",
 };
 
 function HomePage() {
@@ -34,6 +69,21 @@ function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
+
+  // Hero slider
+  const [current, setCurrent] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setCurrent((p) => (p + 1) % HERO_SLIDES.length), 5000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Categories carousel
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const scrollCarousel = (dir: "left" | "right") => {
+    const el = carouselRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "left" ? -240 : 240, behavior: "smooth" });
+  };
 
   useEffect(() => {
     (async () => {
@@ -62,52 +112,116 @@ function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative bg-gradient-hero text-primary-foreground overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: "radial-gradient(circle at 20% 20%, white 0, transparent 40%), radial-gradient(circle at 80% 80%, white 0, transparent 40%)",
-        }} />
-        <div className="container mx-auto px-4 py-20 md:py-28 relative">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full text-xs font-medium mb-5">
-              <Sparkles className="h-3.5 w-3.5" /> Envíos a todo Colombia
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-5 animate-fade-in-up">
-              Todo lo que necesitas para tu hogar y empresa
-            </h1>
-            <p className="text-lg md:text-xl text-white/85 mb-8 max-w-2xl">
-              Tecnología, hogar, equipos corporativos, aires acondicionados, plóters y más. Entrega a todo Colombia.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
-                <Link to="/tienda">Ver productos <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10">
-                <Link to="/ventas-corporativas">Ventas corporativas</Link>
-              </Button>
-            </div>
+      {/* Hero slider */}
+      <section className="relative overflow-hidden text-primary-foreground">
+        <div className="relative h-[480px] md:h-[560px]">
+          {HERO_SLIDES.map((slide, i) => (
+            <div
+              key={i}
+              className={cn(
+                "absolute inset-0 transition-opacity duration-700",
+                i === current ? "opacity-100" : "opacity-0 pointer-events-none",
+              )}
+              aria-hidden={i !== current}
+            >
+              {slide.image ? (
+                <>
+                  <img src={slide.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/30" />
+                </>
+              ) : (
+                <div className="absolute inset-0 bg-gradient-hero" />
+              )}
+              <div className="absolute inset-0 opacity-10" style={{
+                backgroundImage: "radial-gradient(circle at 20% 20%, white 0, transparent 40%), radial-gradient(circle at 80% 80%, white 0, transparent 40%)",
+              }} />
 
-            {/* Search */}
-            <form onSubmit={onSearch} className="mt-10 max-w-xl">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="¿Qué estás buscando?"
-                  className="h-14 pl-12 pr-32 bg-white text-foreground text-base shadow-elevated"
-                />
-                <Button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-secondary">
-                  Buscar
-                </Button>
+              <div className="container relative mx-auto h-full px-4 flex items-center">
+                <div className="max-w-3xl">
+                  {slide.badge ? (
+                    <div className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-xs font-bold mb-5">
+                      <Sparkles className="h-3.5 w-3.5" /> {slide.badge}
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full text-xs font-medium mb-5">
+                      <Sparkles className="h-3.5 w-3.5" /> Envíos a todo Colombia
+                    </div>
+                  )}
+                  <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-5">
+                    {slide.title}
+                  </h1>
+                  <p className="text-lg md:text-xl text-white/85 mb-8 max-w-2xl">
+                    {slide.subtitle}
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
+                      <Link to={slide.ctaLink}>{slide.cta} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                    </Button>
+                    <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10">
+                      <Link to="/ventas-corporativas">Ventas corporativas</Link>
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </form>
+            </div>
+          ))}
+
+          {/* Arrows */}
+          <button
+            type="button"
+            onClick={() => setCurrent((p) => (p - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)}
+            aria-label="Anterior"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 h-11 w-11 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur flex items-center justify-center text-white"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setCurrent((p) => (p + 1) % HERO_SLIDES.length)}
+            aria-label="Siguiente"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-11 w-11 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur flex items-center justify-center text-white"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+
+          {/* Dots */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+            {HERO_SLIDES.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setCurrent(i)}
+                aria-label={`Ir al slide ${i + 1}`}
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  i === current ? "w-8 bg-white" : "w-2 bg-white/50 hover:bg-white/75",
+                )}
+              />
+            ))}
           </div>
+        </div>
+
+        {/* Search bar overlapping the hero */}
+        <div className="container mx-auto px-4 -mt-10 relative z-20">
+          <form onSubmit={onSearch} className="max-w-2xl mx-auto">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="¿Qué estás buscando?"
+                className="h-14 pl-12 pr-32 bg-white text-foreground text-base shadow-elevated border-transparent"
+              />
+              <Button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 bg-secondary">
+                Buscar
+              </Button>
+            </div>
+          </form>
         </div>
       </section>
 
       {/* Trust strip */}
-      <section className="bg-muted/40 border-y">
+      <section className="bg-muted/40 border-y mt-12">
         <div className="container mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <Trust icon={<Truck className="h-5 w-5" />} title="Envíos a todo Colombia" />
           <Trust icon={<ShieldCheck className="h-5 w-5" />} title="Compra protegida" />
@@ -116,30 +230,69 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* Categories carousel */}
       <section className="container mx-auto px-4 py-16">
         <div className="flex items-end justify-between mb-8">
           <div>
             <h2 className="text-3xl font-bold">Categorías</h2>
             <p className="text-muted-foreground">Explora por tipo de producto</p>
           </div>
-          <Link to="/categorias" className="text-secondary text-sm font-medium hover:underline hidden md:inline-flex items-center gap-1">
-            Ver todas <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              to="/tienda"
-              search={{ categoria: cat.slug } as any}
-              className="group bg-card border rounded-xl p-6 hover:shadow-elevated hover:border-secondary transition-smooth"
+          <div className="hidden md:flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => scrollCarousel("left")}
+              aria-label="Anterior"
+              className="h-10 w-10 rounded-full border bg-background hover:bg-muted flex items-center justify-center transition-smooth"
             >
-              <div className="text-4xl mb-3">{CATEGORY_ICONS[cat.slug] || "🛍️"}</div>
-              <h3 className="font-semibold text-lg group-hover:text-secondary transition-smooth">{cat.name}</h3>
-              <p className="text-sm text-muted-foreground">{counts[cat.id] || 0} producto{counts[cat.id] === 1 ? "" : "s"}</p>
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollCarousel("right")}
+              aria-label="Siguiente"
+              className="h-10 w-10 rounded-full border bg-background hover:bg-muted flex items-center justify-center transition-smooth"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+            <Link to="/categorias" className="ml-2 text-secondary text-sm font-medium hover:underline inline-flex items-center gap-1">
+              Ver todas <ArrowRight className="h-4 w-4" />
             </Link>
-          ))}
+          </div>
+        </div>
+
+        <div
+          ref={carouselRef}
+          className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {categories.map((cat) => {
+            const img = cat.image || CATEGORY_IMAGES[cat.slug] || CATEGORY_IMAGES.otros;
+            const productCount = counts[cat.id] || 0;
+            return (
+              <Link
+                key={cat.id}
+                to="/tienda"
+                search={{ categoria: cat.slug } as any}
+                className="group relative shrink-0 w-[200px] h-[200px] rounded-xl overflow-hidden snap-start shadow-card hover:shadow-elevated transition-smooth"
+              >
+                <img
+                  src={img}
+                  alt={cat.name}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4 text-primary-foreground">
+                  <h3 className="font-semibold text-base leading-tight">{cat.name}</h3>
+                  <p className="text-xs text-white/80 mt-0.5">
+                    {productCount} producto{productCount === 1 ? "" : "s"}
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
+          {categories.length === 0 && (
+            <div className="text-sm text-muted-foreground py-8">Cargando categorías…</div>
+          )}
         </div>
       </section>
 
