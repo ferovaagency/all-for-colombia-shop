@@ -115,7 +115,7 @@ function CorporatePage() {
                 <Link
                   key={cat.id}
                   to="/tienda"
-                  search={{ category: cat.slug }}
+                  search={{ categoria: cat.slug }}
                   className="bg-card border rounded-xl p-5 text-center hover:shadow-card hover:border-secondary transition-smooth group"
                 >
                   <div className="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-secondary/20 transition-colors">
