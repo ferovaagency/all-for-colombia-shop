@@ -44,7 +44,7 @@ const HERO_SLIDES: HeroSlide[] = [
     ctaLink: "/ventas-corporativas",
   },
   {
-    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920&q=80",
+    image: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=1920&q=80",
     badge: "NUEVO",
     title: "Aires acondicionados para tu empresa",
     subtitle: "Las mejores marcas. Entrega a todo Colombia.",
