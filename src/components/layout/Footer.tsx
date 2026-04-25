@@ -1,13 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Mail, Phone, Truck } from "lucide-react";
 import { CONTACT_EMAIL, WHATSAPP_NUMBER } from "@/lib/cart";
+import { Logo } from "@/components/layout/Logo";
 
 export function Footer() {
   return (
     <footer className="bg-primary text-primary-foreground mt-20">
       <div className="container mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
-          <div className="text-2xl font-bold mb-3">All For All</div>
+          <div className="mb-3">
+            <Logo variant="light" className="h-10 w-auto" />
+          </div>
           <p className="text-sm text-primary-foreground/75 leading-relaxed">
             Todo lo que necesitas, para todos. Tecnología, hogar y soluciones
             corporativas en toda Colombia.
