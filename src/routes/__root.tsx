@@ -7,6 +7,7 @@ import { AIChatWidget } from "@/components/layout/AIChatWidget";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { SocialProofPopup } from "@/components/layout/SocialProofPopup";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import { DiscountWheel } from "@/components/DiscountWheel";
 import { Toaster } from "@/components/ui/sonner";
 
 const ORG_SCHEMA = {
