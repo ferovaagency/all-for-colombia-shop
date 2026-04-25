@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle } from "lucide-react";
+import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, MessageSquare } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { formatCOP, whatsappUrl } from "@/lib/cart";
 import { toast } from "sonner";
