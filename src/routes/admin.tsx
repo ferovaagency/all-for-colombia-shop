@@ -37,6 +37,8 @@ function AdminPage() {
   const [brands, setBrands] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [viewingConv, setViewingConv] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
 
   const reload = async () => {
