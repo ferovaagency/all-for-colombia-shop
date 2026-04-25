@@ -20,9 +20,11 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AdminGeneradorFichasRouteImport } from './routes/admin.generador-fichas'
 
 const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
   id: '/ventas-corporativas',
@@ -79,6 +81,11 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -94,9 +101,15 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const AdminGeneradorFichasRoute = AdminGeneradorFichasRouteImport.update({
+  id: '/generador-fichas',
+  path: '/generador-fichas',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
@@ -108,11 +121,13 @@ export interface FileRoutesByFullPath {
   '/resultado-pago': typeof ResultadoPagoRoute
   '/tienda': typeof TiendaRoute
   '/ventas-corporativas': typeof VentasCorporativasRoute
+  '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/producto/$slug': typeof ProductoSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
@@ -124,12 +139,14 @@ export interface FileRoutesByTo {
   '/resultado-pago': typeof ResultadoPagoRoute
   '/tienda': typeof TiendaRoute
   '/ventas-corporativas': typeof VentasCorporativasRoute
+  '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/producto/$slug': typeof ProductoSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
@@ -141,6 +158,7 @@ export interface FileRoutesById {
   '/resultado-pago': typeof ResultadoPagoRoute
   '/tienda': typeof TiendaRoute
   '/ventas-corporativas': typeof VentasCorporativasRoute
+  '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/producto/$slug': typeof ProductoSlugRoute
 }
@@ -148,6 +166,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/blog'
     | '/carrito'
     | '/categorias'
@@ -159,11 +178,13 @@ export interface FileRouteTypes {
     | '/resultado-pago'
     | '/tienda'
     | '/ventas-corporativas'
+    | '/admin/generador-fichas'
     | '/blog/$slug'
     | '/producto/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/blog'
     | '/carrito'
     | '/categorias'
@@ -175,11 +196,13 @@ export interface FileRouteTypes {
     | '/resultado-pago'
     | '/tienda'
     | '/ventas-corporativas'
+    | '/admin/generador-fichas'
     | '/blog/$slug'
     | '/producto/$slug'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/blog'
     | '/carrito'
     | '/categorias'
@@ -191,12 +214,14 @@ export interface FileRouteTypes {
     | '/resultado-pago'
     | '/tienda'
     | '/ventas-corporativas'
+    | '/admin/generador-fichas'
     | '/blog/$slug'
     | '/producto/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   CarritoRoute: typeof CarritoRoute
   CategoriasRoute: typeof CategoriasRoute
@@ -290,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -311,8 +343,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/admin/generador-fichas': {
+      id: '/admin/generador-fichas'
+      path: '/generador-fichas'
+      fullPath: '/admin/generador-fichas'
+      preLoaderRoute: typeof AdminGeneradorFichasRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminGeneradorFichasRoute: typeof AdminGeneradorFichasRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminGeneradorFichasRoute: AdminGeneradorFichasRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
@@ -326,6 +375,7 @@ const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   CarritoRoute: CarritoRoute,
   CategoriasRoute: CategoriasRoute,
