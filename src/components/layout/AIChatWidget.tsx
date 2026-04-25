@@ -55,7 +55,7 @@ export function AIChatWidget() {
         [
           {
             session_id: sessionId,
-            messages: msgs as unknown as object,
+            messages: JSON.parse(JSON.stringify(msgs)),
             page_url: window.location.href,
             updated_at: new Date().toISOString(),
           },
