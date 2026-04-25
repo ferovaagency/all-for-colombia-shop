@@ -33,7 +33,16 @@ const schema = z.object({
 function CorporatePage() {
   const [form, setForm] = useState({ name: "", company: "", nit: "", email: "", phone: "", description: "", quantity: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
   const setField = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    supabase
+      .from("categories")
+      .select("id, name, slug")
+      .order("sort_order")
+      .then(({ data }) => setCategories(data || []));
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
