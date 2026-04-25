@@ -151,6 +151,33 @@ export type Database = {
           },
         ]
       }
+      chat_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          page_url: string | null
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages: Json
+          page_url?: string | null
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          page_url?: string | null
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           company: string | null

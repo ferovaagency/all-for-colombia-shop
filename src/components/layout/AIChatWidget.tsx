@@ -1,12 +1,24 @@
-import { useEffect, useRef, useState } from "react";
-import { Bot, Send, X, MessageCircle } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Bot, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { whatsappUrl } from "@/lib/cart";
+import { WHATSAPP_NUMBER } from "@/lib/cart";
+import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/al-chat`;
+const SESSION_KEY = "afa_session";
+
+function getOrCreateSessionId() {
+  if (typeof window === "undefined") return `session_${Date.now()}`;
+  let id = localStorage.getItem(SESSION_KEY);
+  if (!id) {
+    id = `session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    localStorage.setItem(SESSION_KEY, id);
+  }
+  return id;
+}
 
 export function AIChatWidget() {
   const [open, setOpen] = useState(false);
@@ -15,6 +27,8 @@ export function AIChatWidget() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<Msg[]>([]);
+  messagesRef.current = messages;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -30,6 +44,62 @@ export function AIChatWidget() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
+
+  const saveConversation = useCallback(async () => {
+    const msgs = messagesRef.current;
+    if (msgs.length < 2) return;
+    if (typeof window === "undefined") return;
+    const sessionId = getOrCreateSessionId();
+    try {
+      await supabase.from("chat_conversations").upsert(
+        [
+          {
+            session_id: sessionId,
+            messages: JSON.parse(JSON.stringify(msgs)),
+            page_url: window.location.href,
+            updated_at: new Date().toISOString(),
+          },
+        ],
+        { onConflict: "session_id" },
+      );
+    } catch {
+      /* ignore — chat must keep working */
+    }
+  }, []);
+
+  // Save every time messages reach a multiple of 5
+  useEffect(() => {
+    if (messages.length > 0 && messages.length % 5 === 0) {
+      saveConversation();
+    }
+  }, [messages.length, saveConversation]);
+
+  const buildWhatsAppSummary = () => {
+    const summary = messagesRef.current
+      .map((m) => `${m.role === "user" ? "👤 Cliente" : "🤖 Al"}: ${m.content}`)
+      .join("\n\n");
+    return encodeURIComponent(
+      `Hola, vengo del chat de la página web de All For All.\n\n` +
+        `--- Resumen de mi conversación con Al ---\n\n` +
+        `${summary}\n\n` +
+        `--- Fin del resumen ---\n\n` +
+        `¿Me pueden ayudar?`,
+    );
+  };
+
+  const transferToHuman = async () => {
+    await saveConversation();
+    const text =
+      messagesRef.current.length > 1
+        ? buildWhatsAppSummary()
+        : encodeURIComponent("Hola, vengo del chat de la web. ¿Me pueden ayudar?");
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, "_blank");
+  };
+
+  const closeChat = async () => {
+    await saveConversation();
+    setOpen(false);
+  };
 
   const openChat = () => {
     setShowWelcome(false);
@@ -100,7 +170,10 @@ export function AIChatWidget() {
           if (line.endsWith("\r")) line = line.slice(0, -1);
           if (!line.startsWith("data: ")) continue;
           const j = line.slice(6).trim();
-          if (j === "[DONE]") { done = true; break; }
+          if (j === "[DONE]") {
+            done = true;
+            break;
+          }
           try {
             const p = JSON.parse(j);
             const c = p.choices?.[0]?.delta?.content;
@@ -174,7 +247,7 @@ export function AIChatWidget() {
                 <span className="h-2 w-2 rounded-full bg-success inline-block" /> En línea
               </p>
             </div>
-            <button onClick={() => setOpen(false)} className="hover:bg-white/10 rounded p-1">
+            <button onClick={closeChat} className="hover:bg-white/10 rounded p-1" aria-label="Cerrar">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -182,11 +255,13 @@ export function AIChatWidget() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/30">
             {messages.map((m, i) => (
               <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
-                <div className={
-                  m.role === "user"
-                    ? "max-w-[80%] bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-3 py-2 text-sm"
-                    : "max-w-[80%] bg-card border rounded-2xl rounded-tl-sm px-3 py-2 text-sm whitespace-pre-wrap"
-                }>
+                <div
+                  className={
+                    m.role === "user"
+                      ? "max-w-[80%] bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-3 py-2 text-sm"
+                      : "max-w-[80%] bg-card border rounded-2xl rounded-tl-sm px-3 py-2 text-sm whitespace-pre-wrap"
+                  }
+                >
                   {m.content || "…"}
                 </div>
               </div>
@@ -201,19 +276,12 @@ export function AIChatWidget() {
           </div>
 
           <div className="p-3 border-t flex items-center gap-2">
-            <a
-              href={whatsappUrl("Hola, vengo del chat de la web.")}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-secondary hover:underline whitespace-nowrap"
-              title="Hablar por WhatsApp"
-            >
-              <MessageCircle className="h-4 w-4 inline" />
-            </a>
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") send();
+              }}
               placeholder="Escribe tu pregunta..."
               disabled={loading}
             />
@@ -221,6 +289,13 @@ export function AIChatWidget() {
               <Send className="h-4 w-4" />
             </Button>
           </div>
+
+          <button
+            onClick={transferToHuman}
+            className="w-full text-xs text-muted-foreground hover:text-primary transition-colors py-2 border-t border-border bg-muted/30"
+          >
+            💬 Hablar con un asesor humano →
+          </button>
         </div>
       )}
     </>
