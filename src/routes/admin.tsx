@@ -42,13 +42,14 @@ function AdminPage() {
   const [editing, setEditing] = useState<any | null>(null);
 
   const reload = async () => {
-    const [oRes, p, c, b, cu, po] = await Promise.all([
+    const [oRes, p, c, b, cu, po, conv] = await Promise.all([
       supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("brands").select("*"),
       supabase.from("customers").select("*").order("created_at", { ascending: false }),
       supabase.from("blog_posts").select("*").order("created_at", { ascending: false }),
+      supabase.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(100),
     ]);
     if (oRes.error) {
       setOrdersError(oRes.error.message);
