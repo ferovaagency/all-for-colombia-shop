@@ -46,6 +46,17 @@ export function Footer() {
       </div>
       <div className="border-t border-white/10 py-4 text-center text-xs text-primary-foreground/60">
         © {new Date().getFullYear()} All For All. Todos los derechos reservados.
+        <p className="text-xs text-primary-foreground/40 mt-2">
+          Desarrollado por{" "}
+          <a
+            href="https://seoparaecommerce.co"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-secondary hover:text-white transition-colors"
+          >
+            Ferova Agency
+          </a>
+        </p>
       </div>
     </footer>
   );
