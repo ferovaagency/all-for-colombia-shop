@@ -105,6 +105,30 @@ function CorporatePage() {
           </form>
         </div>
       </section>
+
+      {categories.length > 0 && (
+        <section className="py-12 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl font-bold text-center mb-8">Nuestro catálogo corporativo</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to="/tienda"
+                  search={{ category: cat.slug }}
+                  className="bg-card border rounded-xl p-5 text-center hover:shadow-card hover:border-secondary transition-smooth group"
+                >
+                  <div className="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-secondary/20 transition-colors">
+                    <Package className="w-6 h-6 text-secondary" />
+                  </div>
+                  <h3 className="font-semibold text-sm">{cat.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Ver productos →</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }
