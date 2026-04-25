@@ -63,6 +63,7 @@ function AdminPage() {
     setBrands(b.data || []);
     setCustomers(cu.data || []);
     setPosts(po.data || []);
+    setConversations(conv.data || []);
   };
 
   useEffect(() => {
