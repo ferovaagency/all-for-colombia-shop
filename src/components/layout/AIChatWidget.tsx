@@ -52,12 +52,14 @@ export function AIChatWidget() {
     const sessionId = getOrCreateSessionId();
     try {
       await supabase.from("chat_conversations").upsert(
-        {
-          session_id: sessionId,
-          messages: msgs as unknown as object,
-          page_url: window.location.href,
-          updated_at: new Date().toISOString(),
-        },
+        [
+          {
+            session_id: sessionId,
+            messages: msgs as unknown as object,
+            page_url: window.location.href,
+            updated_at: new Date().toISOString(),
+          },
+        ],
         { onConflict: "session_id" },
       );
     } catch {
