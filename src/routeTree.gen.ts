@@ -9,38 +9,319 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VentasCorporativasRouteImport } from './routes/ventas-corporativas'
+import { Route as TiendaRouteImport } from './routes/tienda'
+import { Route as ResultadoPagoRouteImport } from './routes/resultado-pago'
+import { Route as NosotrosRouteImport } from './routes/nosotros'
+import { Route as MiCuentaRouteImport } from './routes/mi-cuenta'
+import { Route as LegalRouteImport } from './routes/legal'
+import { Route as ContactoRouteImport } from './routes/contacto'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as CarritoRouteImport } from './routes/carrito'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AdminGeneradorFichasRouteImport } from './routes/admin.generador-fichas'
 
+const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
+  id: '/ventas-corporativas',
+  path: '/ventas-corporativas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TiendaRoute = TiendaRouteImport.update({
+  id: '/tienda',
+  path: '/tienda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultadoPagoRoute = ResultadoPagoRouteImport.update({
+  id: '/resultado-pago',
+  path: '/resultado-pago',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NosotrosRoute = NosotrosRouteImport.update({
+  id: '/nosotros',
+  path: '/nosotros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MiCuentaRoute = MiCuentaRouteImport.update({
+  id: '/mi-cuenta',
+  path: '/mi-cuenta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactoRoute = ContactoRouteImport.update({
+  id: '/contacto',
+  path: '/contacto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasRoute = CategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarritoRoute = CarritoRouteImport.update({
+  id: '/carrito',
+  path: '/carrito',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductoSlugRoute = ProductoSlugRouteImport.update({
+  id: '/producto/$slug',
+  path: '/producto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
+} as any)
+const AdminGeneradorFichasRoute = AdminGeneradorFichasRouteImport.update({
+  id: '/generador-fichas',
+  path: '/generador-fichas',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRouteWithChildren
+  '/carrito': typeof CarritoRoute
+  '/categorias': typeof CategoriasRoute
+  '/checkout': typeof CheckoutRoute
+  '/contacto': typeof ContactoRoute
+  '/legal': typeof LegalRoute
+  '/mi-cuenta': typeof MiCuentaRoute
+  '/nosotros': typeof NosotrosRoute
+  '/resultado-pago': typeof ResultadoPagoRoute
+  '/tienda': typeof TiendaRoute
+  '/ventas-corporativas': typeof VentasCorporativasRoute
+  '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/producto/$slug': typeof ProductoSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRouteWithChildren
+  '/carrito': typeof CarritoRoute
+  '/categorias': typeof CategoriasRoute
+  '/checkout': typeof CheckoutRoute
+  '/contacto': typeof ContactoRoute
+  '/legal': typeof LegalRoute
+  '/mi-cuenta': typeof MiCuentaRoute
+  '/nosotros': typeof NosotrosRoute
+  '/resultado-pago': typeof ResultadoPagoRoute
+  '/tienda': typeof TiendaRoute
+  '/ventas-corporativas': typeof VentasCorporativasRoute
+  '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/producto/$slug': typeof ProductoSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/blog': typeof BlogRouteWithChildren
+  '/carrito': typeof CarritoRoute
+  '/categorias': typeof CategoriasRoute
+  '/checkout': typeof CheckoutRoute
+  '/contacto': typeof ContactoRoute
+  '/legal': typeof LegalRoute
+  '/mi-cuenta': typeof MiCuentaRoute
+  '/nosotros': typeof NosotrosRoute
+  '/resultado-pago': typeof ResultadoPagoRoute
+  '/tienda': typeof TiendaRoute
+  '/ventas-corporativas': typeof VentasCorporativasRoute
+  '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/producto/$slug': typeof ProductoSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/blog'
+    | '/carrito'
+    | '/categorias'
+    | '/checkout'
+    | '/contacto'
+    | '/legal'
+    | '/mi-cuenta'
+    | '/nosotros'
+    | '/resultado-pago'
+    | '/tienda'
+    | '/ventas-corporativas'
+    | '/admin/generador-fichas'
+    | '/blog/$slug'
+    | '/producto/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/blog'
+    | '/carrito'
+    | '/categorias'
+    | '/checkout'
+    | '/contacto'
+    | '/legal'
+    | '/mi-cuenta'
+    | '/nosotros'
+    | '/resultado-pago'
+    | '/tienda'
+    | '/ventas-corporativas'
+    | '/admin/generador-fichas'
+    | '/blog/$slug'
+    | '/producto/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/blog'
+    | '/carrito'
+    | '/categorias'
+    | '/checkout'
+    | '/contacto'
+    | '/legal'
+    | '/mi-cuenta'
+    | '/nosotros'
+    | '/resultado-pago'
+    | '/tienda'
+    | '/ventas-corporativas'
+    | '/admin/generador-fichas'
+    | '/blog/$slug'
+    | '/producto/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  BlogRoute: typeof BlogRouteWithChildren
+  CarritoRoute: typeof CarritoRoute
+  CategoriasRoute: typeof CategoriasRoute
+  CheckoutRoute: typeof CheckoutRoute
+  ContactoRoute: typeof ContactoRoute
+  LegalRoute: typeof LegalRoute
+  MiCuentaRoute: typeof MiCuentaRoute
+  NosotrosRoute: typeof NosotrosRoute
+  ResultadoPagoRoute: typeof ResultadoPagoRoute
+  TiendaRoute: typeof TiendaRoute
+  VentasCorporativasRoute: typeof VentasCorporativasRoute
+  ProductoSlugRoute: typeof ProductoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/ventas-corporativas': {
+      id: '/ventas-corporativas'
+      path: '/ventas-corporativas'
+      fullPath: '/ventas-corporativas'
+      preLoaderRoute: typeof VentasCorporativasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tienda': {
+      id: '/tienda'
+      path: '/tienda'
+      fullPath: '/tienda'
+      preLoaderRoute: typeof TiendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resultado-pago': {
+      id: '/resultado-pago'
+      path: '/resultado-pago'
+      fullPath: '/resultado-pago'
+      preLoaderRoute: typeof ResultadoPagoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nosotros': {
+      id: '/nosotros'
+      path: '/nosotros'
+      fullPath: '/nosotros'
+      preLoaderRoute: typeof NosotrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mi-cuenta': {
+      id: '/mi-cuenta'
+      path: '/mi-cuenta'
+      fullPath: '/mi-cuenta'
+      preLoaderRoute: typeof MiCuentaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contacto': {
+      id: '/contacto'
+      path: '/contacto'
+      fullPath: '/contacto'
+      preLoaderRoute: typeof ContactoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias': {
+      id: '/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof CategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrito': {
+      id: '/carrito'
+      path: '/carrito'
+      fullPath: '/carrito'
+      preLoaderRoute: typeof CarritoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,21 +329,66 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/producto/$slug': {
+      id: '/producto/$slug'
+      path: '/producto/$slug'
+      fullPath: '/producto/$slug'
+      preLoaderRoute: typeof ProductoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
+    }
+    '/admin/generador-fichas': {
+      id: '/admin/generador-fichas'
+      path: '/generador-fichas'
+      fullPath: '/admin/generador-fichas'
+      preLoaderRoute: typeof AdminGeneradorFichasRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminGeneradorFichasRoute: typeof AdminGeneradorFichasRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminGeneradorFichasRoute: AdminGeneradorFichasRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  BlogRoute: BlogRouteWithChildren,
+  CarritoRoute: CarritoRoute,
+  CategoriasRoute: CategoriasRoute,
+  CheckoutRoute: CheckoutRoute,
+  ContactoRoute: ContactoRoute,
+  LegalRoute: LegalRoute,
+  MiCuentaRoute: MiCuentaRoute,
+  NosotrosRoute: NosotrosRoute,
+  ResultadoPagoRoute: ResultadoPagoRoute,
+  TiendaRoute: TiendaRoute,
+  VentasCorporativasRoute: VentasCorporativasRoute,
+  ProductoSlugRoute: ProductoSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
