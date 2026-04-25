@@ -33,8 +33,8 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full bg-primary text-primary-foreground shadow-elevated">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
-          <Link to="/" className="text-xl font-bold tracking-tight whitespace-nowrap">
-            All <span className="text-secondary-foreground/70">For</span> All
+          <Link to="/" aria-label="All For All — Inicio" className="flex items-center">
+            <Logo variant="light" className="h-10 w-auto" />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
