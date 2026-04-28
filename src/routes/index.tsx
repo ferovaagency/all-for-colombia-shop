@@ -69,6 +69,49 @@ function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [posts, setPosts] = useState<any[]>([]);
+
+  // Promo banners
+  const promoBanners = [
+    {
+      id: 1,
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
+      title: "Audífonos y Sonido",
+      subtitle: "La mejor calidad de audio",
+      cta: "Ver productos",
+      link: "/tienda",
+      categoria: "audifonos-diademas",
+      bg: "#020f1e",
+    },
+    {
+      id: 2,
+      image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&q=80",
+      title: "Gaming",
+      subtitle: "Equipa tu setup",
+      cta: "Ver gaming",
+      link: "/tienda",
+      categoria: "gaming",
+      bg: "#568baf",
+    },
+    {
+      id: 3,
+      image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80",
+      title: "Computadores",
+      subtitle: "Para trabajar y estudiar",
+      cta: "Ver computadores",
+      link: "/tienda",
+      categoria: "computadores-accesorios",
+      bg: "#3e4653",
+    },
+  ];
+  const [bannerIndex, setBannerIndex] = useState(0);
+  useEffect(() => {
+    const t = setInterval(
+      () => setBannerIndex((p) => (p + 1) % promoBanners.length),
+      4000,
+    );
+    return () => clearInterval(t);
+  }, [promoBanners.length]);
 
   // Hero slider
   const [current, setCurrent] = useState(0);
@@ -87,14 +130,16 @@ function HomePage() {
 
   useEffect(() => {
     (async () => {
-      const [cats, prods, brs] = await Promise.all([
+      const [cats, prods, brs, blog] = await Promise.all([
         supabase.from("categories").select("*").is("parent_id", null).order("sort_order"),
         supabase.from("products").select("*").eq("active", true).order("created_at", { ascending: false }).limit(8),
         supabase.from("brands").select("*").limit(12),
+        supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false }).limit(3),
       ]);
       setCategories(cats.data || []);
       setProducts(prods.data || []);
       setBrands(brs.data || []);
+      setPosts(blog.data || []);
 
       const all = await supabase.from("products").select("category_id").eq("active", true);
       const c: Record<string, number> = {};
@@ -303,6 +348,55 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Promo banners slider */}
+      <section className="py-6 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="relative overflow-hidden rounded-2xl" style={{ height: "180px" }}>
+            {promoBanners.map((banner, i) => (
+              <Link
+                key={banner.id}
+                to={banner.link}
+                search={{ categoria: banner.categoria } as any}
+                className={cn(
+                  "absolute inset-0 flex items-center justify-between px-8 transition-all duration-500",
+                  i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0",
+                )}
+                style={{ background: banner.bg }}
+              >
+                <div className="text-white">
+                  <h3 className="text-2xl font-black">{banner.title}</h3>
+                  <p className="text-white/70 text-sm mt-1">{banner.subtitle}</p>
+                  <span className="inline-block mt-3 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-4 py-2 rounded-full transition-colors">
+                    {banner.cta} →
+                  </span>
+                </div>
+                <img
+                  src={banner.image}
+                  alt={banner.title}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-56 object-cover opacity-40 rounded-xl"
+                />
+              </Link>
+            ))}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              {promoBanners.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setBannerIndex(i)}
+                  aria-label={`Banner ${i + 1}`}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all",
+                    i === bannerIndex ? "w-5 bg-white" : "w-1.5 bg-white/40",
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Featured products */}
       <section className="container mx-auto px-4 py-16">
         <div className="flex items-end justify-between mb-8">
@@ -355,6 +449,60 @@ function HomePage() {
                 )}
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Blog */}
+      {posts.length > 0 && (
+        <section className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-bold">Blog y consejos tech</h2>
+                <p className="text-muted-foreground text-sm mt-1">
+                  Guías, comparativas y novedades del mundo tech
+                </p>
+              </div>
+              <Link to="/blog" className="text-sm text-secondary hover:underline font-semibold">
+                Ver todos →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <Link
+                  key={post.id}
+                  to="/blog/$slug"
+                  params={{ slug: post.slug }}
+                  className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-elevated transition-all"
+                >
+                  {post.cover_image && (
+                    <div className="overflow-hidden h-44">
+                      <img
+                        src={post.cover_image}
+                        alt={post.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    {post.category && (
+                      <span className="text-[10px] font-bold text-secondary uppercase tracking-wider bg-secondary/10 px-2 py-0.5 rounded-full">
+                        {post.category}
+                      </span>
+                    )}
+                    <h3 className="font-bold text-foreground mt-2 line-clamp-2 text-sm group-hover:text-secondary transition-colors">
+                      {post.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
       )}
