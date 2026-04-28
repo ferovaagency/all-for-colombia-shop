@@ -1,7 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, Mail, Phone, Truck } from "lucide-react";
+import { MapPin, Mail, Phone, Truck, Clock, Instagram } from "lucide-react";
 import { CONTACT_EMAIL, WHATSAPP_NUMBER } from "@/lib/cart";
 import { Logo } from "@/components/layout/Logo";
+
+const INSTAGRAM_URL = "https://www.instagram.com/all4all_col?igsh=MTNhN3cyNWU1czR3cw%3D%3D";
+const TIKTOK_URL = "https://www.tiktok.com/@allforallcol?_r=1&_t=ZS-94OG8Q9A7vN";
 
 export function Footer() {
   return (
