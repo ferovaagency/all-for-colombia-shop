@@ -69,6 +69,49 @@ function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [posts, setPosts] = useState<any[]>([]);
+
+  // Promo banners
+  const promoBanners = [
+    {
+      id: 1,
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
+      title: "Audífonos y Sonido",
+      subtitle: "La mejor calidad de audio",
+      cta: "Ver productos",
+      link: "/tienda",
+      categoria: "audifonos-diademas",
+      bg: "#020f1e",
+    },
+    {
+      id: 2,
+      image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&q=80",
+      title: "Gaming",
+      subtitle: "Equipa tu setup",
+      cta: "Ver gaming",
+      link: "/tienda",
+      categoria: "gaming",
+      bg: "#568baf",
+    },
+    {
+      id: 3,
+      image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80",
+      title: "Computadores",
+      subtitle: "Para trabajar y estudiar",
+      cta: "Ver computadores",
+      link: "/tienda",
+      categoria: "computadores-accesorios",
+      bg: "#3e4653",
+    },
+  ];
+  const [bannerIndex, setBannerIndex] = useState(0);
+  useEffect(() => {
+    const t = setInterval(
+      () => setBannerIndex((p) => (p + 1) % promoBanners.length),
+      4000,
+    );
+    return () => clearInterval(t);
+  }, [promoBanners.length]);
 
   // Hero slider
   const [current, setCurrent] = useState(0);
