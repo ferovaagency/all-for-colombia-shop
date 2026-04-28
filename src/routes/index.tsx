@@ -130,14 +130,16 @@ function HomePage() {
 
   useEffect(() => {
     (async () => {
-      const [cats, prods, brs] = await Promise.all([
+      const [cats, prods, brs, blog] = await Promise.all([
         supabase.from("categories").select("*").is("parent_id", null).order("sort_order"),
         supabase.from("products").select("*").eq("active", true).order("created_at", { ascending: false }).limit(8),
         supabase.from("brands").select("*").limit(12),
+        supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false }).limit(3),
       ]);
       setCategories(cats.data || []);
       setProducts(prods.data || []);
       setBrands(brs.data || []);
+      setPosts(blog.data || []);
 
       const all = await supabase.from("products").select("category_id").eq("active", true);
       const c: Record<string, number> = {};
