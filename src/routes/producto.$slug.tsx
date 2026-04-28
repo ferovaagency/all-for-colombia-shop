@@ -449,46 +449,65 @@ function ProductDetailPage() {
         </section>
       )}
 
-      {/* Sticky bottom bar */}
-      <div
-        className={cn(
-          "fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 backdrop-blur shadow-elevated transition-transform duration-300",
-          showStickyBar ? "translate-y-0" : "translate-y-full",
-        )}
-        aria-hidden={!showStickyBar}
-      >
-        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="h-12 w-12 shrink-0 rounded-md bg-muted overflow-hidden">
-            {images[0] ? (
-              <img src={images[0]} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <div className="h-full w-full flex items-center justify-center text-[10px] text-muted-foreground">
-                Sin img
-              </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">{product.name}</p>
-            <p className="text-sm text-primary font-bold">{formatCOP(finalPrice)}</p>
-          </div>
-          {inStock ? (
-            <Button onClick={handleAdd} className="bg-primary shrink-0">
-              <ShoppingCart className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Agregar al carrito</span>
-            </Button>
-          ) : (
-            <Button asChild variant="outline" className="shrink-0">
-              <a
-                href={whatsappUrl(`Hola, quiero cotizar: ${product.name}`)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Cotizar
-              </a>
-            </Button>
+      {/* Sticky bottom bar — flotante, deja espacio para WhatsApp/Chat en móvil */}
+      {showStickyBar && (
+        <div
+          className={cn(
+            "fixed z-30 transition-all duration-300",
+            // Móvil: flotante, encima del WhatsApp (bottom-6) y debajo del chat (bottom-24)
+            "bottom-20 left-3 right-3 w-[calc(100%-80px)]",
+            // Desktop: barra completa abajo
+            "md:bottom-0 md:left-0 md:right-0 md:w-full",
           )}
+          aria-hidden={!showStickyBar}
+        >
+          <div
+            className={cn(
+              "bg-background/95 backdrop-blur shadow-elevated border",
+              "rounded-2xl md:rounded-none md:border-t md:border-x-0 md:border-b-0",
+            )}
+          >
+            <div className="container mx-auto px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3">
+              <div className="h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-md bg-muted overflow-hidden">
+                {images[0] ? (
+                  <img src={images[0]} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-[10px] text-muted-foreground">
+                    Sin img
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs md:text-sm font-semibold truncate">{product.name}</p>
+                <p className="text-xs md:text-sm text-primary font-bold">
+                  {product.sale_price
+                    ? formatCOP(product.sale_price)
+                    : product.price
+                    ? formatCOP(product.price)
+                    : "Consultar precio"}
+                </p>
+              </div>
+              {inStock ? (
+                <Button onClick={handleAdd} size="sm" className="bg-primary shrink-0">
+                  <ShoppingCart className="h-4 w-4 md:mr-2" />
+                  <span className="hidden md:inline">Carrito</span>
+                  <span className="md:hidden ml-1 text-xs">+ Carrito</span>
+                </Button>
+              ) : (
+                <Button asChild size="sm" variant="outline" className="shrink-0">
+                  <a
+                    href={whatsappUrl(`Hola, quiero cotizar: ${product.name}`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Cotizar
+                  </a>
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

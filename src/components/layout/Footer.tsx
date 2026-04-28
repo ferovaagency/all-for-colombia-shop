@@ -12,7 +12,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div>
           <div className="mb-3">
-            <Logo variant="light" className="h-10 w-auto" />
+            <Logo variant="light" className="h-14 w-auto" />
           </div>
           <p className="text-sm font-semibold text-secondary mb-2 italic">
             Something for everyone.

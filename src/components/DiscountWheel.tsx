@@ -14,8 +14,17 @@ const SEGMENTS = [
 ] as const;
 
 const COLORS = ["#020f1e", "#568baf"]; // brand-dark / brand-blue
-const STORAGE_KEY = "afa_wheel_shown";
 const SEGMENT_DEG = 360 / SEGMENTS.length;
+
+const getClientId = () => {
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem("afa_client_id");
+  if (!id) {
+    id = `afa_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    localStorage.setItem("afa_client_id", id);
+  }
+  return id;
+};
 
 type Step = "form" | "wheel" | "result";
 
@@ -38,15 +47,17 @@ export function DiscountWheel() {
   useEffect(() => {
     if (!mounted) return;
     if (typeof window === "undefined") return;
-    if (localStorage.getItem(STORAGE_KEY) === "true") return;
-    const t = setTimeout(() => setOpen(true), 5000);
+    const clientId = getClientId();
+    if (localStorage.getItem(`afa_wheel_${clientId}`)) return;
+    const t = setTimeout(() => setOpen(true), 2000);
     return () => clearTimeout(t);
   }, [mounted]);
 
   const close = () => {
     setOpen(false);
     try {
-      localStorage.setItem(STORAGE_KEY, "true");
+      const clientId = getClientId();
+      localStorage.setItem(`afa_wheel_${clientId}`, "participated");
     } catch {
       /* ignore */
     }
