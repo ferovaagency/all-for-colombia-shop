@@ -130,6 +130,9 @@ function AdminPage() {
           <TabsTrigger value="categories">Categorías ({categories.length})</TabsTrigger>
           <TabsTrigger value="brands">Marcas ({brands.length})</TabsTrigger>
           <TabsTrigger value="customers">Clientes ({customers.length})</TabsTrigger>
+          <TabsTrigger value="distributors">
+            <Handshake className="h-3.5 w-3.5 mr-1" /> Distribuidores ({distributors.length})
+          </TabsTrigger>
           <TabsTrigger value="blog">Blog ({posts.length})</TabsTrigger>
           <TabsTrigger value="conversations">
             <MessageSquare className="h-3.5 w-3.5 mr-1" /> Conversaciones IA ({conversations.length})
@@ -142,11 +145,24 @@ function AdminPage() {
               <AlertCircle className="h-4 w-4" /> Error cargando pedidos: {ordersError}
             </div>
           )}
+          <div className="mb-3 flex items-center gap-2">
+            <Label className="text-xs">Filtrar:</Label>
+            <select
+              value={orderFilter}
+              onChange={(e) => setOrderFilter(e.target.value as any)}
+              className="border rounded px-2 py-1 text-xs bg-card"
+            >
+              <option value="all">Todos los pedidos</option>
+              <option value="retail">Solo clientes</option>
+              <option value="distributor">Solo distribuidores</option>
+            </select>
+          </div>
           <div className="bg-card border rounded-xl overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Estado</TableHead>
@@ -155,44 +171,61 @@ function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((o) => (
-                  <TableRow key={o.id}>
-                    <TableCell className="font-mono text-xs">{o.id.slice(0, 8)}</TableCell>
-                    <TableCell>
-                      <div className="font-medium">{o.customer_name}</div>
-                      <div className="text-xs text-muted-foreground">{o.customer_email}</div>
-                    </TableCell>
-                    <TableCell className="font-bold">{formatCOP(Number(o.total))}</TableCell>
-                    <TableCell>
-                      <select
-                        value={o.status || "pending"}
-                        onChange={(e) => updateOrderStatus(o.id, e.target.value)}
-                        className="border rounded px-2 py-1 text-xs bg-card"
-                      >
-                        {ORDER_STATUSES.map((s) => (
-                          <option key={s.value} value={s.value}>
-                            {s.label}
-                          </option>
-                        ))}
-                      </select>
-                    </TableCell>
-                    <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
-                    <TableCell>
-                      <a
-                        href={whatsappUrl(`Hola ${o.customer_name}, soy de All For All. Tu pedido ${o.id.slice(0, 8)} está siendo procesado.`)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-secondary hover:underline text-xs inline-flex items-center gap-1"
-                      >
-                        WhatsApp <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {orders.length === 0 && !ordersError && (
+                {filteredOrders.map((o) => {
+                  const isDist = o.order_type === "distributor" || !!o.distributor_id;
+                  return (
+                    <TableRow key={o.id}>
+                      <TableCell className="font-mono text-xs">{o.id.slice(0, 8)}</TableCell>
+                      <TableCell>
+                        {isDist ? (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                            Distribuidor
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                            Cliente
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{o.customer_name}</div>
+                        <div className="text-xs text-muted-foreground">{o.customer_email}</div>
+                        {isDist && o.distributors?.company_name && (
+                          <div className="text-xs text-blue-600 font-medium">🏢 {o.distributors.company_name}</div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-bold">{formatCOP(Number(o.total))}</TableCell>
+                      <TableCell>
+                        <select
+                          value={o.status || "pending"}
+                          onChange={(e) => updateOrderStatus(o.id, e.target.value)}
+                          className="border rounded px-2 py-1 text-xs bg-card"
+                        >
+                          {ORDER_STATUSES.map((s) => (
+                            <option key={s.value} value={s.value}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </select>
+                      </TableCell>
+                      <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
+                      <TableCell>
+                        <a
+                          href={whatsappUrl(`Hola ${o.customer_name}, soy de All For All. Tu pedido ${o.id.slice(0, 8)} está siendo procesado.`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-secondary hover:underline text-xs inline-flex items-center gap-1"
+                        >
+                          WhatsApp <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {filteredOrders.length === 0 && !ordersError && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      Sin pedidos aún
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      Sin pedidos
                     </TableCell>
                   </TableRow>
                 )}
