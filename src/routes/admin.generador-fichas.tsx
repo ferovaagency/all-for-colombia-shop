@@ -46,12 +46,48 @@ function ProductSheetGeneratorPage() {
     category_id: "",
   });
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const setF = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   // Bulk upload state
   const [csvPreview, setCsvPreview] = useState<CSVRow[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  const generateWithAI = async () => {
+    if (!form.name) {
+      toast.error("Ingresa al menos el nombre del producto");
+      return;
+    }
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-product-sheet", {
+        body: {
+          name: form.name,
+          sku: form.sku,
+          price: form.price,
+          description: form.description,
+          specs: form.short_description,
+        },
+      });
+      if (error) throw error;
+      const content = (data as { content?: string; error?: string })?.content;
+      if ((data as { error?: string })?.error) {
+        toast.error((data as { error: string }).error);
+        return;
+      }
+      if (!content) {
+        toast.error("La IA no devolvió contenido");
+        return;
+      }
+      setForm((f) => ({ ...f, description: content }));
+      toast.success("Ficha generada con IA");
+    } catch (err) {
+      toast.error("Error al generar: " + (err as Error).message);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
