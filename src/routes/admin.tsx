@@ -94,6 +94,21 @@ function AdminPage() {
     reload();
   };
 
+  const setDistStatus = async (id: string, status: "approved" | "rejected") => {
+    const patch: any = { status };
+    if (status === "approved") patch.approved_at = new Date().toISOString();
+    const { error } = await supabase.from("distributors").update(patch).eq("id", id);
+    if (error) toast.error(error.message);
+    else toast.success(status === "approved" ? "Distribuidor aprobado" : "Solicitud rechazada");
+    reload();
+  };
+
+  const filteredOrders = orders.filter((o) => {
+    if (orderFilter === "all") return true;
+    const isDist = o.order_type === "distributor" || !!o.distributor_id;
+    return orderFilter === "distributor" ? isDist : !isDist;
+  });
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
