@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ShoppingCart, Menu, Search, X, ChevronDown } from "lucide-react";
+import { ShoppingCart, Menu, Search, X, ChevronDown, Download } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/lib/cart";
 import { Input } from "@/components/ui/input";
