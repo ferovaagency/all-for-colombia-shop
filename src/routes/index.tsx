@@ -348,6 +348,55 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Promo banners slider */}
+      <section className="py-6 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="relative overflow-hidden rounded-2xl" style={{ height: "180px" }}>
+            {promoBanners.map((banner, i) => (
+              <Link
+                key={banner.id}
+                to={banner.link}
+                search={{ categoria: banner.categoria } as any}
+                className={cn(
+                  "absolute inset-0 flex items-center justify-between px-8 transition-all duration-500",
+                  i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0",
+                )}
+                style={{ background: banner.bg }}
+              >
+                <div className="text-white">
+                  <h3 className="text-2xl font-black">{banner.title}</h3>
+                  <p className="text-white/70 text-sm mt-1">{banner.subtitle}</p>
+                  <span className="inline-block mt-3 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-4 py-2 rounded-full transition-colors">
+                    {banner.cta} →
+                  </span>
+                </div>
+                <img
+                  src={banner.image}
+                  alt={banner.title}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-56 object-cover opacity-40 rounded-xl"
+                />
+              </Link>
+            ))}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              {promoBanners.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setBannerIndex(i)}
+                  aria-label={`Banner ${i + 1}`}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all",
+                    i === bannerIndex ? "w-5 bg-white" : "w-1.5 bg-white/40",
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Featured products */}
       <section className="container mx-auto px-4 py-16">
         <div className="flex items-end justify-between mb-8">
