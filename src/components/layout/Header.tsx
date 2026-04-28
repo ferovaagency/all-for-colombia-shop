@@ -133,6 +133,14 @@ export function Header() {
           </form>
 
           <div className="flex items-center gap-2">
+            <a
+              href="/catalogo-allforall.pdf"
+              download="Catalogo-AllForAll.pdf"
+              className="flex items-center gap-1.5 border border-white/30 text-white/90 hover:bg-white/10 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Catálogo</span>
+            </a>
             <Link to="/carrito" className="relative inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-white/10 transition-smooth">
               <ShoppingCart className="h-5 w-5" />
               {count > 0 && (
