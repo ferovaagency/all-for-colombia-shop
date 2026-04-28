@@ -22,9 +22,15 @@ import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DistribuidoresIndexRouteImport } from './routes/distribuidores.index'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
+import { Route as DistribuidoresRegistroRouteImport } from './routes/distribuidores.registro'
+import { Route as DistribuidoresPortalRouteImport } from './routes/distribuidores.portal'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AdminGeneradorFichasRouteImport } from './routes/admin.generador-fichas'
+import { Route as DistribuidoresPortalIndexRouteImport } from './routes/distribuidores.portal.index'
+import { Route as DistribuidoresPortalPedidosRouteImport } from './routes/distribuidores.portal.pedidos'
+import { Route as DistribuidoresPortalCatalogoRouteImport } from './routes/distribuidores.portal.catalogo'
 
 const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
   id: '/ventas-corporativas',
@@ -91,9 +97,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DistribuidoresIndexRoute = DistribuidoresIndexRouteImport.update({
+  id: '/distribuidores/',
+  path: '/distribuidores/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductoSlugRoute = ProductoSlugRouteImport.update({
   id: '/producto/$slug',
   path: '/producto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistribuidoresRegistroRoute = DistribuidoresRegistroRouteImport.update({
+  id: '/distribuidores/registro',
+  path: '/distribuidores/registro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistribuidoresPortalRoute = DistribuidoresPortalRouteImport.update({
+  id: '/distribuidores/portal',
+  path: '/distribuidores/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
@@ -106,6 +127,24 @@ const AdminGeneradorFichasRoute = AdminGeneradorFichasRouteImport.update({
   path: '/generador-fichas',
   getParentRoute: () => AdminRoute,
 } as any)
+const DistribuidoresPortalIndexRoute =
+  DistribuidoresPortalIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DistribuidoresPortalRoute,
+  } as any)
+const DistribuidoresPortalPedidosRoute =
+  DistribuidoresPortalPedidosRouteImport.update({
+    id: '/pedidos',
+    path: '/pedidos',
+    getParentRoute: () => DistribuidoresPortalRoute,
+  } as any)
+const DistribuidoresPortalCatalogoRoute =
+  DistribuidoresPortalCatalogoRouteImport.update({
+    id: '/catalogo',
+    path: '/catalogo',
+    getParentRoute: () => DistribuidoresPortalRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -123,7 +162,13 @@ export interface FileRoutesByFullPath {
   '/ventas-corporativas': typeof VentasCorporativasRoute
   '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
+  '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
+  '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
+  '/distribuidores/portal/pedidos': typeof DistribuidoresPortalPedidosRoute
+  '/distribuidores/portal/': typeof DistribuidoresPortalIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -141,7 +186,12 @@ export interface FileRoutesByTo {
   '/ventas-corporativas': typeof VentasCorporativasRoute
   '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
+  '/distribuidores': typeof DistribuidoresIndexRoute
+  '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
+  '/distribuidores/portal/pedidos': typeof DistribuidoresPortalPedidosRoute
+  '/distribuidores/portal': typeof DistribuidoresPortalIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -160,7 +210,13 @@ export interface FileRoutesById {
   '/ventas-corporativas': typeof VentasCorporativasRoute
   '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
+  '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
+  '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
+  '/distribuidores/portal/pedidos': typeof DistribuidoresPortalPedidosRoute
+  '/distribuidores/portal/': typeof DistribuidoresPortalIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -180,7 +236,13 @@ export interface FileRouteTypes {
     | '/ventas-corporativas'
     | '/admin/generador-fichas'
     | '/blog/$slug'
+    | '/distribuidores/portal'
+    | '/distribuidores/registro'
     | '/producto/$slug'
+    | '/distribuidores/'
+    | '/distribuidores/portal/catalogo'
+    | '/distribuidores/portal/pedidos'
+    | '/distribuidores/portal/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -198,7 +260,12 @@ export interface FileRouteTypes {
     | '/ventas-corporativas'
     | '/admin/generador-fichas'
     | '/blog/$slug'
+    | '/distribuidores/registro'
     | '/producto/$slug'
+    | '/distribuidores'
+    | '/distribuidores/portal/catalogo'
+    | '/distribuidores/portal/pedidos'
+    | '/distribuidores/portal'
   id:
     | '__root__'
     | '/'
@@ -216,7 +283,13 @@ export interface FileRouteTypes {
     | '/ventas-corporativas'
     | '/admin/generador-fichas'
     | '/blog/$slug'
+    | '/distribuidores/portal'
+    | '/distribuidores/registro'
     | '/producto/$slug'
+    | '/distribuidores/'
+    | '/distribuidores/portal/catalogo'
+    | '/distribuidores/portal/pedidos'
+    | '/distribuidores/portal/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -233,7 +306,10 @@ export interface RootRouteChildren {
   ResultadoPagoRoute: typeof ResultadoPagoRoute
   TiendaRoute: typeof TiendaRoute
   VentasCorporativasRoute: typeof VentasCorporativasRoute
+  DistribuidoresPortalRoute: typeof DistribuidoresPortalRouteWithChildren
+  DistribuidoresRegistroRoute: typeof DistribuidoresRegistroRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
+  DistribuidoresIndexRoute: typeof DistribuidoresIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -329,11 +405,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/distribuidores/': {
+      id: '/distribuidores/'
+      path: '/distribuidores'
+      fullPath: '/distribuidores/'
+      preLoaderRoute: typeof DistribuidoresIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/producto/$slug': {
       id: '/producto/$slug'
       path: '/producto/$slug'
       fullPath: '/producto/$slug'
       preLoaderRoute: typeof ProductoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/distribuidores/registro': {
+      id: '/distribuidores/registro'
+      path: '/distribuidores/registro'
+      fullPath: '/distribuidores/registro'
+      preLoaderRoute: typeof DistribuidoresRegistroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/distribuidores/portal': {
+      id: '/distribuidores/portal'
+      path: '/distribuidores/portal'
+      fullPath: '/distribuidores/portal'
+      preLoaderRoute: typeof DistribuidoresPortalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/$slug': {
@@ -349,6 +446,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/generador-fichas'
       preLoaderRoute: typeof AdminGeneradorFichasRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/distribuidores/portal/': {
+      id: '/distribuidores/portal/'
+      path: '/'
+      fullPath: '/distribuidores/portal/'
+      preLoaderRoute: typeof DistribuidoresPortalIndexRouteImport
+      parentRoute: typeof DistribuidoresPortalRoute
+    }
+    '/distribuidores/portal/pedidos': {
+      id: '/distribuidores/portal/pedidos'
+      path: '/pedidos'
+      fullPath: '/distribuidores/portal/pedidos'
+      preLoaderRoute: typeof DistribuidoresPortalPedidosRouteImport
+      parentRoute: typeof DistribuidoresPortalRoute
+    }
+    '/distribuidores/portal/catalogo': {
+      id: '/distribuidores/portal/catalogo'
+      path: '/catalogo'
+      fullPath: '/distribuidores/portal/catalogo'
+      preLoaderRoute: typeof DistribuidoresPortalCatalogoRouteImport
+      parentRoute: typeof DistribuidoresPortalRoute
     }
   }
 }
@@ -373,6 +491,21 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface DistribuidoresPortalRouteChildren {
+  DistribuidoresPortalCatalogoRoute: typeof DistribuidoresPortalCatalogoRoute
+  DistribuidoresPortalPedidosRoute: typeof DistribuidoresPortalPedidosRoute
+  DistribuidoresPortalIndexRoute: typeof DistribuidoresPortalIndexRoute
+}
+
+const DistribuidoresPortalRouteChildren: DistribuidoresPortalRouteChildren = {
+  DistribuidoresPortalCatalogoRoute: DistribuidoresPortalCatalogoRoute,
+  DistribuidoresPortalPedidosRoute: DistribuidoresPortalPedidosRoute,
+  DistribuidoresPortalIndexRoute: DistribuidoresPortalIndexRoute,
+}
+
+const DistribuidoresPortalRouteWithChildren =
+  DistribuidoresPortalRoute._addFileChildren(DistribuidoresPortalRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
@@ -387,7 +520,10 @@ const rootRouteChildren: RootRouteChildren = {
   ResultadoPagoRoute: ResultadoPagoRoute,
   TiendaRoute: TiendaRoute,
   VentasCorporativasRoute: VentasCorporativasRoute,
+  DistribuidoresPortalRoute: DistribuidoresPortalRouteWithChildren,
+  DistribuidoresRegistroRoute: DistribuidoresRegistroRoute,
   ProductoSlugRoute: ProductoSlugRoute,
+  DistribuidoresIndexRoute: DistribuidoresIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

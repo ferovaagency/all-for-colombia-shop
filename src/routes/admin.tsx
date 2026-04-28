@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, MessageSquare } from "lucide-react";
+import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, MessageSquare, Handshake, Check, X as XIcon, Send } from "lucide-react";
+import { WHATSAPP_NUMBER } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { formatCOP, whatsappUrl } from "@/lib/cart";
 import { toast } from "sonner";
@@ -40,16 +41,20 @@ function AdminPage() {
   const [conversations, setConversations] = useState<any[]>([]);
   const [viewingConv, setViewingConv] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
+  const [distributors, setDistributors] = useState<any[]>([]);
+  const [credDist, setCredDist] = useState<any | null>(null);
+  const [orderFilter, setOrderFilter] = useState<"all" | "retail" | "distributor">("all");
 
   const reload = async () => {
-    const [oRes, p, c, b, cu, po, conv] = await Promise.all([
-      supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(100),
+    const [oRes, p, c, b, cu, po, conv, dist] = await Promise.all([
+      supabase.from("orders").select("*, distributors(company_name)").order("created_at", { ascending: false }).limit(100),
       supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("brands").select("*"),
       supabase.from("customers").select("*").order("created_at", { ascending: false }),
       supabase.from("blog_posts").select("*").order("created_at", { ascending: false }),
       supabase.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(100),
+      supabase.from("distributors").select("*").order("created_at", { ascending: false }),
     ]);
     if (oRes.error) {
       setOrdersError(oRes.error.message);
@@ -64,6 +69,7 @@ function AdminPage() {
     setCustomers(cu.data || []);
     setPosts(po.data || []);
     setConversations(conv.data || []);
+    setDistributors(dist.data || []);
   };
 
   useEffect(() => {
@@ -88,6 +94,21 @@ function AdminPage() {
     reload();
   };
 
+  const setDistStatus = async (id: string, status: "approved" | "rejected") => {
+    const patch: any = { status };
+    if (status === "approved") patch.approved_at = new Date().toISOString();
+    const { error } = await supabase.from("distributors").update(patch).eq("id", id);
+    if (error) toast.error(error.message);
+    else toast.success(status === "approved" ? "Distribuidor aprobado" : "Solicitud rechazada");
+    reload();
+  };
+
+  const filteredOrders = orders.filter((o) => {
+    if (orderFilter === "all") return true;
+    const isDist = o.order_type === "distributor" || !!o.distributor_id;
+    return orderFilter === "distributor" ? isDist : !isDist;
+  });
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -109,6 +130,9 @@ function AdminPage() {
           <TabsTrigger value="categories">Categorías ({categories.length})</TabsTrigger>
           <TabsTrigger value="brands">Marcas ({brands.length})</TabsTrigger>
           <TabsTrigger value="customers">Clientes ({customers.length})</TabsTrigger>
+          <TabsTrigger value="distributors">
+            <Handshake className="h-3.5 w-3.5 mr-1" /> Distribuidores ({distributors.length})
+          </TabsTrigger>
           <TabsTrigger value="blog">Blog ({posts.length})</TabsTrigger>
           <TabsTrigger value="conversations">
             <MessageSquare className="h-3.5 w-3.5 mr-1" /> Conversaciones IA ({conversations.length})
@@ -121,11 +145,24 @@ function AdminPage() {
               <AlertCircle className="h-4 w-4" /> Error cargando pedidos: {ordersError}
             </div>
           )}
+          <div className="mb-3 flex items-center gap-2">
+            <Label className="text-xs">Filtrar:</Label>
+            <select
+              value={orderFilter}
+              onChange={(e) => setOrderFilter(e.target.value as any)}
+              className="border rounded px-2 py-1 text-xs bg-card"
+            >
+              <option value="all">Todos los pedidos</option>
+              <option value="retail">Solo clientes</option>
+              <option value="distributor">Solo distribuidores</option>
+            </select>
+          </div>
           <div className="bg-card border rounded-xl overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>ID</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Estado</TableHead>
@@ -134,44 +171,61 @@ function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((o) => (
-                  <TableRow key={o.id}>
-                    <TableCell className="font-mono text-xs">{o.id.slice(0, 8)}</TableCell>
-                    <TableCell>
-                      <div className="font-medium">{o.customer_name}</div>
-                      <div className="text-xs text-muted-foreground">{o.customer_email}</div>
-                    </TableCell>
-                    <TableCell className="font-bold">{formatCOP(Number(o.total))}</TableCell>
-                    <TableCell>
-                      <select
-                        value={o.status || "pending"}
-                        onChange={(e) => updateOrderStatus(o.id, e.target.value)}
-                        className="border rounded px-2 py-1 text-xs bg-card"
-                      >
-                        {ORDER_STATUSES.map((s) => (
-                          <option key={s.value} value={s.value}>
-                            {s.label}
-                          </option>
-                        ))}
-                      </select>
-                    </TableCell>
-                    <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
-                    <TableCell>
-                      <a
-                        href={whatsappUrl(`Hola ${o.customer_name}, soy de All For All. Tu pedido ${o.id.slice(0, 8)} está siendo procesado.`)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-secondary hover:underline text-xs inline-flex items-center gap-1"
-                      >
-                        WhatsApp <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {orders.length === 0 && !ordersError && (
+                {filteredOrders.map((o) => {
+                  const isDist = o.order_type === "distributor" || !!o.distributor_id;
+                  return (
+                    <TableRow key={o.id}>
+                      <TableCell className="font-mono text-xs">{o.id.slice(0, 8)}</TableCell>
+                      <TableCell>
+                        {isDist ? (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                            Distribuidor
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                            Cliente
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{o.customer_name}</div>
+                        <div className="text-xs text-muted-foreground">{o.customer_email}</div>
+                        {isDist && o.distributors?.company_name && (
+                          <div className="text-xs text-blue-600 font-medium">🏢 {o.distributors.company_name}</div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-bold">{formatCOP(Number(o.total))}</TableCell>
+                      <TableCell>
+                        <select
+                          value={o.status || "pending"}
+                          onChange={(e) => updateOrderStatus(o.id, e.target.value)}
+                          className="border rounded px-2 py-1 text-xs bg-card"
+                        >
+                          {ORDER_STATUSES.map((s) => (
+                            <option key={s.value} value={s.value}>
+                              {s.label}
+                            </option>
+                          ))}
+                        </select>
+                      </TableCell>
+                      <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
+                      <TableCell>
+                        <a
+                          href={whatsappUrl(`Hola ${o.customer_name}, soy de All For All. Tu pedido ${o.id.slice(0, 8)} está siendo procesado.`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-secondary hover:underline text-xs inline-flex items-center gap-1"
+                        >
+                          WhatsApp <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {filteredOrders.length === 0 && !ordersError && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      Sin pedidos aún
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      Sin pedidos
                     </TableCell>
                   </TableRow>
                 )}
@@ -250,6 +304,79 @@ function AdminPage() {
           <SimpleList items={posts} cols={["title", "slug", "category", "published"]} />
         </TabsContent>
 
+        <TabsContent value="distributors" className="mt-6">
+          <div className="bg-card border rounded-xl overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Empresa</TableHead>
+                  <TableHead>NIT</TableHead>
+                  <TableHead>Contacto</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Ciudad</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {distributors.map((d) => (
+                  <TableRow key={d.id}>
+                    <TableCell className="font-medium">{d.company_name}</TableCell>
+                    <TableCell className="text-xs">{d.nit}</TableCell>
+                    <TableCell className="text-xs">
+                      <div>{d.contact_name}</div>
+                      <div className="text-muted-foreground">{d.phone}</div>
+                    </TableCell>
+                    <TableCell className="text-xs">{d.email}</TableCell>
+                    <TableCell className="text-xs">{d.city}</TableCell>
+                    <TableCell>
+                      {d.status === "approved" ? (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                          ✓ Aprobado
+                        </span>
+                      ) : d.status === "rejected" ? (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                          Rechazado
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">
+                          Pendiente
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2 flex-wrap">
+                        {d.status === "pending" && (
+                          <>
+                            <Button size="sm" variant="outline" onClick={() => setCredDist(d)}>
+                              <Check className="h-3 w-3 mr-1" /> Aprobar
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => setDistStatus(d.id, "rejected")}>
+                              <XIcon className="h-3 w-3 mr-1" /> Rechazar
+                            </Button>
+                          </>
+                        )}
+                        {d.status === "approved" && (
+                          <Button size="sm" variant="outline" onClick={() => setCredDist(d)}>
+                            <Send className="h-3 w-3 mr-1" /> Enviar credenciales
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {distributors.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      Sin solicitudes todavía
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+
         <TabsContent value="conversations" className="mt-6">
           <div className="bg-card border rounded-xl overflow-x-auto">
             <Table>
@@ -296,6 +423,11 @@ function AdminPage() {
 
       <EditProductDialog product={editing} onClose={() => setEditing(null)} onSaved={reload} />
       <ConversationDialog conversation={viewingConv} onClose={() => setViewingConv(null)} />
+      <DistributorCredentialsDialog
+        distributor={credDist}
+        onClose={() => setCredDist(null)}
+        onSaved={reload}
+      />
     </div>
   );
 }
@@ -476,5 +608,96 @@ function SimpleList({ items, cols }: { items: any[]; cols: string[] }) {
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+function DistributorCredentialsDialog({
+  distributor,
+  onClose,
+  onSaved,
+}: {
+  distributor: any | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [password, setPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (distributor) {
+      setPassword(distributor.password_hash || "");
+    }
+  }, [distributor]);
+
+  const save = async () => {
+    if (!distributor) return;
+    if (!password || password.length < 6) {
+      toast.error("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("distributors")
+      .update({
+        status: "approved",
+        password_hash: password,
+        approved_at: new Date().toISOString(),
+      })
+      .eq("id", distributor.id);
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Credenciales guardadas");
+
+    const msg =
+      `Hola ${distributor.contact_name}, tu solicitud como distribuidor de All For All fue aprobada.\n\n` +
+      `Accede al portal en: allforall.com.co/distribuidores\n` +
+      `Usuario: ${distributor.email}\n` +
+      `Contraseña: ${password}\n\n` +
+      `¡Bienvenido!`;
+    const phone = (distributor.phone || "").replace(/\D/g, "");
+    const waNumber = phone.length >= 10 ? (phone.startsWith("57") ? phone : `57${phone}`) : "573000000000";
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
+
+    onSaved();
+    onClose();
+  };
+
+  return (
+    <Dialog open={!!distributor} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Credenciales del distribuidor</DialogTitle>
+        </DialogHeader>
+        {distributor && (
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground space-y-1">
+              <div><span className="font-semibold text-foreground">Empresa:</span> {distributor.company_name}</div>
+              <div><span className="font-semibold text-foreground">Email:</span> {distributor.email}</div>
+            </div>
+            <div>
+              <Label>Contraseña a asignar</Label>
+              <Input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                maxLength={100}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Al confirmar se aprueba al distribuidor y se abre WhatsApp con el mensaje de bienvenida.
+            </p>
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={save} disabled={saving} className="bg-primary">
+            {saving ? "Guardando..." : "Aprobar y enviar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
