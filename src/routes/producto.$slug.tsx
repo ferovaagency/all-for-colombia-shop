@@ -341,11 +341,11 @@ function ProductDetailPage() {
               Métodos de pago aceptados
             </p>
             <div className="flex flex-wrap gap-2 mb-3">
-              <PayBadge icon={<Landmark className="h-3.5 w-3.5" />} label="Bancolombia" />
-              <PayBadge icon={<Smartphone className="h-3.5 w-3.5" />} label="Nequi" />
-              <PayBadge icon={<Smartphone className="h-3.5 w-3.5" />} label="Daviplata" />
-              <PayBadge icon={<KeyRound className="h-3.5 w-3.5" />} label="Bre-b" />
               <PayBadge icon={<CreditCard className="h-3.5 w-3.5" />} label="Wompi" />
+              <PayBadge icon={<KeyRound className="h-3.5 w-3.5" />} label="Addi" />
+              <PayBadge icon={<Landmark className="h-3.5 w-3.5" />} label="Bancolombia" />
+              <PayBadge icon={<Landmark className="h-3.5 w-3.5" />} label="Davivienda" />
+              <PayBadge icon={<Smartphone className="h-3.5 w-3.5" />} label="Nequi" />
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1">🚚 Envío a toda Colombia</span>

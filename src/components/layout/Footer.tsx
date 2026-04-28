@@ -71,6 +71,23 @@ export function Footer() {
           </ul>
         </div>
       </div>
+      <div className="border-t border-white/10 py-4">
+        <div className="container mx-auto px-4 flex flex-col items-center gap-2">
+          <p className="text-xs uppercase tracking-wide text-primary-foreground/60 font-semibold">
+            Métodos de pago aceptados
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {["💳 Wompi", "🛍️ Addi", "🏦 Bancolombia", "🏦 Davivienda", "📱 Nequi"].map((m) => (
+              <span
+                key={m}
+                className="text-xs px-3 py-1.5 rounded-full bg-white/10 text-primary-foreground/90"
+              >
+                {m}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
       <div className="border-t border-white/10 py-4 text-center text-xs text-primary-foreground/60">
         <p>All For All S.A.S. — NIT 901.009.310-8</p>
         <p className="mt-1">© {new Date().getFullYear()} All For All. Todos los derechos reservados.</p>
