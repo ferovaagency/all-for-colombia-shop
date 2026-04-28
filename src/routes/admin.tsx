@@ -610,3 +610,94 @@ function SimpleList({ items, cols }: { items: any[]; cols: string[] }) {
     </div>
   );
 }
+
+function DistributorCredentialsDialog({
+  distributor,
+  onClose,
+  onSaved,
+}: {
+  distributor: any | null;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [password, setPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (distributor) {
+      setPassword(distributor.password_hash || "");
+    }
+  }, [distributor]);
+
+  const save = async () => {
+    if (!distributor) return;
+    if (!password || password.length < 6) {
+      toast.error("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+    setSaving(true);
+    const { error } = await supabase
+      .from("distributors")
+      .update({
+        status: "approved",
+        password_hash: password,
+        approved_at: new Date().toISOString(),
+      })
+      .eq("id", distributor.id);
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Credenciales guardadas");
+
+    const msg =
+      `Hola ${distributor.contact_name}, tu solicitud como distribuidor de All For All fue aprobada.\n\n` +
+      `Accede al portal en: allforall.com.co/distribuidores\n` +
+      `Usuario: ${distributor.email}\n` +
+      `Contraseña: ${password}\n\n` +
+      `¡Bienvenido!`;
+    const phone = (distributor.phone || "").replace(/\D/g, "");
+    const waNumber = phone.length >= 10 ? (phone.startsWith("57") ? phone : `57${phone}`) : "573000000000";
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
+
+    onSaved();
+    onClose();
+  };
+
+  return (
+    <Dialog open={!!distributor} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Credenciales del distribuidor</DialogTitle>
+        </DialogHeader>
+        {distributor && (
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground space-y-1">
+              <div><span className="font-semibold text-foreground">Empresa:</span> {distributor.company_name}</div>
+              <div><span className="font-semibold text-foreground">Email:</span> {distributor.email}</div>
+            </div>
+            <div>
+              <Label>Contraseña a asignar</Label>
+              <Input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                maxLength={100}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Al confirmar se aprueba al distribuidor y se abre WhatsApp con el mensaje de bienvenida.
+            </p>
+          </div>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={save} disabled={saving} className="bg-primary">
+            {saving ? "Guardando..." : "Aprobar y enviar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
