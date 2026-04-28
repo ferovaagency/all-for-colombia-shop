@@ -80,16 +80,73 @@ function LegalPage() {
         </TabsContent>
 
         <TabsContent value="privacidad" className="mt-6 space-y-4 text-muted-foreground leading-relaxed">
-          <h2 className="text-2xl font-bold text-foreground">Privacidad y Datos Personales</h2>
+          <h2 className="text-2xl font-bold text-foreground">
+            Política de Privacidad y Tratamiento de Datos Personales
+          </h2>
           <p>
-            En cumplimiento con la Ley 1581 de 2012, All For All S.A.S. NIT 901.009.310-8
-            informa que los datos personales recopilados (nombre, email, teléfono, dirección)
-            son utilizados exclusivamente para procesar pedidos y comunicaciones relacionadas.
+            All For All S.A.S., NIT 901.009.310-8, con domicilio en Bogotá, Colombia, en
+            cumplimiento de la Ley 1581 de 2012, el Decreto 1377 de 2013 y demás normas aplicables,
+            informa:
           </p>
-          <p>No compartimos datos con terceros sin autorización.</p>
-          <p>
-            Para ejercer derechos de acceso, rectificación o supresión contáctenos a través de
-            nuestros canales oficiales.
+          <div>
+            <h3 className="font-semibold text-foreground">1. Datos recopilados</h3>
+            <p>Nombre completo, correo electrónico, teléfono, dirección de entrega, información de pago.</p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">2. Finalidad del tratamiento</h3>
+            <p>
+              Procesamiento de pedidos, envío de productos, comunicaciones comerciales con
+              consentimiento previo, mejora de la experiencia de compra, cumplimiento de obligaciones
+              legales y contables.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">3. Derechos del titular</h3>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Conocer, actualizar, rectificar y suprimir sus datos.</li>
+              <li>Revocar la autorización otorgada.</li>
+              <li>
+                Presentar quejas ante la Superintendencia de Industria y Comercio (SIC).
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">4. Para ejercer sus derechos</h3>
+            <p>
+              Envíe un correo a:{" "}
+              <a
+                href="mailto:ventas.marketplace@allforall.com.co"
+                className="text-secondary hover:underline"
+              >
+                ventas.marketplace@allforall.com.co
+              </a>
+              {" "}indicando nombre completo, solicitud específica y documento de identidad.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">5. Seguridad</h3>
+            <p>
+              Implementamos medidas técnicas y administrativas para proteger su información contra
+              acceso no autorizado, pérdida o alteración.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">6. Transferencia a terceros</h3>
+            <p>
+              No compartimos datos con terceros sin autorización, excepto cuando sea requerido por
+              ley o necesario para la prestación del servicio (transportadoras, pasarelas de pago).
+            </p>
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">7. Vigencia</h3>
+            <p>
+              Los datos se conservan mientras exista una relación comercial activa o sea requerido
+              por ley.
+            </p>
+          </div>
+          <p className="text-xs italic">
+            Esta política puede ser actualizada. La versión vigente estará siempre disponible en
+            nuestro sitio web.
           </p>
         </TabsContent>
 
