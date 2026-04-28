@@ -211,14 +211,73 @@ export type Database = {
         }
         Relationships: []
       }
+      distributors: {
+        Row: {
+          address: string | null
+          approved_at: string | null
+          approved_by: string | null
+          business_type: string | null
+          city: string
+          company_name: string
+          contact_name: string
+          created_at: string | null
+          email: string
+          id: string
+          nit: string
+          password_hash: string | null
+          phone: string
+          products_sold: string | null
+          status: string | null
+          username: string | null
+        }
+        Insert: {
+          address?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          business_type?: string | null
+          city: string
+          company_name: string
+          contact_name: string
+          created_at?: string | null
+          email: string
+          id?: string
+          nit: string
+          password_hash?: string | null
+          phone: string
+          products_sold?: string | null
+          status?: string | null
+          username?: string | null
+        }
+        Update: {
+          address?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          business_type?: string | null
+          city?: string
+          company_name?: string
+          contact_name?: string
+          created_at?: string | null
+          email?: string
+          id?: string
+          nit?: string
+          password_hash?: string | null
+          phone?: string
+          products_sold?: string | null
+          status?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string | null
           customer_email: string | null
           customer_name: string | null
           customer_phone: string | null
+          distributor_id: string | null
           id: string
           items: Json | null
+          order_type: string | null
           payment_method: string | null
           receipt_url: string | null
           shipping_address: Json | null
@@ -231,8 +290,10 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          distributor_id?: string | null
           id?: string
           items?: Json | null
+          order_type?: string | null
           payment_method?: string | null
           receipt_url?: string | null
           shipping_address?: Json | null
@@ -245,8 +306,10 @@ export type Database = {
           customer_email?: string | null
           customer_name?: string | null
           customer_phone?: string | null
+          distributor_id?: string | null
           id?: string
           items?: Json | null
+          order_type?: string | null
           payment_method?: string | null
           receipt_url?: string | null
           shipping_address?: Json | null
@@ -254,7 +317,15 @@ export type Database = {
           subtotal?: number | null
           total?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_distributor_id_fkey"
+            columns: ["distributor_id"]
+            isOneToOne: false
+            referencedRelation: "distributors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -263,6 +334,7 @@ export type Database = {
           category_id: string | null
           created_at: string | null
           description: string | null
+          distributor_price: number | null
           featured: boolean | null
           id: string
           images: string[] | null
@@ -283,6 +355,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string | null
           description?: string | null
+          distributor_price?: number | null
           featured?: boolean | null
           id?: string
           images?: string[] | null
@@ -303,6 +376,7 @@ export type Database = {
           category_id?: string | null
           created_at?: string | null
           description?: string | null
+          distributor_price?: number | null
           featured?: boolean | null
           id?: string
           images?: string[] | null
