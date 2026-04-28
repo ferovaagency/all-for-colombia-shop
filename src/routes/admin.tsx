@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, MessageSquare } from "lucide-react";
+import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, MessageSquare, Handshake, Check, X as XIcon, Send } from "lucide-react";
+import { WHATSAPP_NUMBER } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { formatCOP, whatsappUrl } from "@/lib/cart";
 import { toast } from "sonner";
@@ -40,16 +41,20 @@ function AdminPage() {
   const [conversations, setConversations] = useState<any[]>([]);
   const [viewingConv, setViewingConv] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
+  const [distributors, setDistributors] = useState<any[]>([]);
+  const [credDist, setCredDist] = useState<any | null>(null);
+  const [orderFilter, setOrderFilter] = useState<"all" | "retail" | "distributor">("all");
 
   const reload = async () => {
-    const [oRes, p, c, b, cu, po, conv] = await Promise.all([
-      supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(100),
+    const [oRes, p, c, b, cu, po, conv, dist] = await Promise.all([
+      supabase.from("orders").select("*, distributors(company_name)").order("created_at", { ascending: false }).limit(100),
       supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("brands").select("*"),
       supabase.from("customers").select("*").order("created_at", { ascending: false }),
       supabase.from("blog_posts").select("*").order("created_at", { ascending: false }),
       supabase.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(100),
+      supabase.from("distributors").select("*").order("created_at", { ascending: false }),
     ]);
     if (oRes.error) {
       setOrdersError(oRes.error.message);
@@ -64,6 +69,7 @@ function AdminPage() {
     setCustomers(cu.data || []);
     setPosts(po.data || []);
     setConversations(conv.data || []);
+    setDistributors(dist.data || []);
   };
 
   useEffect(() => {
