@@ -304,6 +304,79 @@ function AdminPage() {
           <SimpleList items={posts} cols={["title", "slug", "category", "published"]} />
         </TabsContent>
 
+        <TabsContent value="distributors" className="mt-6">
+          <div className="bg-card border rounded-xl overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Empresa</TableHead>
+                  <TableHead>NIT</TableHead>
+                  <TableHead>Contacto</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Ciudad</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {distributors.map((d) => (
+                  <TableRow key={d.id}>
+                    <TableCell className="font-medium">{d.company_name}</TableCell>
+                    <TableCell className="text-xs">{d.nit}</TableCell>
+                    <TableCell className="text-xs">
+                      <div>{d.contact_name}</div>
+                      <div className="text-muted-foreground">{d.phone}</div>
+                    </TableCell>
+                    <TableCell className="text-xs">{d.email}</TableCell>
+                    <TableCell className="text-xs">{d.city}</TableCell>
+                    <TableCell>
+                      {d.status === "approved" ? (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                          ✓ Aprobado
+                        </span>
+                      ) : d.status === "rejected" ? (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                          Rechazado
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700">
+                          Pendiente
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2 flex-wrap">
+                        {d.status === "pending" && (
+                          <>
+                            <Button size="sm" variant="outline" onClick={() => setCredDist(d)}>
+                              <Check className="h-3 w-3 mr-1" /> Aprobar
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => setDistStatus(d.id, "rejected")}>
+                              <XIcon className="h-3 w-3 mr-1" /> Rechazar
+                            </Button>
+                          </>
+                        )}
+                        {d.status === "approved" && (
+                          <Button size="sm" variant="outline" onClick={() => setCredDist(d)}>
+                            <Send className="h-3 w-3 mr-1" /> Enviar credenciales
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {distributors.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      Sin solicitudes todavía
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+
         <TabsContent value="conversations" className="mt-6">
           <div className="bg-card border rounded-xl overflow-x-auto">
             <Table>
@@ -350,6 +423,11 @@ function AdminPage() {
 
       <EditProductDialog product={editing} onClose={() => setEditing(null)} onSaved={reload} />
       <ConversationDialog conversation={viewingConv} onClose={() => setViewingConv(null)} />
+      <DistributorCredentialsDialog
+        distributor={credDist}
+        onClose={() => setCredDist(null)}
+        onSaved={reload}
+      />
     </div>
   );
 }
