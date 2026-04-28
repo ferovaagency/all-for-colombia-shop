@@ -61,7 +61,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           <Link to="/" aria-label="All For All — Inicio" className="flex items-center">
-            <Logo variant="light" className="h-10 w-auto" />
+            <Logo variant="light" className="h-14 md:h-16 w-auto" />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1 relative">

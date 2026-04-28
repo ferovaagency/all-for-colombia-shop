@@ -126,7 +126,14 @@ function HomePage() {
             >
               {slide.image ? (
                 <>
-                  <img src={slide.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                  <img
+                    src={slide.image}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    fetchPriority={i === 0 ? "high" : "low"}
+                  />
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/30" />
                 </>
               ) : (

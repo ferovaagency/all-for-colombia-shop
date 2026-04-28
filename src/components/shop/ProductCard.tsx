@@ -39,6 +39,7 @@ export function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
