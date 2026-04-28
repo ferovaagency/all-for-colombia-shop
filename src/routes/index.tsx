@@ -452,6 +452,60 @@ function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Blog */}
+      {posts.length > 0 && (
+        <section className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-bold">Blog y consejos tech</h2>
+                <p className="text-muted-foreground text-sm mt-1">
+                  Guías, comparativas y novedades del mundo tech
+                </p>
+              </div>
+              <Link to="/blog" className="text-sm text-secondary hover:underline font-semibold">
+                Ver todos →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <Link
+                  key={post.id}
+                  to="/blog/$slug"
+                  params={{ slug: post.slug }}
+                  className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-elevated transition-all"
+                >
+                  {post.cover_image && (
+                    <div className="overflow-hidden h-44">
+                      <img
+                        src={post.cover_image}
+                        alt={post.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    {post.category && (
+                      <span className="text-[10px] font-bold text-secondary uppercase tracking-wider bg-secondary/10 px-2 py-0.5 rounded-full">
+                        {post.category}
+                      </span>
+                    )}
+                    <h3 className="font-bold text-foreground mt-2 line-clamp-2 text-sm group-hover:text-secondary transition-colors">
+                      {post.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }
