@@ -256,6 +256,17 @@ function ProductSheetGeneratorPage() {
                 />
               </div>
             </div>
+            <Button
+              type="button"
+              onClick={generateWithAI}
+              disabled={generating}
+              variant="outline"
+              size="lg"
+              className="w-full"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              {generating ? "Generando con IA..." : "Generar descripción con IA"}
+            </Button>
             <Button type="submit" disabled={saving} size="lg" className="w-full bg-primary">
               {saving ? "Guardando..." : "Crear producto"}
             </Button>
