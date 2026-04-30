@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Upload, FileCheck2, Info, X, ExternalLink } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { startAddiCheckout } from "@/server/addi.functions";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
