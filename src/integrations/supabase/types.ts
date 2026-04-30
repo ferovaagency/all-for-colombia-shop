@@ -270,6 +270,9 @@ export type Database = {
       }
       orders: {
         Row: {
+          addi_application_id: string | null
+          addi_checkout_url: string | null
+          addi_status: string | null
           created_at: string | null
           customer_email: string | null
           customer_name: string | null
@@ -286,6 +289,9 @@ export type Database = {
           total: number | null
         }
         Insert: {
+          addi_application_id?: string | null
+          addi_checkout_url?: string | null
+          addi_status?: string | null
           created_at?: string | null
           customer_email?: string | null
           customer_name?: string | null
@@ -302,6 +308,9 @@ export type Database = {
           total?: number | null
         }
         Update: {
+          addi_application_id?: string | null
+          addi_checkout_url?: string | null
+          addi_status?: string | null
           created_at?: string | null
           customer_email?: string | null
           customer_name?: string | null
