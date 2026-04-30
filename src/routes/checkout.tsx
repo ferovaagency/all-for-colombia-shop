@@ -222,8 +222,8 @@ function CheckoutPage() {
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
                 <p className="font-semibold mb-1">Paga con Addi</p>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Financia tu compra en cuotas cómodas. Addi se encargará del proceso de aprobación.
-                  Al confirmar tu pedido te contactaremos para coordinar el pago con Addi.
+                  Al confirmar el pedido te llevaremos al checkout seguro de Addi
+                  para validar tu identidad y aprobar tu crédito en minutos.
                 </p>
                 <a
                   href="https://www.addi.com/co/como-funciona"
