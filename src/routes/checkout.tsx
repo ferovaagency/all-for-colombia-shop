@@ -53,6 +53,7 @@ const PAYMENT_OPTIONS: {
 function CheckoutPage() {
   const { items, subtotal, clear, count } = useCart();
   const navigate = useNavigate();
+  const startAddi = useServerFn(startAddiCheckout);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", address: "", city: "", notes: "",
