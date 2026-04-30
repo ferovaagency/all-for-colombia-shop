@@ -10,6 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Upload, FileCheck2, Info, X, ExternalLink } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { startAddiCheckout } from "@/server/addi.functions";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -51,6 +53,7 @@ const PAYMENT_OPTIONS: {
 function CheckoutPage() {
   const { items, subtotal, clear, count } = useCart();
   const navigate = useNavigate();
+  const startAddi = useServerFn(startAddiCheckout);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", address: "", city: "", notes: "",
@@ -143,6 +146,29 @@ function CheckoutPage() {
 
     const summary = items.map(i => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`).join("\n");
     const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${data.id.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
+
+    // Addi: crear aplicación y redirigir al checkout de Addi
+    if (payment === "addi") {
+      const toastId = toast.loading("Conectando con Addi...");
+      try {
+        const result = await startAddi({
+          data: { orderId: data.id, origin: window.location.origin },
+        });
+        toast.dismiss(toastId);
+        if (!result.ok || !result.redirectUrl) {
+          toast.error(result.ok ? "Addi no devolvió URL de pago" : result.error);
+          return;
+        }
+        clear();
+        window.location.href = result.redirectUrl;
+        return;
+      } catch (err: any) {
+        toast.dismiss(toastId);
+        toast.error("No se pudo iniciar Addi: " + (err?.message || "error"));
+        return;
+      }
+    }
+
     window.open(whatsappUrl(msg), "_blank");
 
     clear();
@@ -196,8 +222,8 @@ function CheckoutPage() {
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
                 <p className="font-semibold mb-1">Paga con Addi</p>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Financia tu compra en cuotas cómodas. Addi se encargará del proceso de aprobación.
-                  Al confirmar tu pedido te contactaremos para coordinar el pago con Addi.
+                  Al confirmar el pedido te llevaremos al checkout seguro de Addi
+                  para validar tu identidad y aprobar tu crédito en minutos.
                 </p>
                 <a
                   href="https://www.addi.com/co/como-funciona"

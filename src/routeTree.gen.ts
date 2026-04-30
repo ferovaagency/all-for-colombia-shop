@@ -31,6 +31,7 @@ import { Route as AdminGeneradorFichasRouteImport } from './routes/admin.generad
 import { Route as DistribuidoresPortalIndexRouteImport } from './routes/distribuidores.portal.index'
 import { Route as DistribuidoresPortalPedidosRouteImport } from './routes/distribuidores.portal.pedidos'
 import { Route as DistribuidoresPortalCatalogoRouteImport } from './routes/distribuidores.portal.catalogo'
+import { Route as ApiPublicAddiWebhookRouteImport } from './routes/api/public/addi-webhook'
 
 const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
   id: '/ventas-corporativas',
@@ -145,6 +146,11 @@ const DistribuidoresPortalCatalogoRoute =
     path: '/catalogo',
     getParentRoute: () => DistribuidoresPortalRoute,
   } as any)
+const ApiPublicAddiWebhookRoute = ApiPublicAddiWebhookRouteImport.update({
+  id: '/api/public/addi-webhook',
+  path: '/api/public/addi-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
   '/distribuidores/portal/pedidos': typeof DistribuidoresPortalPedidosRoute
   '/distribuidores/portal/': typeof DistribuidoresPortalIndexRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/distribuidores': typeof DistribuidoresIndexRoute
+  '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
   '/distribuidores/portal/pedidos': typeof DistribuidoresPortalPedidosRoute
   '/distribuidores/portal': typeof DistribuidoresPortalIndexRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
   '/distribuidores/portal/pedidos': typeof DistribuidoresPortalPedidosRoute
   '/distribuidores/portal/': typeof DistribuidoresPortalIndexRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/distribuidores/registro'
     | '/producto/$slug'
     | '/distribuidores/'
+    | '/api/public/addi-webhook'
     | '/distribuidores/portal/catalogo'
     | '/distribuidores/portal/pedidos'
     | '/distribuidores/portal/'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/distribuidores/registro'
     | '/producto/$slug'
     | '/distribuidores'
+    | '/api/public/addi-webhook'
     | '/distribuidores/portal/catalogo'
     | '/distribuidores/portal/pedidos'
     | '/distribuidores/portal'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/distribuidores/registro'
     | '/producto/$slug'
     | '/distribuidores/'
+    | '/api/public/addi-webhook'
     | '/distribuidores/portal/catalogo'
     | '/distribuidores/portal/pedidos'
     | '/distribuidores/portal/'
@@ -310,6 +322,7 @@ export interface RootRouteChildren {
   DistribuidoresRegistroRoute: typeof DistribuidoresRegistroRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
   DistribuidoresIndexRoute: typeof DistribuidoresIndexRoute
+  ApiPublicAddiWebhookRoute: typeof ApiPublicAddiWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -468,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DistribuidoresPortalCatalogoRouteImport
       parentRoute: typeof DistribuidoresPortalRoute
     }
+    '/api/public/addi-webhook': {
+      id: '/api/public/addi-webhook'
+      path: '/api/public/addi-webhook'
+      fullPath: '/api/public/addi-webhook'
+      preLoaderRoute: typeof ApiPublicAddiWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -524,6 +544,7 @@ const rootRouteChildren: RootRouteChildren = {
   DistribuidoresRegistroRoute: DistribuidoresRegistroRoute,
   ProductoSlugRoute: ProductoSlugRoute,
   DistribuidoresIndexRoute: DistribuidoresIndexRoute,
+  ApiPublicAddiWebhookRoute: ApiPublicAddiWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
