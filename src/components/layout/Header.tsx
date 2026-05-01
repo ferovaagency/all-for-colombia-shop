@@ -22,6 +22,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [cats, setCats] = useState<Cat[]>([]);
+  const [productCounts, setProductCounts] = useState<Record<string, number>>({});
   const [hovered, setHovered] = useState<string | null>(null);
   const [mobileShop, setMobileShop] = useState(false);
   const navigate = useNavigate();
@@ -34,6 +35,15 @@ export function Header() {
         .select("id, slug, name, parent_id, sort_order")
         .order("sort_order", { ascending: true });
       setCats((data as Cat[]) || []);
+      const { data: prods } = await supabase
+        .from("products")
+        .select("category_id")
+        .eq("active", true);
+      const counts: Record<string, number> = {};
+      (prods || []).forEach((p: any) => {
+        if (p.category_id) counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+      });
+      setProductCounts(counts);
     })();
   }, []);
 
@@ -59,9 +69,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full bg-primary text-primary-foreground shadow-elevated">
       <div className="container mx-auto px-4">
-        <div className="flex min-h-[72px] sm:min-h-[80px] items-center justify-between gap-4 py-2">
+        <div className="flex items-center justify-between gap-4 h-20 md:h-24">
           <Link to="/" aria-label="All For All — Inicio" className="flex items-center">
-            <Logo variant="light" className="h-16 sm:h-20 w-auto object-contain" />
+            <Logo variant="light" className="h-16 md:h-20 w-auto object-contain" />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1 relative">
@@ -86,27 +96,31 @@ export function Header() {
                   <div
                     onMouseEnter={() => openMega(n.label)}
                     onMouseLeave={scheduleClose}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white text-foreground border border-border rounded-2xl shadow-elevated p-5 z-50 w-[580px] max-w-[95vw]"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white text-foreground border border-border rounded-2xl shadow-elevated p-6 z-50 w-[680px] max-w-[95vw]"
                   >
-                    <div className="columns-2 sm:columns-3 gap-5 space-y-0">
+                    <div className="grid grid-cols-3 gap-x-6 gap-y-5">
                       {parents.map((parent) => {
-                        const children = childrenOf(parent.id);
-                        if (children.length === 0) return null;
+                        const subs = childrenOf(parent.id).filter(
+                          (s) =>
+                            (productCounts[s.id] || 0) > 0 ||
+                            childrenOf(s.id).some((s3) => (productCounts[s3.id] || 0) > 0),
+                        );
+                        if (subs.length === 0) return null;
                         return (
-                          <div key={parent.id} className="break-inside-avoid mb-4 last:mb-0">
-                            <p className="font-bold text-xs text-foreground uppercase tracking-wider mb-2 pb-1 border-b border-border">
+                          <div key={parent.id} className="break-inside-avoid">
+                            <p className="font-bold text-[11px] text-foreground uppercase tracking-wider mb-2 pb-1.5 border-b-2 border-secondary/30">
                               {parent.name}
                             </p>
-                            <ul className="space-y-1">
-                              {children.map((child) => (
-                                <li key={child.id}>
+                            <ul className="space-y-0.5">
+                              {subs.map((sub) => (
+                                <li key={sub.id}>
                                   <Link
                                     to="/tienda"
-                                    search={{ categoria: child.slug } as any}
+                                    search={{ categoria: sub.slug } as any}
                                     onClick={() => setHovered(null)}
-                                    className="text-xs text-muted-foreground hover:text-secondary transition-colors block py-0.5"
+                                    className="text-xs text-muted-foreground hover:text-secondary hover:font-medium transition-colors block py-0.5 leading-tight"
                                   >
-                                    {child.name}
+                                    {sub.name}
                                   </Link>
                                 </li>
                               ))}
@@ -115,13 +129,16 @@ export function Header() {
                         );
                       })}
                     </div>
-                    <div className="border-t border-border mt-4 pt-3">
+                    <div className="border-t border-border mt-5 pt-3 flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground italic">
+                        Encuentra todo en All For All
+                      </span>
                       <Link
                         to="/tienda"
                         onClick={() => setHovered(null)}
-                        className="text-xs text-secondary font-semibold hover:underline"
+                        className="text-xs font-bold text-secondary hover:underline inline-flex items-center gap-1"
                       >
-                        Ver todos los productos →
+                        Ver todo el catálogo →
                       </Link>
                     </div>
                   </div>

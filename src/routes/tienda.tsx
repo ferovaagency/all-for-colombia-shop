@@ -177,9 +177,9 @@ function ShopPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              defaultValue={search.q || ""}
+              value={search.q || ""}
               onChange={(e) => updateSearch({ q: e.target.value || undefined })}
-              placeholder="Buscar productos..."
+              placeholder="Buscar productos, marcas, SKU..."
               className="pl-9"
             />
           </div>
@@ -225,7 +225,10 @@ function ShopPage() {
             </div>
           ) : (
             <>
-              <p className="text-sm text-muted-foreground mb-4">{filtered.length} producto{filtered.length === 1 ? "" : "s"}</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                {filtered.length} producto{filtered.length === 1 ? "" : "s"} encontrado{filtered.length === 1 ? "" : "s"}
+                {search.q && ` para "${search.q}"`}
+              </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
               </div>
