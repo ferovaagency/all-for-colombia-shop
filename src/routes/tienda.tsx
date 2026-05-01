@@ -177,9 +177,9 @@ function ShopPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              defaultValue={search.q || ""}
+              value={search.q || ""}
               onChange={(e) => updateSearch({ q: e.target.value || undefined })}
-              placeholder="Buscar productos..."
+              placeholder="Buscar productos, marcas, SKU..."
               className="pl-9"
             />
           </div>
