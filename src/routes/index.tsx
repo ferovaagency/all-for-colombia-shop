@@ -348,6 +348,27 @@ function HomePage() {
         </div>
       </section>
 
+
+      {/* Featured products */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold">Productos destacados</h2>
+            <p className="text-muted-foreground">Lo más nuevo en nuestra tienda</p>
+          </div>
+          <Link to="/tienda" className="text-secondary text-sm font-medium hover:underline">Ver todos →</Link>
+        </div>
+        {products.length === 0 ? (
+          <div className="bg-muted/40 border rounded-xl p-12 text-center text-muted-foreground">
+            Aún no hay productos. Agrega productos desde el panel de administración.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map((p) => <ProductCard key={p.id} product={p} />)}
+          </div>
+        )}
+      </section>
+
       {/* Promo banners slider */}
       <section className="py-6 bg-background">
         <div className="container mx-auto px-4">
@@ -395,26 +416,6 @@ function HomePage() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Featured products */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold">Productos destacados</h2>
-            <p className="text-muted-foreground">Lo más nuevo en nuestra tienda</p>
-          </div>
-          <Link to="/tienda" className="text-secondary text-sm font-medium hover:underline">Ver todos →</Link>
-        </div>
-        {products.length === 0 ? (
-          <div className="bg-muted/40 border rounded-xl p-12 text-center text-muted-foreground">
-            Aún no hay productos. Agrega productos desde el panel de administración.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((p) => <ProductCard key={p.id} product={p} />)}
-          </div>
-        )}
       </section>
 
       {/* Corporate banner */}
