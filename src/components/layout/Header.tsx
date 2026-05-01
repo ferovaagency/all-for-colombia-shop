@@ -22,6 +22,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [cats, setCats] = useState<Cat[]>([]);
+  const [productCounts, setProductCounts] = useState<Record<string, number>>({});
   const [hovered, setHovered] = useState<string | null>(null);
   const [mobileShop, setMobileShop] = useState(false);
   const navigate = useNavigate();
@@ -34,6 +35,15 @@ export function Header() {
         .select("id, slug, name, parent_id, sort_order")
         .order("sort_order", { ascending: true });
       setCats((data as Cat[]) || []);
+      const { data: prods } = await supabase
+        .from("products")
+        .select("category_id")
+        .eq("active", true);
+      const counts: Record<string, number> = {};
+      (prods || []).forEach((p: any) => {
+        if (p.category_id) counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+      });
+      setProductCounts(counts);
     })();
   }, []);
 
