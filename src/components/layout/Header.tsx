@@ -86,34 +86,44 @@ export function Header() {
                   <div
                     onMouseEnter={() => openMega(n.label)}
                     onMouseLeave={scheduleClose}
-                    className="absolute top-full left-0 mt-1 bg-white text-foreground border border-border rounded-2xl shadow-elevated p-6 z-50 w-[640px] grid grid-cols-3 gap-4"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white text-foreground border border-border rounded-2xl shadow-elevated p-5 z-50 w-[580px] max-w-[95vw]"
                   >
-                    {parents.map((parent) => (
-                      <div key={parent.id}>
-                        <Link
-                          to="/tienda"
-                          search={{ categoria: parent.slug } as any}
-                          onClick={() => setHovered(null)}
-                          className="font-bold text-sm text-foreground hover:text-secondary block mb-2"
-                        >
-                          {parent.name}
-                        </Link>
-                        <ul className="space-y-1">
-                          {childrenOf(parent.id).map((child) => (
-                            <li key={child.id}>
-                              <Link
-                                to="/tienda"
-                                search={{ categoria: child.slug } as any}
-                                onClick={() => setHovered(null)}
-                                className="text-xs text-muted-foreground hover:text-secondary transition-colors block py-0.5"
-                              >
-                                {child.name}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                    <div className="columns-2 sm:columns-3 gap-5 space-y-0">
+                      {parents.map((parent) => {
+                        const children = childrenOf(parent.id);
+                        if (children.length === 0) return null;
+                        return (
+                          <div key={parent.id} className="break-inside-avoid mb-4 last:mb-0">
+                            <p className="font-bold text-xs text-foreground uppercase tracking-wider mb-2 pb-1 border-b border-border">
+                              {parent.name}
+                            </p>
+                            <ul className="space-y-1">
+                              {children.map((child) => (
+                                <li key={child.id}>
+                                  <Link
+                                    to="/tienda"
+                                    search={{ categoria: child.slug } as any}
+                                    onClick={() => setHovered(null)}
+                                    className="text-xs text-muted-foreground hover:text-secondary transition-colors block py-0.5"
+                                  >
+                                    {child.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="border-t border-border mt-4 pt-3">
+                      <Link
+                        to="/tienda"
+                        onClick={() => setHovered(null)}
+                        className="text-xs text-secondary font-semibold hover:underline"
+                      >
+                        Ver todos los productos →
+                      </Link>
+                    </div>
                   </div>
                 )}
               </div>
