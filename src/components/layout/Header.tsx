@@ -59,9 +59,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full bg-primary text-primary-foreground shadow-elevated">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div className="flex min-h-[72px] sm:min-h-[80px] items-center justify-between gap-4 py-2">
           <Link to="/" aria-label="All For All — Inicio" className="flex items-center">
-            <Logo variant="light" className="h-14 md:h-16 w-auto" />
+            <Logo variant="light" className="h-16 sm:h-20 w-auto object-contain" />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1 relative">
