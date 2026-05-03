@@ -20,9 +20,9 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as BlogRouteImport } from './routes/blog'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DistribuidoresIndexRouteImport } from './routes/distribuidores.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
 import { Route as DistribuidoresRegistroRouteImport } from './routes/distribuidores.registro'
 import { Route as DistribuidoresPortalRouteImport } from './routes/distribuidores.portal'
@@ -88,11 +88,6 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -101,6 +96,11 @@ const IndexRoute = IndexRouteImport.update({
 const DistribuidoresIndexRoute = DistribuidoresIndexRouteImport.update({
   id: '/distribuidores/',
   path: '/distribuidores/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductoSlugRoute = ProductoSlugRouteImport.update({
@@ -124,9 +124,9 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   getParentRoute: () => BlogRoute,
 } as any)
 const AdminGeneradorFichasRoute = AdminGeneradorFichasRouteImport.update({
-  id: '/generador-fichas',
-  path: '/generador-fichas',
-  getParentRoute: () => AdminRoute,
+  id: '/admin/generador-fichas',
+  path: '/admin/generador-fichas',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DistribuidoresPortalIndexRoute =
   DistribuidoresPortalIndexRouteImport.update({
@@ -154,7 +154,6 @@ const ApiPublicAddiWebhookRoute = ApiPublicAddiWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
@@ -171,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
@@ -179,7 +179,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
@@ -195,6 +194,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
+  '/admin': typeof AdminIndexRoute
   '/distribuidores': typeof DistribuidoresIndexRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
@@ -204,7 +204,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
@@ -221,6 +220,7 @@ export interface FileRoutesById {
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
@@ -231,7 +231,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
     | '/blog'
     | '/carrito'
     | '/categorias'
@@ -248,6 +247,7 @@ export interface FileRouteTypes {
     | '/distribuidores/portal'
     | '/distribuidores/registro'
     | '/producto/$slug'
+    | '/admin/'
     | '/distribuidores/'
     | '/api/public/addi-webhook'
     | '/distribuidores/portal/catalogo'
@@ -256,7 +256,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/blog'
     | '/carrito'
     | '/categorias'
@@ -272,6 +271,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/distribuidores/registro'
     | '/producto/$slug'
+    | '/admin'
     | '/distribuidores'
     | '/api/public/addi-webhook'
     | '/distribuidores/portal/catalogo'
@@ -280,7 +280,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/admin'
     | '/blog'
     | '/carrito'
     | '/categorias'
@@ -297,6 +296,7 @@ export interface FileRouteTypes {
     | '/distribuidores/portal'
     | '/distribuidores/registro'
     | '/producto/$slug'
+    | '/admin/'
     | '/distribuidores/'
     | '/api/public/addi-webhook'
     | '/distribuidores/portal/catalogo'
@@ -306,7 +306,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   CarritoRoute: typeof CarritoRoute
   CategoriasRoute: typeof CategoriasRoute
@@ -318,9 +317,11 @@ export interface RootRouteChildren {
   ResultadoPagoRoute: typeof ResultadoPagoRoute
   TiendaRoute: typeof TiendaRoute
   VentasCorporativasRoute: typeof VentasCorporativasRoute
+  AdminGeneradorFichasRoute: typeof AdminGeneradorFichasRoute
   DistribuidoresPortalRoute: typeof DistribuidoresPortalRouteWithChildren
   DistribuidoresRegistroRoute: typeof DistribuidoresRegistroRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   DistribuidoresIndexRoute: typeof DistribuidoresIndexRoute
   ApiPublicAddiWebhookRoute: typeof ApiPublicAddiWebhookRoute
 }
@@ -404,13 +405,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -423,6 +417,13 @@ declare module '@tanstack/react-router' {
       path: '/distribuidores'
       fullPath: '/distribuidores/'
       preLoaderRoute: typeof DistribuidoresIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/producto/$slug': {
@@ -455,10 +456,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/generador-fichas': {
       id: '/admin/generador-fichas'
-      path: '/generador-fichas'
+      path: '/admin/generador-fichas'
       fullPath: '/admin/generador-fichas'
       preLoaderRoute: typeof AdminGeneradorFichasRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof rootRouteImport
     }
     '/distribuidores/portal/': {
       id: '/distribuidores/portal/'
@@ -491,16 +492,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AdminRouteChildren {
-  AdminGeneradorFichasRoute: typeof AdminGeneradorFichasRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminGeneradorFichasRoute: AdminGeneradorFichasRoute,
-}
-
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
-
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
 }
@@ -528,7 +519,6 @@ const DistribuidoresPortalRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   CarritoRoute: CarritoRoute,
   CategoriasRoute: CategoriasRoute,
@@ -540,9 +530,11 @@ const rootRouteChildren: RootRouteChildren = {
   ResultadoPagoRoute: ResultadoPagoRoute,
   TiendaRoute: TiendaRoute,
   VentasCorporativasRoute: VentasCorporativasRoute,
+  AdminGeneradorFichasRoute: AdminGeneradorFichasRoute,
   DistribuidoresPortalRoute: DistribuidoresPortalRouteWithChildren,
   DistribuidoresRegistroRoute: DistribuidoresRegistroRoute,
   ProductoSlugRoute: ProductoSlugRoute,
+  AdminIndexRoute: AdminIndexRoute,
   DistribuidoresIndexRoute: DistribuidoresIndexRoute,
   ApiPublicAddiWebhookRoute: ApiPublicAddiWebhookRoute,
 }

@@ -15,7 +15,7 @@ import { Link } from "@tanstack/react-router";
 import { formatCOP, whatsappUrl } from "@/lib/cart";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin — All For All" }, { name: "robots", content: "noindex" }] }),
   component: AdminPage,
 });
