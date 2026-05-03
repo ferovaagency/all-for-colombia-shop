@@ -57,6 +57,7 @@ export type Database = {
           published: boolean | null
           slug: string
           title: string
+          updated_at: string | null
         }
         Insert: {
           category?: string | null
@@ -70,6 +71,7 @@ export type Database = {
           published?: boolean | null
           slug: string
           title: string
+          updated_at?: string | null
         }
         Update: {
           category?: string | null
@@ -83,6 +85,7 @@ export type Database = {
           published?: boolean | null
           slug?: string
           title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -339,8 +342,11 @@ export type Database = {
       products: {
         Row: {
           active: boolean | null
+          brand: string | null
           brand_id: string | null
+          category: string | null
           category_id: string | null
+          condition: string | null
           created_at: string | null
           description: string | null
           distributor_price: number | null
@@ -357,11 +363,16 @@ export type Database = {
           slug: string
           specs: Json | null
           stock: number | null
+          updated_at: string | null
+          warranty: string | null
         }
         Insert: {
           active?: boolean | null
+          brand?: string | null
           brand_id?: string | null
+          category?: string | null
           category_id?: string | null
+          condition?: string | null
           created_at?: string | null
           description?: string | null
           distributor_price?: number | null
@@ -378,11 +389,16 @@ export type Database = {
           slug: string
           specs?: Json | null
           stock?: number | null
+          updated_at?: string | null
+          warranty?: string | null
         }
         Update: {
           active?: boolean | null
+          brand?: string | null
           brand_id?: string | null
+          category?: string | null
           category_id?: string | null
+          condition?: string | null
           created_at?: string | null
           description?: string | null
           distributor_price?: number | null
@@ -399,6 +415,8 @@ export type Database = {
           slug?: string
           specs?: Json | null
           stock?: number | null
+          updated_at?: string | null
+          warranty?: string | null
         }
         Relationships: [
           {
