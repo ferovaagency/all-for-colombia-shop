@@ -96,47 +96,29 @@ export function Header() {
                   <div
                     onMouseEnter={() => openMega(n.label)}
                     onMouseLeave={scheduleClose}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white text-foreground border border-border rounded-2xl shadow-elevated p-6 z-50 w-[680px] max-w-[95vw]"
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white text-foreground rounded-2xl shadow-2xl border border-gray-100 z-50 p-4 w-[min(90vw,400px)]"
                   >
-                    <div className="grid grid-cols-3 gap-x-6 gap-y-5">
-                      {parents.map((parent) => {
-                        const subs = childrenOf(parent.id).filter(
-                          (s) =>
-                            (productCounts[s.id] || 0) > 0 ||
-                            childrenOf(s.id).some((s3) => (productCounts[s3.id] || 0) > 0),
-                        );
-                        if (subs.length === 0) return null;
-                        return (
-                          <div key={parent.id} className="break-inside-avoid">
-                            <p className="font-bold text-[11px] text-foreground uppercase tracking-wider mb-2 pb-1.5 border-b-2 border-secondary/30">
-                              {parent.name}
-                            </p>
-                            <ul className="space-y-0.5">
-                              {subs.map((sub) => (
-                                <li key={sub.id}>
-                                  <Link
-                                    to="/tienda"
-                                    search={{ categoria: sub.slug } as any}
-                                    onClick={() => setHovered(null)}
-                                    className="text-xs text-muted-foreground hover:text-secondary hover:font-medium transition-colors block py-0.5 leading-tight"
-                                  >
-                                    {sub.name}
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        );
-                      })}
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {parents.map((parent) => (
+                        <Link
+                          key={parent.id}
+                          to="/tienda"
+                          search={{ categoria: parent.slug } as any}
+                          onClick={() => setHovered(null)}
+                          className="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-secondary/10 transition-colors group cursor-pointer"
+                        >
+                          <div className="w-2 h-2 rounded-full bg-secondary flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" />
+                          <span className="text-sm text-gray-700 group-hover:text-secondary transition-colors leading-tight font-medium">
+                            {parent.name}
+                          </span>
+                        </Link>
+                      ))}
                     </div>
-                    <div className="border-t border-border mt-5 pt-3 flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground italic">
-                        Encuentra todo en All For All
-                      </span>
+                    <div className="mt-3 pt-3 border-t border-gray-100">
                       <Link
                         to="/tienda"
                         onClick={() => setHovered(null)}
-                        className="text-xs font-bold text-secondary hover:underline inline-flex items-center gap-1"
+                        className="flex items-center justify-center text-sm font-bold text-secondary hover:underline py-1 gap-1"
                       >
                         Ver todo el catálogo →
                       </Link>
