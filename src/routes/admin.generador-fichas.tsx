@@ -381,30 +381,36 @@ Responde SOLO en JSON valido:
     let ok = 0, fail = 0;
     for (let i = 0; i < csvPreview.length; i++) {
       const r = csvPreview[i];
-      const name = (r.nombre || r.name || '').trim();
+      const name = (r.nombre || r.name || r.producto || r.titulo || '').trim();
       if (!name) { setUploadProgress(i + 1); continue; }
       setCurrentAction(`[${i + 1}/${csvPreview.length}] Procesando: ${name}`);
       const productSlug = slugify(name);
       let finalImageUrl = '';
-      const imageUrl = (r.imagen_url || r.image_url || r.imagen || '').trim();
+      const imageUrl = (r.imagen_url || r.image_url || r.imagen || r.url_imagen || r.foto || r.image || '').trim();
       if (imageUrl) {
         setCurrentAction(`[${i + 1}/${csvPreview.length}] Descargando imagen: ${name}`);
         const uploaded = await downloadAndUploadImage(imageUrl, productSlug);
         finalImageUrl = uploaded || imageUrl;
       }
       setCurrentAction(`[${i + 1}/${csvPreview.length}] Guardando: ${name}`);
-      const brandName = (r.marca || r.brand || '').trim();
-      const categoryName = (r.categoria || r.category || '').trim();
+      const brandName = (r.marca || r.brand || r.fabricante || '').trim();
+      const categoryName = (r.categoria || r.category || r.departamento || '').trim();
+      const productSku = (r.sku || r.referencia || r.codigo || r.ref || '').trim();
+      const productPrice = parseFloat((r.precio || r.price || r.valor || '0').replace(/[^0-9.]/g, '')) || null;
+      const productSalePrice = parseFloat((r.precio_oferta || r.sale_price || r.oferta || r.precio_descuento || '0').replace(/[^0-9.]/g, '')) || null;
+      const productStock = parseInt(r.stock || r.inventario || '0') || 0;
+      const productDesc = (r.descripcion || r.description || r.detalle || '').trim() || null;
+      const productShortDesc = (r.descripcion_corta || r.short_desc || r.resumen || r.short_description || '').trim() || null;
       const catData = categoryName ? (await supabase.from('categories').select('id').eq('name', categoryName).single()).data : null;
       const brandData = brandName ? (await supabase.from('brands').select('id').eq('name', brandName).single()).data : null;
       const { error } = await supabase.from('products').upsert({
         slug: productSlug, name,
-        sku: (r.sku || r.referencia || '').trim() || null,
-        price: parseFloat((r.precio || r.price || '0').replace(/[^0-9.]/g, '')) || null,
-        sale_price: parseFloat((r.precio_oferta || r.sale_price || '0').replace(/[^0-9.]/g, '')) || null,
-        stock: parseInt(r.stock || '0') || 0,
-        description: (r.descripcion || r.description || '').trim() || null,
-        short_description: (r.descripcion_corta || r.short_desc || '').trim() || null,
+        sku: productSku || null,
+        price: productPrice,
+        sale_price: productSalePrice,
+        stock: productStock,
+        description: productDesc,
+        short_description: productShortDesc,
         category: categoryName || null, brand: brandName || null,
         category_id: catData?.id || null, brand_id: brandData?.id || null,
         images: finalImageUrl ? [finalImageUrl] : [],
