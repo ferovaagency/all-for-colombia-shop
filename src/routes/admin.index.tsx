@@ -308,7 +308,63 @@ function AdminPage() {
           <SimpleList items={customers} cols={["name", "email", "phone", "company"]} />
         </TabsContent>
         <TabsContent value="blog" className="mt-6">
-          <SimpleList items={posts} cols={["title", "slug", "category", "published"]} />
+          <div className="bg-card border rounded-xl overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Título</TableHead>
+                  <TableHead>Slug</TableHead>
+                  <TableHead>Categoría</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {posts.map((post) => (
+                  <TableRow key={post.id}>
+                    <TableCell className="font-medium">{post.title}</TableCell>
+                    <TableCell className="text-xs font-mono">{post.slug}</TableCell>
+                    <TableCell className="text-xs">{post.category || "—"}</TableCell>
+                    <TableCell>
+                      <button
+                        onClick={async () => {
+                          await supabase
+                            .from("blog_posts")
+                            .update({ published: !post.published })
+                            .eq("id", post.id);
+                          reload();
+                        }}
+                        className={`text-xs px-3 py-1 rounded-full font-semibold transition-colors ${
+                          post.published
+                            ? "bg-green-100 text-green-700 hover:bg-green-200"
+                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                        }`}
+                      >
+                        {post.published ? "● Publicado" : "○ Borrador"}
+                      </button>
+                    </TableCell>
+                    <TableCell>
+                      <a
+                        href={`/blog/${post.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-secondary hover:underline inline-flex items-center gap-1"
+                      >
+                        Ver <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {posts.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                      Sin artículos
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </TabsContent>
 
         <TabsContent value="distributors" className="mt-6">
