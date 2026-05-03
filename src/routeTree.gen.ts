@@ -23,6 +23,7 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DistribuidoresIndexRouteImport } from './routes/distribuidores.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
 import { Route as DistribuidoresRegistroRouteImport } from './routes/distribuidores.registro'
 import { Route as DistribuidoresPortalRouteImport } from './routes/distribuidores.portal'
@@ -103,6 +104,11 @@ const DistribuidoresIndexRoute = DistribuidoresIndexRouteImport.update({
   path: '/distribuidores/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ProductoSlugRoute = ProductoSlugRouteImport.update({
   id: '/producto/$slug',
   path: '/producto/$slug',
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
@@ -179,7 +186,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
   '/categorias': typeof CategoriasRoute
@@ -195,6 +201,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
+  '/admin': typeof AdminIndexRoute
   '/distribuidores': typeof DistribuidoresIndexRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
@@ -221,6 +228,7 @@ export interface FileRoutesById {
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
@@ -248,6 +256,7 @@ export interface FileRouteTypes {
     | '/distribuidores/portal'
     | '/distribuidores/registro'
     | '/producto/$slug'
+    | '/admin/'
     | '/distribuidores/'
     | '/api/public/addi-webhook'
     | '/distribuidores/portal/catalogo'
@@ -256,7 +265,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/blog'
     | '/carrito'
     | '/categorias'
@@ -272,6 +280,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/distribuidores/registro'
     | '/producto/$slug'
+    | '/admin'
     | '/distribuidores'
     | '/api/public/addi-webhook'
     | '/distribuidores/portal/catalogo'
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/distribuidores/portal'
     | '/distribuidores/registro'
     | '/producto/$slug'
+    | '/admin/'
     | '/distribuidores/'
     | '/api/public/addi-webhook'
     | '/distribuidores/portal/catalogo'
@@ -425,6 +435,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DistribuidoresIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/producto/$slug': {
       id: '/producto/$slug'
       path: '/producto/$slug'
@@ -493,10 +510,12 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminGeneradorFichasRoute: typeof AdminGeneradorFichasRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminGeneradorFichasRoute: AdminGeneradorFichasRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
