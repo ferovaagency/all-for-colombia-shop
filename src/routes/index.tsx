@@ -19,47 +19,27 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-type HeroSlide = {
-  image: string | null;
-  title: string;
-  subtitle: string;
-  cta: string;
-  ctaLink: string;
-  badge?: string;
-};
-
-const HERO_SLIDES: HeroSlide[] = [
+const HERO_SLIDES = [
   {
-    image: null,
-    title: "Todo lo que necesitas para tu hogar y empresa",
-    subtitle: "Tecnología, hogar, equipos corporativos y más. Entrega a todo Colombia.",
-    cta: "Ver productos",
-    ctaLink: "/tienda",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1920&q=80",
-    title: "Equipos corporativos con precios especiales",
-    subtitle: "Compras por volumen. Facturación y soporte incluido.",
-    cta: "Cotizar ahora",
-    ctaLink: "/ventas-corporativas",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=1920&q=80",
-    badge: "NUEVO",
-    title: "Aires acondicionados para tu empresa",
-    subtitle: "Las mejores marcas. Entrega a todo Colombia.",
-    cta: "Ver aires",
-    ctaLink: "/tienda",
+    id: 1,
+    title: "Regala tecnología\neste Día de la Madre",
+    subtitle: "Ofertas especiales Logitech hasta 30% OFF.\nEnvío gratis en compras mayores a $150.000",
+    badge: "🌸 Día de la Madre",
+    cta: "Ver ofertas",
+    ctaLink: "/tienda?marca=Logitech",
+    bgColor: "from-[#020f1e] via-[#0d1f35] to-[#1a3a5c]",
+    accentColor: "#568baf",
   },
 ];
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  tecnologia: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400&q=80",
-  hogar: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400&q=80",
-  "equipos-corporativos": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80",
-  "aires-acondicionados": "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&q=80",
-  ploters: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
-  otros: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&q=80",
+  audio: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+  gaming: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&q=80",
+  "computadores-accesorios": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=500&q=80",
+  "celulares-tablets": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=500&q=80",
+  "hogar-tech": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80",
+  impresion: "https://images.unsplash.com/photo-1612198537235-59b95a20c6a7?w=500&q=80",
+  accesorios: "https://images.unsplash.com/photo-1609692814857-9f939c77b37c?w=500&q=80",
 };
 
 function HomePage() {
@@ -68,40 +48,32 @@ function HomePage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
-  const [counts, setCounts] = useState<Record<string, number>>({});
   const [posts, setPosts] = useState<any[]>([]);
 
-  // Promo banners
   const promoBanners = [
     {
       id: 1,
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
-      title: "Audífonos y Sonido",
-      subtitle: "La mejor calidad de audio",
-      cta: "Ver productos",
-      link: "/tienda",
-      categoria: "audifonos-diademas",
-      bg: "#020f1e",
+      tag: "🌸 Día de la Madre — Oferta especial",
+      title: "Logitech MX Master 3S",
+      subtitle: "El mouse inalámbrico más preciso del mercado.\nPerfecto para regalar este Día de la Madre.",
+      discount: "25% OFF",
+      cta: "Ver oferta",
+      link: "/tienda?categoria=accesorios-pc&marca=Logitech",
+      bgGradient: "from-[#020f1e] to-[#1a3a5c]",
+      accentColor: "#568baf",
+      imageUrl: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=600&q=80",
     },
     {
       id: 2,
-      image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600&q=80",
-      title: "Gaming",
-      subtitle: "Equipa tu setup",
-      cta: "Ver gaming",
-      link: "/tienda",
-      categoria: "gaming",
-      bg: "#568baf",
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80",
-      title: "Computadores",
-      subtitle: "Para trabajar y estudiar",
-      cta: "Ver computadores",
-      link: "/tienda",
-      categoria: "computadores-accesorios",
-      bg: "#3e4653",
+      tag: "🌸 Día de la Madre — Edición limitada",
+      title: "Logitech G PRO X Headset",
+      subtitle: "Audio de calidad profesional.\nHazla sentir especial con el mejor sonido.",
+      discount: "30% OFF",
+      cta: "Ver oferta",
+      link: "/tienda?categoria=audifonos-diademas&marca=Logitech",
+      bgGradient: "from-[#1a0a2e] to-[#2d1b4e]",
+      accentColor: "#a78bfa",
+      imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
     },
   ];
   const [bannerIndex, setBannerIndex] = useState(0);
@@ -113,14 +85,8 @@ function HomePage() {
     return () => clearInterval(t);
   }, [promoBanners.length]);
 
-  // Hero slider
   const [current, setCurrent] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setCurrent((p) => (p + 1) % HERO_SLIDES.length), 5000);
-    return () => clearInterval(t);
-  }, []);
 
-  // Categories carousel
   const carouselRef = useRef<HTMLDivElement>(null);
   const scrollCarousel = (dir: "left" | "right") => {
     const el = carouselRef.current;
@@ -132,7 +98,7 @@ function HomePage() {
     (async () => {
       const [cats, prods, brs, blog] = await Promise.all([
         supabase.from("categories").select("*").is("parent_id", null).order("sort_order"),
-        supabase.from("products").select("*").eq("active", true).order("created_at", { ascending: false }).limit(8),
+        supabase.from("products").select("*").eq("active", true).order("updated_at", { ascending: false }).limit(8),
         supabase.from("brands").select("*").limit(12),
         supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false }).limit(3),
       ]);
@@ -140,13 +106,6 @@ function HomePage() {
       setProducts(prods.data || []);
       setBrands(brs.data || []);
       setPosts(blog.data || []);
-
-      const all = await supabase.from("products").select("category_id").eq("active", true);
-      const c: Record<string, number> = {};
-      (all.data || []).forEach((p: any) => {
-        if (p.category_id) c[p.category_id] = (c[p.category_id] || 0) + 1;
-      });
-      setCounts(c);
     })();
   }, []);
 
@@ -162,47 +121,27 @@ function HomePage() {
         <div className="relative h-[480px] md:h-[560px]">
           {HERO_SLIDES.map((slide, i) => (
             <div
-              key={i}
+              key={slide.id}
               className={cn(
                 "absolute inset-0 transition-opacity duration-700",
                 i === current ? "opacity-100" : "opacity-0 pointer-events-none",
               )}
               aria-hidden={i !== current}
             >
-              {slide.image ? (
-                <>
-                  <img
-                    src={slide.image}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
-                    loading={i === 0 ? "eager" : "lazy"}
-                    decoding="async"
-                    fetchPriority={i === 0 ? "high" : "low"}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-primary/30" />
-                </>
-              ) : (
-                <div className="absolute inset-0 bg-gradient-hero" />
-              )}
+              <div className={cn("absolute inset-0 bg-gradient-to-br", slide.bgColor)} />
               <div className="absolute inset-0 opacity-10" style={{
                 backgroundImage: "radial-gradient(circle at 20% 20%, white 0, transparent 40%), radial-gradient(circle at 80% 80%, white 0, transparent 40%)",
               }} />
 
               <div className="container relative mx-auto h-full px-4 flex items-center">
                 <div className="max-w-3xl">
-                  {slide.badge ? (
-                    <div className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-xs font-bold mb-5">
-                      <Sparkles className="h-3.5 w-3.5" /> {slide.badge}
-                    </div>
-                  ) : (
-                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full text-xs font-medium mb-5">
-                      <Sparkles className="h-3.5 w-3.5" /> Envíos a todo Colombia
-                    </div>
-                  )}
-                  <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-5">
+                  <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1 rounded-full text-xs font-bold mb-5">
+                    <Sparkles className="h-3.5 w-3.5" /> {slide.badge}
+                  </div>
+                  <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-5 whitespace-pre-line">
                     {slide.title}
                   </h1>
-                  <p className="text-lg md:text-xl text-white/85 mb-8 max-w-2xl">
+                  <p className="text-lg md:text-xl text-white/85 mb-8 max-w-2xl whitespace-pre-line">
                     {slide.subtitle}
                   </p>
                   <div className="flex flex-wrap gap-3">
@@ -217,40 +156,6 @@ function HomePage() {
               </div>
             </div>
           ))}
-
-          {/* Arrows */}
-          <button
-            type="button"
-            onClick={() => setCurrent((p) => (p - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)}
-            aria-label="Anterior"
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 h-11 w-11 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur flex items-center justify-center text-white"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setCurrent((p) => (p + 1) % HERO_SLIDES.length)}
-            aria-label="Siguiente"
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 h-11 w-11 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur flex items-center justify-center text-white"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
-
-          {/* Dots */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-            {HERO_SLIDES.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setCurrent(i)}
-                aria-label={`Ir al slide ${i + 1}`}
-                className={cn(
-                  "h-2 rounded-full transition-all",
-                  i === current ? "w-8 bg-white" : "w-2 bg-white/50 hover:bg-white/75",
-                )}
-              />
-            ))}
-          </div>
         </div>
 
         {/* Search bar overlapping the hero */}
@@ -317,8 +222,7 @@ function HomePage() {
           className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {categories.map((cat) => {
-            const img = cat.image || CATEGORY_IMAGES[cat.slug] || CATEGORY_IMAGES.otros;
-            const productCount = counts[cat.id] || 0;
+            const img = CATEGORY_IMAGES[cat.slug] || cat.image || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80";
             return (
               <Link
                 key={cat.id}
@@ -333,11 +237,9 @@ function HomePage() {
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-4 text-primary-foreground">
+                <div className="absolute inset-x-0 bottom-0 p-4 text-primary-foreground flex items-center justify-between">
                   <h3 className="font-semibold text-base leading-tight">{cat.name}</h3>
-                  <p className="text-xs text-white/80 mt-0.5">
-                    {productCount} producto{productCount === 1 ? "" : "s"}
-                  </p>
+                  <ArrowRight className="h-4 w-4 opacity-80 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
             );
@@ -350,49 +252,52 @@ function HomePage() {
 
 
       {/* Featured products */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold">Productos destacados</h2>
-            <p className="text-muted-foreground">Lo más nuevo en nuestra tienda</p>
+      {products.length > 0 && (
+        <section className="container mx-auto px-4 py-16">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold">Productos destacados</h2>
+              <p className="text-muted-foreground">Lo más nuevo en nuestra tienda</p>
+            </div>
+            <Link to="/tienda" className="text-secondary text-sm font-medium hover:underline">Ver todos →</Link>
           </div>
-          <Link to="/tienda" className="text-secondary text-sm font-medium hover:underline">Ver todos →</Link>
-        </div>
-        {products.length === 0 ? (
-          <div className="bg-muted/40 border rounded-xl p-12 text-center text-muted-foreground">
-            Aún no hay productos. Agrega productos desde el panel de administración.
-          </div>
-        ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       {/* Promo banners slider */}
       <section className="py-6 bg-background">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-2xl" style={{ height: "180px" }}>
+          <div className="relative overflow-hidden rounded-2xl" style={{ height: "200px" }}>
             {promoBanners.map((banner, i) => (
               <Link
                 key={banner.id}
                 to={banner.link}
-                search={{ categoria: banner.categoria } as any}
                 className={cn(
-                  "absolute inset-0 flex items-center justify-between px-8 transition-all duration-500",
+                  "absolute inset-0 flex items-center justify-between px-8 transition-all duration-500 bg-gradient-to-r",
+                  banner.bgGradient,
                   i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0",
                 )}
-                style={{ background: banner.bg }}
               >
-                <div className="text-white">
-                  <h3 className="text-2xl font-black">{banner.title}</h3>
-                  <p className="text-white/70 text-sm mt-1">{banner.subtitle}</p>
-                  <span className="inline-block mt-3 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-4 py-2 rounded-full transition-colors">
-                    {banner.cta} →
+                <div className="text-white max-w-md">
+                  <span className="inline-block text-xs font-semibold mb-2 px-2 py-1 rounded-full bg-white/15">
+                    {banner.tag}
                   </span>
+                  <h3 className="text-2xl font-black">{banner.title}</h3>
+                  <p className="text-white/75 text-sm mt-1 whitespace-pre-line">{banner.subtitle}</p>
+                  <div className="flex items-center gap-3 mt-3">
+                    <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: banner.accentColor }}>
+                      {banner.discount}
+                    </span>
+                    <span className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors">
+                      {banner.cta} →
+                    </span>
+                  </div>
                 </div>
                 <img
-                  src={banner.image}
+                  src={banner.imageUrl}
                   alt={banner.title}
                   loading="lazy"
                   decoding="async"
