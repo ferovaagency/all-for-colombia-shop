@@ -349,13 +349,26 @@ Responde SOLO en JSON valido:
     reader.onload = ev => {
       const text = ev.target?.result as string;
       const lines = text.split(/\r?\n/).filter(l => l.trim());
-      if (lines.length < 2) { toast.error('El CSV necesita encabezado y al menos 1 fila'); return; }
+      if (lines.length < 2) {
+        toast.error('El CSV necesita encabezado y datos');
+        return;
+      }
       const sep = lines[0].includes(';') ? ';' : ',';
-      const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/['"]/g, '').replace(/\s+/g, '_'));
+      const normalize = (s: string) => s
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/['"]/g, '')
+        .replace(/\s+/g, '_');
+      const headers = lines[0].split(sep).map(normalize);
       const rows = lines.slice(1).map(line => {
         const vals = line.split(sep).map(v => v.trim().replace(/^["']|["']$/g, ''));
         return Object.fromEntries(headers.map((h, i) => [h, vals[i] || '']));
-      }).filter(r => (r.nombre || r.name || '').trim());
+      }).filter(r => {
+        const name = r.nombre || r.name || r.producto || '';
+        return name.trim().length > 0;
+      });
       setCsvPreview(rows);
       toast.success(`${rows.length} productos detectados`);
     };
