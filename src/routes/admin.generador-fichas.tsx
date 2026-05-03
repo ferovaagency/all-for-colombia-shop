@@ -243,38 +243,19 @@ function ProductGeneratorPage() {
         body: {
           name, price, brand: selectedBrand, category: selectedCategory,
           condition, warranty, specs: aiNotes,
-          prompt: `Genera ficha completa siguiendo Guia Editorial Ferova Agency para All For All.
-REGLAS OBLIGATORIAS:
-1. DESCRIPCION (150-200 palabras): primera oracion Sujeto+Verbo+Predicado tecnico. NO preguntas.
-2. PERFILES (3-4): casos de uso especificos y reales. NO vagos como "cualquier usuario".
-3. SPECS CON CONTEXTO: cada spec con su impacto real para el usuario.
-4. BENEFICIOS (5): FEATURE a BENEFICIO medible. Ej: "Bateria 72Wh = 12h sin enchufe"
-5. FAQ (3 preguntas reales del comprador, respuestas 2-3 oraciones)
-6. DESCRIPCION CORTA: max 40 palabras
-7. META TITLE: max 60 chars con keyword principal
-8. META DESCRIPTION: 150-160 chars con propuesta de valor
-9. Mencionar "All For All" max 2 veces de forma natural y contextual
-10. NO: adjetivos vacios, venta agresiva, exageraciones. SI: datos concretos, beneficios medibles
-Responde SOLO en JSON valido:
-{"description":"[HTML con h2 p ul]","short_description":"[max 40 palabras]","meta_title":"[max 60 chars]","meta_description":"[150-160 chars]","specs":{"[spec]":"[valor | impacto real]"},"category":"[si no especificado]","brand":"[si identificas la marca]"}`
         }
       });
       if (error) throw error;
-      let parsed: any = {};
-      try {
-        const raw = data?.content || '';
-        const jsonMatch = raw.match(/\{[\s\S]*\}/);
-        if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
-        else parsed = { description: raw };
-      } catch { parsed = { description: data?.content || '' }; }
-      if (parsed.description) setDescription(parsed.description);
-      if (parsed.short_description) setShortDesc(parsed.short_description);
-      if (parsed.meta_title) setMetaTitle(parsed.meta_title);
-      if (parsed.meta_description) setMetaDesc(parsed.meta_description);
-      if (parsed.specs) setSpecsText(Object.entries(parsed.specs as Record<string, string>)
-        .map(([k, v]) => `${k}: ${v}`).join('\n'));
-      if (parsed.category && !selectedCategory) setSelectedCategory(parsed.category);
-      if (parsed.brand && !selectedBrand) setSelectedBrand(parsed.brand);
+      if (data.description) setDescription(data.description);
+      if (data.short_description) setShortDesc(data.short_description);
+      if (data.meta_title) setMetaTitle(data.meta_title);
+      if (data.meta_description) setMetaDesc(data.meta_description);
+      if (data.specs && typeof data.specs === 'object') {
+        setSpecsText(Object.entries(data.specs as Record<string, string>)
+          .map(([k, v]) => `${k}: ${v}`).join('\n'));
+      }
+      if (data.category && !selectedCategory) setSelectedCategory(data.category);
+      if (data.brand && !selectedBrand) setSelectedBrand(data.brand);
       toast.success('Contenido generado con IA');
     } catch (err: any) {
       toast.error('Error al generar: ' + err.message);
