@@ -33,6 +33,16 @@ export function Header() {
       const { data } = await supabase
         .from("categories")
         .select("id, slug, name, parent_id, sort_order")
+        .is("parent_id", null)
+        .in("slug", [
+          "audio",
+          "gaming",
+          "computadores-accesorios",
+          "celulares-tablets",
+          "hogar-tech",
+          "impresion",
+          "accesorios",
+        ])
         .order("sort_order", { ascending: true });
       setCats((data as Cat[]) || []);
       const { data: prods } = await supabase
