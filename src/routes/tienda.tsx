@@ -45,6 +45,10 @@ function ShopPage() {
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [maxPrice, setMaxPrice] = useState(10000000);
+  const [expanded, setExpanded] = useState<string[]>([]);
+
+  const parentCats = useMemo(() => categories.filter((c: any) => !c.parent_id), [categories]);
+  const getChildren = (parentId: string) => categories.filter((c: any) => c.parent_id === parentId);
 
   useEffect(() => {
     (async () => {
