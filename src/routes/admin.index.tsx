@@ -116,11 +116,18 @@ function AdminPage() {
           <h1 className="text-3xl font-bold">Panel de administración</h1>
           <p className="text-sm text-muted-foreground">Gestiona pedidos, productos y contenido.</p>
         </div>
-        <Button asChild variant="outline">
-          <Link to="/admin/generador-fichas">
-            <Sparkles className="h-4 w-4 mr-2" /> Generador de fichas
-          </Link>
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button asChild variant="outline">
+            <Link to="/admin/generador-fichas">
+              <Sparkles className="h-4 w-4 mr-2" /> Generador de fichas
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/admin/blog-generator">
+              <Sparkles className="h-4 w-4 mr-2" /> Generador de Blog con IA
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="orders">
