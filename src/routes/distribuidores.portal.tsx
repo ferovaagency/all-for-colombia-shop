@@ -21,17 +21,25 @@ function DistributorPortalLayout() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const raw = typeof window !== "undefined" ? localStorage.getItem("afa_distributor") : null;
-    if (!raw) {
-      navigate({ to: "/distribuidores" });
-      return;
-    }
     try {
-      setDistributor(JSON.parse(raw));
+      const stored = typeof window !== "undefined" ? localStorage.getItem("afa_distributor") : null;
+      if (!stored) {
+        navigate({ to: "/distribuidores" });
+        return;
+      }
+      const parsed = JSON.parse(stored);
+      if (!parsed?.email) {
+        localStorage.removeItem("afa_distributor");
+        navigate({ to: "/distribuidores" });
+        return;
+      }
+      setDistributor(parsed);
     } catch {
+      localStorage.removeItem("afa_distributor");
       navigate({ to: "/distribuidores" });
+    } finally {
+      setLoaded(true);
     }
-    setLoaded(true);
   }, [navigate]);
 
   const logout = () => {
@@ -39,9 +47,14 @@ function DistributorPortalLayout() {
     navigate({ to: "/distribuidores" });
   };
 
-  if (!loaded || !distributor) {
-    return <div className="container mx-auto px-4 py-12">Cargando portal...</div>;
+  if (!loaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
+  if (!distributor) return null;
 
   return (
     <div className="min-h-[60vh]">
