@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +44,22 @@ function ProductSheetGeneratorPage() {
   const [csvPreview, setCsvPreview] = useState<CSVRow[]>([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("categories")
+      .select("id,name,slug")
+      .is("parent_id", null)
+      .order("sort_order")
+      .then(({ data }) => setCategories(data || []));
+    supabase
+      .from("brands")
+      .select("id,name")
+      .order("name")
+      .then(({ data }) => setBrands(data || []));
+  }, []);
 
   const set = (field: keyof typeof form, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -81,6 +97,12 @@ function ProductSheetGeneratorPage() {
     setSaving(true);
     try {
       const slug = slugify(form.name);
+      const catResult = form.category
+        ? await supabase.from("categories").select("id").eq("name", form.category).maybeSingle()
+        : { data: null as any };
+      const brandResult = form.brand
+        ? await supabase.from("brands").select("id").eq("name", form.brand).maybeSingle()
+        : { data: null as any };
       const { error } = await supabase.from("products").upsert(
         {
           slug,
@@ -90,6 +112,8 @@ function ProductSheetGeneratorPage() {
           sale_price: form.salePrice ? parseFloat(form.salePrice) : null,
           stock: form.stock ? parseInt(form.stock) : 0,
           description: generated || null,
+          category_id: catResult.data?.id || null,
+          brand_id: brandResult.data?.id || null,
           active: true,
         },
         { onConflict: "slug" },
@@ -219,7 +243,16 @@ function ProductSheetGeneratorPage() {
                   </div>
                   <div>
                     <Label>Marca</Label>
-                    <Input value={form.brand} onChange={(e) => set("brand", e.target.value)} />
+                    <select
+                      value={form.brand}
+                      onChange={(e) => set("brand", e.target.value)}
+                      className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background"
+                    >
+                      <option value="">Marca (IA la identifica si puede)</option>
+                      {brands.map((b) => (
+                        <option key={b.id} value={b.name}>{b.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
@@ -241,7 +274,16 @@ function ProductSheetGeneratorPage() {
                   </div>
                   <div>
                     <Label>Categoría</Label>
-                    <Input value={form.category} onChange={(e) => set("category", e.target.value)} />
+                    <select
+                      value={form.category}
+                      onChange={(e) => set("category", e.target.value)}
+                      className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background"
+                    >
+                      <option value="">Categoría (IA la asigna)</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
