@@ -117,22 +117,59 @@ function ShopPage() {
     <div className="space-y-6">
       <div>
         <Label className="font-semibold mb-3 block">Categorías</Label>
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <button
             onClick={() => updateSearch({ categoria: undefined })}
-            className={`block text-sm w-full text-left px-2 py-1 rounded ${!search.categoria ? "bg-secondary/10 text-secondary font-medium" : "hover:bg-muted"}`}
+            className={`block text-sm w-full text-left px-3 py-2 rounded-lg font-medium transition-colors ${!search.categoria ? "bg-secondary text-secondary-foreground" : "hover:bg-muted"}`}
           >
-            Todas
+            Todos los productos
           </button>
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => updateSearch({ categoria: c.slug })}
-              className={`block text-sm w-full text-left px-2 py-1 rounded ${search.categoria === c.slug ? "bg-secondary/10 text-secondary font-medium" : "hover:bg-muted"}`}
-            >
-              {c.name}
-            </button>
-          ))}
+          {parentCats.map((parent: any) => {
+            const subs = getChildren(parent.id);
+            const isExpanded = expanded.includes(parent.id);
+            const isParentActive = search.categoria === parent.slug;
+            const hasActiveChild = subs.some((s: any) => s.slug === search.categoria);
+            return (
+              <div key={parent.id}>
+                <button
+                  onClick={() => {
+                    if (subs.length === 0) {
+                      updateSearch({ categoria: parent.slug });
+                    } else {
+                      setExpanded((prev) =>
+                        prev.includes(parent.id) ? prev.filter((id) => id !== parent.id) : [...prev, parent.id]
+                      );
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    isParentActive || hasActiveChild ? "bg-secondary/10 text-secondary" : "hover:bg-muted text-foreground"
+                  }`}
+                >
+                  <span>{parent.name}</span>
+                  {subs.length > 0 && (
+                    <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                  )}
+                </button>
+                {isExpanded && subs.length > 0 && (
+                  <div className="ml-3 mt-1 space-y-0.5 border-l border-border pl-2">
+                    {subs.map((sub: any) => (
+                      <button
+                        key={sub.id}
+                        onClick={() => updateSearch({ categoria: sub.slug })}
+                        className={`w-full text-left px-2 py-1.5 rounded-lg text-xs transition-colors ${
+                          search.categoria === sub.slug
+                            ? "bg-secondary text-secondary-foreground font-semibold"
+                            : "hover:bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {sub.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
