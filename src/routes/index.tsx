@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
+import heroMama from "@/assets/hero-mama-pink.png";
+import bannerMamaPink from "@/assets/hero-mama-pink.png";
+import bannerMamaWhite from "@/assets/banner-mama-white.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,19 +22,6 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const HERO_SLIDES = [
-  {
-    id: 1,
-    title: "Regala tecnología\neste Día de la Madre",
-    subtitle: "Ofertas especiales Logitech hasta 30% OFF.\nEnvío gratis en compras mayores a $150.000",
-    badge: "🌸 Día de la Madre",
-    cta: "Ver ofertas",
-    ctaLink: "/tienda?marca=Logitech",
-    bgColor: "from-[#020f1e] via-[#0d1f35] to-[#1a3a5c]",
-    accentColor: "#568baf",
-  },
-];
-
 const CATEGORY_IMAGES: Record<string, string> = {
   audio: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
   gaming: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&q=80",
@@ -42,6 +32,11 @@ const CATEGORY_IMAGES: Record<string, string> = {
   accesorios: "https://images.unsplash.com/photo-1609692814857-9f939c77b37c?w=500&q=80",
 };
 
+const PROMO_BANNERS = [
+  { id: 1, image: bannerMamaPink, link: "/tienda", alt: "Sorprende a mamá con Logitech" },
+  { id: 2, image: bannerMamaWhite, link: "/tienda", alt: "Logitech para mamá - bienestar" },
+];
+
 function HomePage() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
@@ -50,42 +45,11 @@ function HomePage() {
   const [brands, setBrands] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
 
-  const promoBanners = [
-    {
-      id: 1,
-      tag: "🌸 Día de la Madre — Oferta especial",
-      title: "Logitech MX Master 3S",
-      subtitle: "El mouse inalámbrico más preciso del mercado.\nPerfecto para regalar este Día de la Madre.",
-      discount: "25% OFF",
-      cta: "Ver oferta",
-      link: "/tienda?categoria=accesorios-pc&marca=Logitech",
-      bgGradient: "from-[#020f1e] to-[#1a3a5c]",
-      accentColor: "#568baf",
-      imageUrl: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=600&q=80",
-    },
-    {
-      id: 2,
-      tag: "🌸 Día de la Madre — Edición limitada",
-      title: "Logitech G PRO X Headset",
-      subtitle: "Audio de calidad profesional.\nHazla sentir especial con el mejor sonido.",
-      discount: "30% OFF",
-      cta: "Ver oferta",
-      link: "/tienda?categoria=audifonos-diademas&marca=Logitech",
-      bgGradient: "from-[#1a0a2e] to-[#2d1b4e]",
-      accentColor: "#a78bfa",
-      imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
-    },
-  ];
   const [bannerIndex, setBannerIndex] = useState(0);
   useEffect(() => {
-    const t = setInterval(
-      () => setBannerIndex((p) => (p + 1) % promoBanners.length),
-      4000,
-    );
+    const t = setInterval(() => setBannerIndex((p) => (p + 1) % PROMO_BANNERS.length), 4000);
     return () => clearInterval(t);
-  }, [promoBanners.length]);
-
-  const [current, setCurrent] = useState(0);
+  }, []);
 
   const carouselRef = useRef<HTMLDivElement>(null);
   const scrollCarousel = (dir: "left" | "right") => {
@@ -116,49 +80,34 @@ function HomePage() {
 
   return (
     <>
-      {/* Hero slider */}
-      <section className="relative overflow-hidden text-primary-foreground">
-        <div className="relative h-[480px] md:h-[560px]">
-          {HERO_SLIDES.map((slide, i) => (
-            <div
-              key={slide.id}
-              className={cn(
-                "absolute inset-0 transition-opacity duration-700",
-                i === current ? "opacity-100" : "opacity-0 pointer-events-none",
-              )}
-              aria-hidden={i !== current}
-            >
-              <div className={cn("absolute inset-0 bg-gradient-to-br", slide.bgColor)} />
-              <div className="absolute inset-0 opacity-10" style={{
-                backgroundImage: "radial-gradient(circle at 20% 20%, white 0, transparent 40%), radial-gradient(circle at 80% 80%, white 0, transparent 40%)",
-              }} />
-
-              <div className="container relative mx-auto h-full px-4 flex items-center">
-                <div className="max-w-3xl">
-                  <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1 rounded-full text-xs font-bold mb-5">
-                    <Sparkles className="h-3.5 w-3.5" /> {slide.badge}
-                  </div>
-                  <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-5 whitespace-pre-line">
-                    {slide.title}
-                  </h1>
-                  <p className="text-lg md:text-xl text-white/85 mb-8 max-w-2xl whitespace-pre-line">
-                    {slide.subtitle}
-                  </p>
-                  <div className="flex flex-wrap gap-3">
-                    <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
-                      <Link to={slide.ctaLink}>{slide.cta} <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                    </Button>
-                    <Button asChild size="lg" variant="outline" className="bg-transparent border-white text-white hover:bg-white/10">
-                      <Link to="/ventas-corporativas">Ventas corporativas</Link>
-                    </Button>
-                  </div>
-                </div>
+      {/* Hero - single slide Día de la Madre */}
+      <section className="relative overflow-hidden">
+        <div className="relative h-[400px] md:h-[560px]">
+          <img
+            src={heroMama}
+            alt="Día de la Madre - Logitech"
+            className="absolute inset-0 h-full w-full object-cover object-center"
+            fetchPriority="high"
+          />
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="container relative mx-auto h-full px-4 flex items-end md:items-center pb-10 md:pb-0">
+            <div className="max-w-2xl text-white">
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1 rounded-full text-xs font-bold mb-4">
+                <Sparkles className="h-3.5 w-3.5" /> 🌸 Día de la Madre
               </div>
+              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 whitespace-pre-line">
+                {"Regala tecnología\neste Día de la Madre"}
+              </h1>
+              <p className="text-base md:text-lg text-white/90 mb-6 whitespace-pre-line">
+                {"Ofertas especiales Logitech.\nEnvío gratis en compras mayores a $150.000"}
+              </p>
+              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
+                <Link to="/tienda">Ver ofertas <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </Button>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Search bar overlapping the hero */}
         <div className="container mx-auto px-4 -mt-10 relative z-20">
           <form onSubmit={onSearch} className="max-w-2xl mx-auto">
             <div className="relative">
@@ -195,20 +144,10 @@ function HomePage() {
             <p className="text-muted-foreground">Explora por tipo de producto</p>
           </div>
           <div className="hidden md:flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => scrollCarousel("left")}
-              aria-label="Anterior"
-              className="h-10 w-10 rounded-full border bg-background hover:bg-muted flex items-center justify-center transition-smooth"
-            >
+            <button type="button" onClick={() => scrollCarousel("left")} aria-label="Anterior" className="h-10 w-10 rounded-full border bg-background hover:bg-muted flex items-center justify-center transition-smooth">
               <ChevronLeft className="h-5 w-5" />
             </button>
-            <button
-              type="button"
-              onClick={() => scrollCarousel("right")}
-              aria-label="Siguiente"
-              className="h-10 w-10 rounded-full border bg-background hover:bg-muted flex items-center justify-center transition-smooth"
-            >
+            <button type="button" onClick={() => scrollCarousel("right")} aria-label="Siguiente" className="h-10 w-10 rounded-full border bg-background hover:bg-muted flex items-center justify-center transition-smooth">
               <ChevronRight className="h-5 w-5" />
             </button>
             <Link to="/categorias" className="ml-2 text-secondary text-sm font-medium hover:underline inline-flex items-center gap-1">
@@ -217,10 +156,7 @@ function HomePage() {
           </div>
         </div>
 
-        <div
-          ref={carouselRef}
-          className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
+        <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categories.map((cat) => {
             const img = CATEGORY_IMAGES[cat.slug] || cat.image || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80";
             return (
@@ -230,16 +166,10 @@ function HomePage() {
                 search={{ categoria: cat.slug } as any}
                 className="group relative shrink-0 w-[200px] h-[200px] rounded-xl overflow-hidden snap-start shadow-card hover:shadow-elevated transition-smooth"
               >
-                <img
-                  src={img}
-                  alt={cat.name}
-                  loading="lazy"
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-4 text-primary-foreground flex items-center justify-between">
+                <img src={img} alt={cat.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-black/45 group-hover:bg-black/55 transition-colors" />
+                <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                   <h3 className="font-semibold text-base leading-tight">{cat.name}</h3>
-                  <ArrowRight className="h-4 w-4 opacity-80 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
             );
@@ -249,7 +179,6 @@ function HomePage() {
           )}
         </div>
       </section>
-
 
       {/* Featured products */}
       {products.length > 0 && (
@@ -270,52 +199,27 @@ function HomePage() {
       {/* Promo banners slider */}
       <section className="py-6 bg-background">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-2xl" style={{ height: "200px" }}>
-            {promoBanners.map((banner, i) => (
+          <div className="relative overflow-hidden rounded-2xl h-[160px] md:h-[220px]">
+            {PROMO_BANNERS.map((banner, i) => (
               <Link
                 key={banner.id}
                 to={banner.link}
                 className={cn(
-                  "absolute inset-0 flex items-center justify-between px-8 transition-all duration-500 bg-gradient-to-r",
-                  banner.bgGradient,
+                  "absolute inset-0 transition-opacity duration-500",
                   i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0",
                 )}
               >
-                <div className="text-white max-w-md">
-                  <span className="inline-block text-xs font-semibold mb-2 px-2 py-1 rounded-full bg-white/15">
-                    {banner.tag}
-                  </span>
-                  <h3 className="text-2xl font-black">{banner.title}</h3>
-                  <p className="text-white/75 text-sm mt-1 whitespace-pre-line">{banner.subtitle}</p>
-                  <div className="flex items-center gap-3 mt-3">
-                    <span className="text-xs font-bold px-3 py-1.5 rounded-full" style={{ background: banner.accentColor }}>
-                      {banner.discount}
-                    </span>
-                    <span className="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors">
-                      {banner.cta} →
-                    </span>
-                  </div>
-                </div>
-                <img
-                  src={banner.imageUrl}
-                  alt={banner.title}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-56 object-cover opacity-40 rounded-xl"
-                />
+                <img src={banner.image} alt={banner.alt} className="w-full h-full object-cover object-center" loading="lazy" />
               </Link>
             ))}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-              {promoBanners.map((_, i) => (
+              {PROMO_BANNERS.map((_, i) => (
                 <button
                   key={i}
                   type="button"
                   onClick={() => setBannerIndex(i)}
                   aria-label={`Banner ${i + 1}`}
-                  className={cn(
-                    "h-1.5 rounded-full transition-all",
-                    i === bannerIndex ? "w-5 bg-white" : "w-1.5 bg-white/40",
-                  )}
+                  className={cn("h-1.5 rounded-full transition-all", i === bannerIndex ? "w-5 bg-white" : "w-1.5 bg-white/60")}
                 />
               ))}
             </div>
@@ -366,13 +270,9 @@ function HomePage() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-2xl font-bold">Blog y consejos tech</h2>
-                <p className="text-muted-foreground text-sm mt-1">
-                  Guías, comparativas y novedades del mundo tech
-                </p>
+                <p className="text-muted-foreground text-sm mt-1">Guías, comparativas y novedades del mundo tech</p>
               </div>
-              <Link to="/blog" className="text-sm text-secondary hover:underline font-semibold">
-                Ver todos →
-              </Link>
+              <Link to="/blog" className="text-sm text-secondary hover:underline font-semibold">Ver todos →</Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {posts.map((post) => (
@@ -384,13 +284,7 @@ function HomePage() {
                 >
                   {post.cover_image && (
                     <div className="overflow-hidden h-44">
-                      <img
-                        src={post.cover_image}
-                        alt={post.title}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <img src={post.cover_image} alt={post.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
                   )}
                   <div className="p-4">
@@ -399,12 +293,8 @@ function HomePage() {
                         {post.category}
                       </span>
                     )}
-                    <h3 className="font-bold text-foreground mt-2 line-clamp-2 text-sm group-hover:text-secondary transition-colors">
-                      {post.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {post.excerpt}
-                    </p>
+                    <h3 className="font-bold text-foreground mt-2 line-clamp-2 text-sm group-hover:text-secondary transition-colors">{post.title}</h3>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{post.excerpt}</p>
                   </div>
                 </Link>
               ))}
