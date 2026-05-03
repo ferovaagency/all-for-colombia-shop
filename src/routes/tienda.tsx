@@ -77,7 +77,19 @@ function ShopPage() {
         p.sku?.toLowerCase().includes(q)
       );
     }
-    if (search.categoria) list = list.filter((p) => p.categories?.slug === search.categoria);
+    if (search.categoria) {
+      const selected = categories.find((c: any) => c.slug === search.categoria);
+      if (selected) {
+        const getDescendantIds = (catId: string): string[] => {
+          const children = categories.filter((c: any) => c.parent_id === catId);
+          return [catId, ...children.flatMap((c: any) => getDescendantIds(c.id))];
+        };
+        const ids = new Set(getDescendantIds(selected.id));
+        list = list.filter((p) => p.category_id && ids.has(p.category_id));
+      } else {
+        list = list.filter((p) => p.categories?.slug === search.categoria);
+      }
+    }
     if (search.marca) list = list.filter((p) => p.brands?.slug === search.marca);
     if (search.oferta === "1") list = list.filter((p) => p.sale_price && p.price && p.sale_price < p.price);
     list = list.filter((p) => {
@@ -95,7 +107,7 @@ function ShopPage() {
         list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
     return list;
-  }, [products, search, priceRange]);
+  }, [products, categories, search, priceRange]);
 
   const Filters = (
     <div className="space-y-6">
