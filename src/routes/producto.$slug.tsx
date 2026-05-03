@@ -1,30 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
-import {
-  ShoppingCart,
-  ArrowLeft,
-  Package,
-  Truck,
-  ShieldCheck,
-  Mail,
-  Landmark,
-  Smartphone,
-  KeyRound,
-  CreditCard,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useCart, formatCOP } from "@/lib/cart";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "@/components/shop/ProductCard";
+import { ShoppingCart, ChevronRight, Star, ShieldCheck, Package, Clock, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/producto/$slug")({
   component: ProductDetailPage,
 });
+
+const WHATSAPP_NUMBER = "573218280762";
 
 type DBProduct = {
   id: string;
@@ -39,8 +28,20 @@ type DBProduct = {
   short_description: string | null;
   description: string | null;
   specs: Record<string, unknown> | null;
+  condition: string | null;
+  warranty: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
   brands?: { slug: string; name: string } | null;
-  categories?: { slug: string; name: string } | null;
+  categories?: { id: string; slug: string; name: string; parent_id: string | null } | null;
+};
+
+type Review = {
+  id: string;
+  name: string;
+  role?: string | null;
+  rating: number;
+  text: string;
 };
 
 function ProductDetailPage() {
@@ -50,165 +51,173 @@ function ProductDetailPage() {
   const [product, setProduct] = useState<DBProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [imageIdx, setImageIdx] = useState(0);
-  const [qty, setQty] = useState(1);
-  const [showRequest, setShowRequest] = useState(false);
-  const [reqName, setReqName] = useState("");
-  const [reqEmail, setReqEmail] = useState("");
-
-  // Complementary (2) and related (4) products
   const [complements, setComplements] = useState<DBProduct[]>([]);
   const [related, setRelated] = useState<DBProduct[]>([]);
-  const [complementSel, setComplementSel] = useState<Record<string, boolean>>({});
-
-  // Sticky bar visibility
-  const buyBoxRef = useRef<HTMLDivElement>(null);
-  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [reviews] = useState<Review[]>([]);
 
   useEffect(() => {
     setLoading(true);
+    setImageIdx(0);
     setComplements([]);
     setRelated([]);
-    setComplementSel({});
-    setImageIdx(0);
-    setQty(1);
     (async () => {
       const { data } = await supabase
         .from("products")
-        .select("*, categories(slug,name), brands(slug,name)")
+        .select("*, categories(id,slug,name,parent_id), brands(slug,name)")
         .eq("slug", slug)
+        .eq("active", true)
         .maybeSingle();
       setProduct(data as DBProduct | null);
       setLoading(false);
     })();
   }, [slug]);
 
-  // Load complements + related when product (and its category) is known
   useEffect(() => {
-    if (!product?.category_id) return;
+    if (!product) return;
     (async () => {
-      const [complementsRes, relatedRes] = await Promise.all([
-        supabase
-          .from("products")
-          .select("*")
-          .eq("category_id", product.category_id!)
-          .eq("active", true)
-          .neq("id", product.id)
-          .limit(2),
-        supabase
-          .from("products")
-          .select("*")
-          .eq("category_id", product.category_id!)
-          .eq("active", true)
-          .neq("id", product.id)
-          .order("created_at", { ascending: false })
-          .limit(4),
-      ]);
-      setComplements((complementsRes.data as DBProduct[] | null) ?? []);
-      setRelated((relatedRes.data as DBProduct[] | null) ?? []);
-    })();
-  }, [product?.id, product?.category_id]);
+      // Determine parent category
+      let parentId = product.categories?.parent_id ?? product.categories?.id ?? null;
+      if (!parentId && product.category_id) parentId = product.category_id;
 
-  // IntersectionObserver for sticky bar
+      // Complements: same parent category, different products
+      let complementsRes;
+      if (parentId) {
+        const { data: siblingCats } = await supabase
+          .from("categories")
+          .select("id")
+          .or(`id.eq.${parentId},parent_id.eq.${parentId}`);
+        const ids = (siblingCats || []).map((c: { id: string }) => c.id);
+        complementsRes = await supabase
+          .from("products")
+          .select("*")
+          .in("category_id", ids.length ? ids : [parentId])
+          .eq("active", true)
+          .neq("id", product.id)
+          .order("updated_at", { ascending: false })
+          .limit(4);
+      } else {
+        complementsRes = { data: [] as DBProduct[] };
+      }
+      const comps = (complementsRes.data as DBProduct[] | null) ?? [];
+      setComplements(comps);
+
+      // Related: same exact category, exclude already shown
+      if (product.category_id) {
+        const excludeIds = [product.id, ...comps.map((c) => c.id)];
+        const { data: rel } = await supabase
+          .from("products")
+          .select("*")
+          .eq("category_id", product.category_id)
+          .eq("active", true)
+          .not("id", "in", `(${excludeIds.join(",")})`)
+          .order("updated_at", { ascending: false })
+          .limit(4);
+        setRelated((rel as DBProduct[] | null) ?? []);
+      }
+    })();
+  }, [product?.id]);
+
+  // Update document head with meta tags
   useEffect(() => {
-    const node = buyBoxRef.current;
-    if (!node) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setShowStickyBar(!entry.isIntersecting),
-      { rootMargin: "0px 0px -20px 0px", threshold: 0 },
-    );
-    obs.observe(node);
-    return () => obs.disconnect();
-  }, [product?.id, loading]);
+    if (!product) return;
+    const title = product.meta_title || `${product.name} | All For All`;
+    const desc = product.meta_description || product.short_description || "";
+    document.title = title;
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "description");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", desc);
+  }, [product?.id]);
 
   const finalPrice = product?.sale_price ?? product?.price ?? 0;
-  const hasDiscount = !!(
-    product?.sale_price &&
-    product?.price &&
-    product.sale_price < product.price
-  );
+  const hasDiscount = !!(product?.sale_price && product?.price && product.sale_price < product.price);
   const inStock = (product?.stock ?? 0) > 0;
   const images = useMemo(() => product?.images ?? [], [product?.images]);
 
-  if (loading) {
-    return <div className="container mx-auto px-4 py-12">Cargando...</div>;
-  }
+  const productUrl = typeof window !== "undefined" ? window.location.href : "";
+  const whatsappLink = product
+    ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el producto ${product.name}: ${productUrl}`)}`
+    : "#";
+
+  if (loading) return <div className="container mx-auto px-4 py-12">Cargando...</div>;
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-2xl font-bold mb-2">Producto no encontrado</h1>
-        <p className="text-muted-foreground mb-6">El producto que buscas no existe.</p>
+        <p className="text-muted-foreground mb-6">El producto que buscas no existe o no está disponible.</p>
         <Button asChild>
-          <Link to="/tienda">Ver tienda</Link>
+          <Link to="/tienda">Volver a la tienda</Link>
         </Button>
       </div>
     );
   }
 
   const handleAdd = () => {
-    add(
-      {
-        id: product.id,
-        slug: product.slug,
-        name: product.name,
-        price: finalPrice,
-        image: images[0],
-        sku: product.sku ?? undefined,
-      },
-      qty,
-    );
-
-    // Also add selected complements (qty 1 each)
-    let extras = 0;
-    complements.forEach((c) => {
-      if (complementSel[c.id]) {
-        add({
-          id: c.id,
-          slug: c.slug,
-          name: c.name,
-          price: c.sale_price ?? c.price ?? 0,
-          image: c.images?.[0],
-          sku: c.sku ?? undefined,
-        });
-        extras += 1;
-      }
+    add({
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      price: finalPrice,
+      image: images[0],
+      sku: product.sku ?? undefined,
     });
-
-    if (extras > 0) {
-      toast.success(`${product.name} y ${extras} producto${extras === 1 ? "" : "s"} más al carrito`);
-    } else {
-      toast.success(`${product.name} agregado al carrito`);
-    }
+    toast.success(`${product.name} agregado al carrito`);
   };
 
-  const submitRequest = async () => {
-    if (!reqName || !reqEmail) {
-      toast.error("Completa nombre y email");
-      return;
-    }
-    const { error } = await supabase.from("availability_requests").insert({
-      customer_name: reqName,
-      customer_email: reqEmail,
-      items: [{ product_id: product.id, name: product.name, slug: product.slug }],
-    });
-    if (error) {
-      toast.error("No se pudo enviar la solicitud");
-    } else {
-      toast.success("Te avisaremos cuando esté disponible");
-      setShowRequest(false);
-      setReqName("");
-      setReqEmail("");
-    }
+  const specsEntries = product.specs && typeof product.specs === "object"
+    ? Object.entries(product.specs as Record<string, unknown>)
+    : [];
+
+  const avgRating = reviews.length
+    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+    : 0;
+
+  const jsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.name,
+    description: product.short_description || product.description || "",
+    sku: product.sku || undefined,
+    image: images,
+    brand: product.brands?.name ? { "@type": "Brand", name: product.brands.name } : undefined,
+    offers: {
+      "@type": "Offer",
+      price: finalPrice,
+      priceCurrency: "COP",
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      url: productUrl,
+    },
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 pb-24 md:pb-8">
-      <button
-        onClick={() => navigate({ to: "/tienda" })}
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
-      >
-        <ArrowLeft className="h-4 w-4 mr-1" /> Volver a la tienda
-      </button>
+    <div className="container mx-auto px-4 py-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-6 flex-wrap">
+        <Link to="/" className="hover:text-foreground">Inicio</Link>
+        <ChevronRight className="h-3 w-3" />
+        <Link to="/tienda" className="hover:text-foreground">Tienda</Link>
+        {product.categories?.name && (
+          <>
+            <ChevronRight className="h-3 w-3" />
+            <Link
+              to="/tienda"
+              search={{ category: product.categories.slug } as never}
+              className="hover:text-foreground"
+            >
+              {product.categories.name}
+            </Link>
+          </>
+        )}
+        <ChevronRight className="h-3 w-3" />
+        <span className="text-foreground font-medium truncate max-w-[200px]">{product.name}</span>
+      </nav>
+
+      {/* Main grid */}
       <div className="grid md:grid-cols-2 gap-10">
         {/* Gallery */}
         <div>
@@ -227,7 +236,7 @@ function ProductDetailPage() {
                   onClick={() => setImageIdx(i)}
                   className={cn(
                     "h-20 w-20 rounded-lg overflow-hidden border-2",
-                    i === imageIdx ? "border-secondary" : "border-transparent",
+                    i === imageIdx ? "border-primary" : "border-transparent",
                   )}
                 >
                   <img src={img} alt="" className="w-full h-full object-cover" />
@@ -237,143 +246,93 @@ function ProductDetailPage() {
           )}
         </div>
 
-        {/* Info + buy box */}
+        {/* Info */}
         <div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-green-200">
+              <Package className="h-3 w-3" /> {product.condition || "Nuevo"}
+            </span>
+            <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-200">
+              <ShieldCheck className="h-3 w-3" /> {product.warranty || "12 meses con fabricante"}
+            </span>
+          </div>
+
           {product.brands?.name && (
-            <p className="text-sm text-secondary font-medium mb-1">{product.brands.name}</p>
+            <p className="text-sm text-muted-foreground font-medium mb-1">{product.brands.name}</p>
           )}
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{product.name}</h1>
-          {product.sku && <p className="text-sm text-muted-foreground mb-4">SKU: {product.sku}</p>}
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">{product.name}</h1>
 
-          {inStock ? (
-            <div className="flex items-baseline gap-3 mb-6 flex-wrap">
-              <span className="text-3xl font-bold text-primary">{formatCOP(finalPrice)}</span>
-              {hasDiscount && (
-                <>
-                  <span className="text-xl line-through text-muted-foreground">
-                    {formatCOP(product.price ?? 0)}
-                  </span>
-                  <span className="bg-destructive/10 text-destructive text-sm font-bold px-2 py-1 rounded">
-                    -{Math.round((1 - (product.sale_price as number) / (product.price as number)) * 100)}%
-                  </span>
-                </>
-              )}
-            </div>
-          ) : (
-            <p className="text-base text-muted-foreground italic mb-6">
-              Consulte disponibilidad y precio
-            </p>
-          )}
-
-          {product.short_description && (
-            <p className="text-muted-foreground mb-6">{product.short_description}</p>
-          )}
-
-          {/* Buy box (observed by IntersectionObserver) */}
-          <div ref={buyBoxRef}>
-            {inStock ? (
-              <div className="space-y-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <Label htmlFor="qty">Cantidad:</Label>
-                  <Input
-                    id="qty"
-                    type="number"
-                    min={1}
-                    max={product.stock ?? undefined}
-                    value={qty}
-                    onChange={(e) =>
-                      setQty(
-                        Math.max(
-                          1,
-                          Math.min(product.stock ?? 9999, Number(e.target.value) || 1),
-                        ),
-                      )
-                    }
-                    className="w-20"
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className={cn(
+                      "h-4 w-4",
+                      s <= Math.round(avgRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300",
+                    )}
                   />
-                  <span className="text-sm text-muted-foreground">{product.stock} disponibles</span>
-                </div>
-                <div className="flex gap-3">
-                  <Button onClick={handleAdd} size="lg" className="flex-1 bg-primary">
-                    <ShoppingCart className="h-4 w-4 mr-2" /> Agregar al carrito
-                  </Button>
-                  <Button asChild size="lg" variant="outline">
-                    <a
-                      href={whatsappUrl(`Hola, quiero cotizar: ${product.name}`)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Cotizar
-                    </a>
-                  </Button>
-                </div>
+                ))}
               </div>
-            ) : (
-              <div className="space-y-4 mb-6">
-                <div className="bg-warning/10 border border-warning/30 text-foreground px-4 py-3 rounded-lg text-sm">
-                  Producto sin stock. Avísanos para coordinar disponibilidad.
-                </div>
-                {!showRequest ? (
-                  <Button onClick={() => setShowRequest(true)} variant="outline" className="w-full">
-                    <Mail className="h-4 w-4 mr-2" /> Solicitar disponibilidad
-                  </Button>
-                ) : (
-                  <div className="bg-card border rounded-lg p-4 space-y-3">
-                    <Input placeholder="Tu nombre" value={reqName} onChange={(e) => setReqName(e.target.value)} />
-                    <Input
-                      placeholder="Tu email"
-                      type="email"
-                      value={reqEmail}
-                      onChange={(e) => setReqEmail(e.target.value)}
-                    />
-                    <Button onClick={submitRequest} className="w-full bg-primary">
-                      Enviar solicitud
-                    </Button>
-                  </div>
-                )}
-              </div>
+              <span className="text-sm text-muted-foreground">({reviews.length} reseñas)</span>
+            </div>
+          )}
+
+          <div className="flex items-baseline gap-3 mb-4 flex-wrap">
+            <span className="text-3xl font-bold text-primary">{formatCOP(finalPrice)}</span>
+            {hasDiscount && (
+              <>
+                <span className="text-xl line-through text-muted-foreground">{formatCOP(product.price ?? 0)}</span>
+                <span className="bg-destructive/10 text-destructive text-sm font-bold px-2 py-1 rounded">
+                  -{Math.round((1 - (product.sale_price as number) / (product.price as number)) * 100)}%
+                </span>
+              </>
             )}
           </div>
 
-          {/* Payment methods + extras */}
-          <div className="rounded-xl border bg-card p-4 mb-6">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-              Métodos de pago aceptados
-            </p>
-            <div className="flex flex-wrap gap-2 mb-3">
-              <PayBadge icon={<CreditCard className="h-3.5 w-3.5" />} label="Wompi" />
-              <PayBadge icon={<KeyRound className="h-3.5 w-3.5" />} label="Addi" />
-              <PayBadge icon={<Landmark className="h-3.5 w-3.5" />} label="Bancolombia" />
-              <PayBadge icon={<Landmark className="h-3.5 w-3.5" />} label="Davivienda" />
-              <PayBadge icon={<Smartphone className="h-3.5 w-3.5" />} label="Nequi" />
-            </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1">🚚 Envío a toda Colombia</span>
-              <span className="inline-flex items-center gap-1">🛡️ Garantía incluida</span>
-            </div>
-          </div>
+          {product.short_description && (
+            <p className="text-muted-foreground mb-4">{product.short_description}</p>
+          )}
 
-          <div className="grid grid-cols-3 gap-4 py-4 border-y">
-            <Trust icon={<Truck className="h-4 w-4" />} title="Envío Colombia" />
-            <Trust icon={<ShieldCheck className="h-4 w-4" />} title="Garantía" />
-            <Trust icon={<Package className="h-4 w-4" />} title="Empaque seguro" />
-          </div>
-
-          {product.description && (
-            <div className="mt-8">
-              <h2 className="font-semibold mb-2">Descripción</h2>
-              <div className="prose prose-sm max-w-none whitespace-pre-wrap text-muted-foreground">
-                {product.description}
-              </div>
+          {inStock ? (
+            <div className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
+              <Clock className="h-3 w-3" /> Solo quedan {product.stock} unidades
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
+              Sin stock inmediato
             </div>
           )}
 
-          {product.specs && typeof product.specs === "object" && Object.keys(product.specs).length > 0 && (
-            <div className="mt-8">
-              <h2 className="font-semibold mb-3">Especificaciones</h2>
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                {Object.entries(product.specs).map(([k, v]) => (
-                  <div key={k} className="flex justify-between border-b py-1.5">
+          <div className="flex items-start gap-2 bg-muted/50 border border-border rounded-lg p-3 mb-5 text-sm text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <span>Solicita disponibilidad, confirmamos en 48h hábiles.</span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <Button onClick={handleAdd} size="lg" className="flex-1 bg-primary">
+              <ShoppingCart className="h-4 w-4 mr-2" /> Agregar al carrito
+            </Button>
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-8 rounded-md font-medium text-white shadow transition-colors"
+              style={{ backgroundColor: "#25D366" }}
+            >
+              <MessageCircle className="h-4 w-4" /> Consultar por WhatsApp
+            </a>
+          </div>
+
+          {specsEntries.length > 0 && (
+            <div className="bg-muted/40 border rounded-lg p-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                Características destacadas
+              </p>
+              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
+                {specsEntries.slice(0, 4).map(([k, v]) => (
+                  <div key={k} className="flex justify-between gap-2">
                     <dt className="text-muted-foreground">{k}</dt>
                     <dd className="font-medium text-right">{String(v)}</dd>
                   </div>
@@ -384,127 +343,110 @@ function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Complementary products */}
+      {/* Tabs */}
+      <section className="mt-14">
+        <Tabs defaultValue="description">
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="description">Descripción</TabsTrigger>
+            <TabsTrigger value="specs">Especificaciones</TabsTrigger>
+            <TabsTrigger value="reviews">Reseñas</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="description" className="pt-6">
+            {product.description ? (
+              product.description.trim().startsWith("<") ? (
+                <div
+                  className="prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              ) : (
+                <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+                  {product.description}
+                </p>
+              )
+            ) : (
+              <p className="text-muted-foreground">Sin descripción disponible.</p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="specs" className="pt-6">
+            {specsEntries.length > 0 ? (
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <tbody>
+                    {specsEntries.map(([k, v], i) => (
+                      <tr key={k} className={i % 2 === 0 ? "bg-muted/30" : "bg-background"}>
+                        <td className="px-4 py-2.5 font-medium text-muted-foreground w-1/3">{k}</td>
+                        <td className="px-4 py-2.5">{String(v)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">No hay especificaciones registradas.</p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="reviews" className="pt-6">
+            {reviews.length === 0 ? (
+              <div className="text-center py-10 border-2 border-dashed rounded-lg">
+                <Star className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                <p className="font-semibold mb-1">Sé el primero en reseñar</p>
+                <p className="text-sm text-muted-foreground">Comparte tu experiencia con este producto.</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">
+                {reviews.map((rev) => (
+                  <div key={rev.id} className="border rounded-lg p-4 bg-card">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                        {rev.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">{rev.name}</p>
+                        {rev.role && <p className="text-xs text-muted-foreground">{rev.role}</p>}
+                      </div>
+                    </div>
+                    <div className="flex mb-2">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star
+                          key={s}
+                          className={cn(
+                            "h-3.5 w-3.5",
+                            s <= rev.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300",
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{rev.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </section>
+
+      {/* Complements */}
       {complements.length > 0 && (
         <section className="mt-14">
-          <h2 className="text-2xl font-bold mb-1">Completa tu compra</h2>
-          <p className="text-muted-foreground text-sm mb-6">
-            Agrega estos productos en un solo paso al añadir al carrito.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {complements.map((c) => {
-              const cPrice = c.sale_price ?? c.price ?? 0;
-              const cImg = c.images?.[0];
-              const checked = !!complementSel[c.id];
-              return (
-                <label
-                  key={c.id}
-                  className={cn(
-                    "flex items-center gap-3 p-3 border rounded-xl bg-card cursor-pointer transition-smooth",
-                    checked ? "border-secondary ring-2 ring-secondary/20" : "hover:border-secondary/50",
-                  )}
-                >
-                  <Checkbox
-                    checked={checked}
-                    onCheckedChange={(v) =>
-                      setComplementSel((prev) => ({ ...prev, [c.id]: !!v }))
-                    }
-                  />
-                  <div className="h-16 w-16 shrink-0 rounded-md bg-muted overflow-hidden">
-                    {cImg ? (
-                      <img src={cImg} alt={c.name} className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center text-[10px] text-muted-foreground">
-                        Sin imagen
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      to="/producto/$slug"
-                      params={{ slug: c.slug }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-sm font-medium line-clamp-2 hover:text-secondary"
-                    >
-                      {c.name}
-                    </Link>
-                    <p className="text-sm font-bold text-primary mt-1">{formatCOP(cPrice)}</p>
-                  </div>
-                </label>
-              );
-            })}
+          <h2 className="text-2xl font-bold mb-6">Productos que complementan este producto</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {complements.map((c) => <ProductCard key={c.id} product={c} />)}
           </div>
         </section>
       )}
 
-      {/* Related products */}
+      {/* Related */}
       {related.length > 0 && (
         <section className="mt-14">
           <h2 className="text-2xl font-bold mb-6">Productos relacionados</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {related.map((r) => (
-              <ProductCard key={r.id} product={r} />
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {related.map((r) => <ProductCard key={r.id} product={r} />)}
           </div>
         </section>
       )}
-
-      {/* Sticky bottom bar — flotante, deja espacio para WhatsApp/Chat en móvil */}
-      {showStickyBar && product && (
-        <div
-          className="fixed z-40
-            bottom-[5.5rem] sm:bottom-6
-            left-1/2 -translate-x-1/2
-            w-[calc(100vw-5rem)] sm:w-auto sm:max-w-lg
-            bg-white border border-border rounded-2xl
-            shadow-elevated px-3 py-2 sm:px-4 sm:py-3
-            pointer-events-auto"
-        >
-          <div className="flex items-center gap-2 sm:gap-3">
-            <img
-              src={product.images?.[0] || "/placeholder.svg"}
-              alt={product.name}
-              className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-lg border border-border flex-shrink-0"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-[11px] sm:text-xs text-foreground truncate">
-                {product.name}
-              </p>
-              <p className="text-primary font-bold text-xs sm:text-sm">
-                {product.sale_price
-                  ? formatCOP(product.sale_price)
-                  : product.price
-                  ? formatCOP(product.price)
-                  : "Consultar precio"}
-              </p>
-            </div>
-            <button
-              onClick={handleAdd}
-              className="flex-shrink-0 bg-primary text-white px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl font-semibold text-[11px] sm:text-xs hover:bg-secondary transition-colors whitespace-nowrap"
-            >
-              + Carrito
-            </button>
-          </div>
-        </div>
-      )}
     </div>
-  );
-}
-
-function Trust({ icon, title }: { icon: React.ReactNode; title: string }) {
-  return (
-    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-      <span className="text-secondary">{icon}</span>
-      {title}
-    </div>
-  );
-}
-
-function PayBadge({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 bg-muted text-foreground text-xs font-medium px-2.5 py-1 rounded-md border">
-      <span className="text-secondary">{icon}</span>
-      {label}
-    </span>
   );
 }
