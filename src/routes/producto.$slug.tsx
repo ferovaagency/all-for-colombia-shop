@@ -494,24 +494,60 @@ function ProductDetailPage() {
         </Tabs>
       </section>
 
-      {/* Complements */}
-      {complements.length > 0 && (
-        <section className="mt-14">
-          <h2 className="text-2xl font-bold mb-6">Productos que complementan este producto</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {complements.map((c) => <ProductCard key={c.id} product={c} />)}
-          </div>
-        </section>
+
+      {/* Related al final */}
+      <ProductCarousel
+        title="Productos relacionados"
+        subtitle="Otras opciones de la misma categoría"
+        productId={product.id}
+        categoryId={product.category_id}
+        parentCategoryId={product.categories?.parent_id}
+        mode="related"
+        minItems={3}
+        maxItems={8}
+      />
+
+      {/* JSON-LD FAQ */}
+      {product.faq && product.faq.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: product.faq.map((f) => ({
+                '@type': 'Question',
+                name: f.pregunta,
+                acceptedAnswer: { '@type': 'Answer', text: f.respuesta },
+              })),
+            }),
+          }}
+        />
       )}
 
-      {/* Related */}
-      {related.length > 0 && (
-        <section className="mt-14">
-          <h2 className="text-2xl font-bold mb-6">Productos relacionados</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {related.map((r) => <ProductCard key={r.id} product={r} />)}
-          </div>
-        </section>
+      {/* JSON-LD Reviews */}
+      {reviews.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Product',
+              name: product.name,
+              review: reviews.map((r) => ({
+                '@type': 'Review',
+                author: { '@type': 'Person', name: r.nombre_completo },
+                reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5 },
+                reviewBody: r.contenido,
+              })),
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1),
+                reviewCount: reviews.length,
+              },
+            }),
+          }}
+        />
       )}
     </div>
   );
