@@ -339,81 +339,149 @@ export type Database = {
           },
         ]
       }
+      product_reviews: {
+        Row: {
+          cargo: string
+          ciudad: string
+          contenido: string
+          created_at: string
+          id: string
+          nombre_completo: string
+          pie_nota: string
+          product_id: string
+          rating: number
+        }
+        Insert: {
+          cargo: string
+          ciudad: string
+          contenido: string
+          created_at?: string
+          id?: string
+          nombre_completo: string
+          pie_nota?: string
+          product_id: string
+          rating?: number
+        }
+        Update: {
+          cargo?: string
+          ciudad?: string
+          contenido?: string
+          created_at?: string
+          id?: string
+          nombre_completo?: string
+          pie_nota?: string
+          product_id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           active: boolean | null
+          afirmacion_inicial: string | null
+          audiencia: Json | null
+          beneficios_reales: Json | null
           brand: string | null
           brand_id: string | null
           category: string | null
           category_id: string | null
+          cierre_estrategico: string | null
           condition: string | null
           created_at: string | null
           description: string | null
           distributor_price: number | null
+          faq: Json | null
           featured: boolean | null
           id: string
           images: string[] | null
+          info_fabricante: string | null
           meta_description: string | null
           meta_title: string | null
           name: string
+          por_que_comprar: Json | null
           price: number | null
           sale_price: number | null
           short_description: string | null
           sku: string | null
           slug: string
           specs: Json | null
+          specs_contexto: Json | null
           stock: number | null
           updated_at: string | null
           warranty: string | null
         }
         Insert: {
           active?: boolean | null
+          afirmacion_inicial?: string | null
+          audiencia?: Json | null
+          beneficios_reales?: Json | null
           brand?: string | null
           brand_id?: string | null
           category?: string | null
           category_id?: string | null
+          cierre_estrategico?: string | null
           condition?: string | null
           created_at?: string | null
           description?: string | null
           distributor_price?: number | null
+          faq?: Json | null
           featured?: boolean | null
           id?: string
           images?: string[] | null
+          info_fabricante?: string | null
           meta_description?: string | null
           meta_title?: string | null
           name: string
+          por_que_comprar?: Json | null
           price?: number | null
           sale_price?: number | null
           short_description?: string | null
           sku?: string | null
           slug: string
           specs?: Json | null
+          specs_contexto?: Json | null
           stock?: number | null
           updated_at?: string | null
           warranty?: string | null
         }
         Update: {
           active?: boolean | null
+          afirmacion_inicial?: string | null
+          audiencia?: Json | null
+          beneficios_reales?: Json | null
           brand?: string | null
           brand_id?: string | null
           category?: string | null
           category_id?: string | null
+          cierre_estrategico?: string | null
           condition?: string | null
           created_at?: string | null
           description?: string | null
           distributor_price?: number | null
+          faq?: Json | null
           featured?: boolean | null
           id?: string
           images?: string[] | null
+          info_fabricante?: string | null
           meta_description?: string | null
           meta_title?: string | null
           name?: string
+          por_que_comprar?: Json | null
           price?: number | null
           sale_price?: number | null
           short_description?: string | null
           sku?: string | null
           slug?: string
           specs?: Json | null
+          specs_contexto?: Json | null
           stock?: number | null
           updated_at?: string | null
           warranty?: string | null
