@@ -356,7 +356,7 @@ function ProductDetailPage() {
             {product.description ? (
               product.description.trim().startsWith("<") ? (
                 <div
-                  className="prose prose-sm max-w-none"
+                  className="product-description max-w-none"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
               ) : (
