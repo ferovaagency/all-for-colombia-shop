@@ -58,7 +58,7 @@ type Review = {
 function ProductDetailPage() {
   const { slug } = Route.useParams();
   const { add } = useCart();
-  const navigate = useNavigate();
+  
   const [product, setProduct] = useState<DBProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [imageIdx, setImageIdx] = useState(0);
