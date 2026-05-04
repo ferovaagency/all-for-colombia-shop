@@ -267,29 +267,24 @@ function ProductDetailPage() {
           )}
 
           {inStock ? (
-            <div className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
+            <div className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
               <Clock className="h-3 w-3" /> Solo quedan {product.stock} unidades
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
-              Sin stock inmediato
+            <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              Agotado temporalmente
             </div>
           )}
 
-          <div className="flex items-start gap-2 bg-muted/50 border border-border rounded-lg p-3 mb-5 text-sm text-muted-foreground">
-            <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <span>Solicita disponibilidad, confirmamos en 48h hábiles.</span>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <Button onClick={handleAdd} size="lg" className="flex-1 bg-primary">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            <Button onClick={handleAdd} size="lg" className="w-full h-12" disabled={!inStock}>
               <ShoppingCart className="h-4 w-4 mr-2" /> Agregar al carrito
             </Button>
             <a
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-8 rounded-md font-medium text-white shadow transition-colors"
+              className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-md font-medium text-white shadow transition-colors"
               style={{ backgroundColor: "#25D366" }}
             >
               <MessageCircle className="h-4 w-4" /> Consultar por WhatsApp
