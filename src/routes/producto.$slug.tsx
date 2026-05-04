@@ -192,9 +192,9 @@ function ProductDetailPage() {
       <div className="grid md:grid-cols-2 gap-10">
         {/* Gallery */}
         <div>
-          <div className="aspect-square bg-muted rounded-xl overflow-hidden border">
+          <div className="aspect-square bg-white rounded-xl overflow-hidden border flex items-center justify-center p-8 md:p-12">
             {images[imageIdx] ? (
-              <img src={images[imageIdx]} alt={product.name} className="w-full h-full object-cover" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
+              <img src={images[imageIdx]} alt={product.name} className="max-w-full max-h-full object-contain" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">Sin imagen</div>
             )}
@@ -206,11 +206,11 @@ function ProductDetailPage() {
                   key={i}
                   onClick={() => setImageIdx(i)}
                   className={cn(
-                    "h-20 w-20 rounded-lg overflow-hidden border-2",
+                    "h-20 w-20 rounded-lg overflow-hidden border-2 bg-white flex items-center justify-center p-1",
                     i === imageIdx ? "border-primary" : "border-transparent",
                   )}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
+                  <img src={img} alt="" className="max-w-full max-h-full object-contain" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
                 </button>
               ))}
             </div>
