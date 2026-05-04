@@ -118,6 +118,7 @@ function ProductGeneratorPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currentAction, setCurrentAction] = useState('');
+  const [generateWithAI, setGenerateWithAI] = useState(true);
 
   const slug = slugify(name);
   const parentCats = categories.filter(c => !c.parent_id);
