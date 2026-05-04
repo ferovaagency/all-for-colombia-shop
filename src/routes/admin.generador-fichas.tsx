@@ -118,6 +118,7 @@ function ProductGeneratorPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currentAction, setCurrentAction] = useState('');
+  const [generateWithAI, setGenerateWithAI] = useState(true);
 
   const slug = slugify(name);
   const parentCats = categories.filter(c => !c.parent_id);
@@ -384,11 +385,11 @@ function ProductGeneratorPage() {
       const productShortDesc = (r.descripcion_corta || r.short_desc || r.resumen || r.short_description || '').trim() || null;
       const catData = categoryName ? (await supabase.from('categories').select('id').eq('name', categoryName).single()).data : null;
       const brandData = brandName ? (await supabase.from('brands').select('id').eq('name', brandName).single()).data : null;
-      const { error } = await supabase.from('products').upsert({
+      const productData: any = {
         slug: productSlug, name,
         sku: productSku || null,
         price: productPrice,
-        sale_price: productSalePrice,
+        sale_price: productSalePrice || null,
         stock: productStock,
         description: productDesc,
         short_description: productShortDesc,
@@ -397,7 +398,38 @@ function ProductGeneratorPage() {
         images: finalImageUrl ? [finalImageUrl] : [],
         condition: 'Nuevo', warranty: '12 meses con fabricante',
         active: true, updated_at: new Date().toISOString(),
-      }, { onConflict: 'slug' });
+      };
+
+      if (generateWithAI && !productDesc) {
+        setCurrentAction(`[${i + 1}/${csvPreview.length}] Generando ficha con IA: ${name}`);
+        try {
+          const { data: aiData } = await supabase.functions.invoke('generate-product-sheet', {
+            body: {
+              name,
+              price: productPrice?.toString() || '',
+              brand: brandName,
+              category: categoryName,
+              condition: 'Nuevo',
+              warranty: '12 meses con fabricante',
+              specs: '',
+            },
+          });
+          if (aiData?.description) {
+            productData.description = aiData.description;
+            productData.short_description = aiData.short_description || productShortDesc;
+            productData.meta_title = aiData.meta_title || null;
+            productData.meta_description = aiData.meta_description || null;
+            if (aiData.specs && typeof aiData.specs === 'object') {
+              productData.specs = aiData.specs;
+            }
+          }
+        } catch (err) {
+          console.error('Error IA:', err);
+        }
+        await new Promise(r => setTimeout(r, 1000));
+      }
+
+      const { error } = await supabase.from('products').upsert(productData, { onConflict: 'slug' });
       if (error) fail++; else ok++;
       setUploadProgress(i + 1);
       if (i % 5 === 4) await new Promise(res => setTimeout(res, 200));
@@ -804,6 +836,24 @@ ${catalog}`,
                   <span>o descripcion — texto largo</span>
                 </div>
               </div>
+
+              <label className="flex items-start gap-3 bg-white border rounded-xl p-4 cursor-pointer hover:border-secondary transition-colors">
+                <input
+                  type="checkbox"
+                  checked={generateWithAI}
+                  onChange={(e) => setGenerateWithAI(e.target.checked)}
+                  className="mt-1 rounded border-border h-4 w-4"
+                />
+                <div className="flex-1">
+                  <p className="font-semibold text-sm flex items-center gap-1.5">
+                    <Sparkles className="h-4 w-4 text-secondary" />
+                    Generar descripciones con IA durante la subida
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Más lento pero crea fichas completas siguiendo la guía editorial
+                  </p>
+                </div>
+              </label>
 
               <label className="border-2 border-dashed border-border rounded-xl p-10 text-center cursor-pointer hover:border-secondary hover:bg-secondary/5 transition-all block group bg-white">
                 <input type="file" accept=".csv,.txt" onChange={handleCSV} className="hidden" />

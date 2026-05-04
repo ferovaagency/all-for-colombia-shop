@@ -40,6 +40,10 @@ export function ProductCard({ product }: { product: Product }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
             loading="lazy"
             decoding="async"
+            onError={(e) => {
+              const t = e.target as HTMLImageElement;
+              if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg';
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">

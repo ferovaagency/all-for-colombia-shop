@@ -180,18 +180,42 @@ Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
 
     let parsed: any = {};
     try {
-      const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsed = JSON.parse(jsonMatch[0]);
+      let jsonStr = rawContent
+        .replace(/```json\s*/g, '')
+        .replace(/```\s*/g, '');
+      const start = jsonStr.indexOf('{');
+      const end = jsonStr.lastIndexOf('}');
+      if (start >= 0 && end > start) {
+        jsonStr = jsonStr.slice(start, end + 1);
+        parsed = JSON.parse(jsonStr);
       } else {
         parsed = { description: rawContent };
       }
-    } catch {
+    } catch (parseErr) {
+      console.error('Parse error:', parseErr);
       parsed = { description: rawContent };
     }
 
+    if (parsed.description && !parsed.description.trim().startsWith('<')) {
+      const paragraphs = parsed.description
+        .split('\n\n')
+        .filter((p: string) => p.trim())
+        .map((p: string) => `<p>${p.trim()}</p>`)
+        .join('\n');
+      parsed.description = paragraphs;
+    }
+
     return new Response(
-      JSON.stringify({ content: parsed.description || rawContent, ...parsed }),
+      JSON.stringify({
+        content: parsed.description || rawContent,
+        description: parsed.description,
+        short_description: parsed.short_description,
+        meta_title: parsed.meta_title,
+        meta_description: parsed.meta_description,
+        specs: parsed.specs,
+        category: parsed.category,
+        brand: parsed.brand,
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (e) {

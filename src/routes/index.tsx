@@ -23,13 +23,13 @@ export const Route = createFileRoute("/")({
 });
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  audio: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
-  gaming: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&q=80",
-  "computadores-accesorios": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=500&q=80",
-  "celulares-tablets": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=500&q=80",
-  "hogar-tech": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&q=80",
-  impresion: "https://images.unsplash.com/photo-1612198537235-59b95a20c6a7?w=500&q=80",
-  accesorios: "https://images.unsplash.com/photo-1609692814857-9f939c77b37c?w=500&q=80",
+  audio: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80&auto=format",
+  gaming: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80&auto=format",
+  "computadores-accesorios": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80&auto=format",
+  "celulares-tablets": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80&auto=format",
+  "hogar-tech": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format",
+  impresion: "https://images.unsplash.com/photo-1601524909162-ae8725290836?w=600&q=80&auto=format",
+  accesorios: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&q=80&auto=format",
 };
 
 const PROMO_BANNERS = [
@@ -166,7 +166,7 @@ function HomePage() {
                 search={{ categoria: cat.slug } as any}
                 className="group relative shrink-0 w-[200px] h-[200px] rounded-xl overflow-hidden snap-start shadow-card hover:shadow-elevated transition-smooth"
               >
-                <img src={img} alt={cat.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <img src={img} alt={cat.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
                 <div className="absolute inset-0 bg-black/45 group-hover:bg-black/55 transition-colors" />
                 <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                   <h3 className="font-semibold text-base leading-tight">{cat.name}</h3>

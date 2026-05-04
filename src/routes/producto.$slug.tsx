@@ -223,7 +223,7 @@ function ProductDetailPage() {
         <div>
           <div className="aspect-square bg-muted rounded-xl overflow-hidden border">
             {images[imageIdx] ? (
-              <img src={images[imageIdx]} alt={product.name} className="w-full h-full object-cover" />
+              <img src={images[imageIdx]} alt={product.name} className="w-full h-full object-cover" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">Sin imagen</div>
             )}
@@ -239,7 +239,7 @@ function ProductDetailPage() {
                     i === imageIdx ? "border-primary" : "border-transparent",
                   )}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img src={img} alt="" className="w-full h-full object-cover" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
                 </button>
               ))}
             </div>
@@ -356,7 +356,7 @@ function ProductDetailPage() {
             {product.description ? (
               product.description.trim().startsWith("<") ? (
                 <div
-                  className="prose prose-sm max-w-none"
+                  className="product-description max-w-none"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
               ) : (
