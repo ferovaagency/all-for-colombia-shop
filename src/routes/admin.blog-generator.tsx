@@ -1,175 +1,204 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { ArrowLeft, Sparkles, Save, Copy } from "lucide-react";
+import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Loader2, Sparkles, Save, Eye } from 'lucide-react';
+import { toast } from 'sonner';
 
-export const Route = createFileRoute("/admin/blog-generator")({
-  head: () => ({ meta: [{ title: "Generador de Blog — Admin" }, { name: "robots", content: "noindex" }] }),
-  component: BlogGeneratorPage,
-});
+const INDUSTRIAS = [
+  { value: 'tecnologia', label: 'Tecnología / SaaS / TIC' },
+  { value: 'ecommerce', label: 'E-commerce / Tiendas virtuales' },
+  { value: 'restaurantes', label: 'Restaurantes / Gastronomía' },
+  { value: 'salud', label: 'Salud / Clínicas' },
+  { value: 'educacion', label: 'Educación / Instituciones' },
+  { value: 'construccion', label: 'Construcción / Inmobiliaria' },
+  { value: 'legal_financiero', label: 'Legal / Financiero' },
+  { value: 'retail_moda', label: 'Retail / Moda / Lifestyle' },
+];
 
-function slugify(s: string) {
-  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").slice(0, 80);
-}
+const TIPOS = [
+  { value: 'rapido', label: 'Post rápido (600-900 palabras)' },
+  { value: 'informativo', label: 'Informativo (800-1200 palabras)' },
+  { value: 'autoridad', label: 'Autoridad (1200-2000 palabras)' },
+  { value: 'guia', label: 'Guía completa (2000-3500 palabras)' },
+];
 
-function BlogGeneratorPage() {
+function GeneradorBlogs() {
   const [form, setForm] = useState({
-    title: "",
-    category: "",
-    keywords: "",
-    tone: "profesional",
-    length: "800",
+    tema: '', keyword_principal: '',
+    industria: 'tecnologia', tipo: 'informativo',
+    audiencia_objetivo: '', notas_adicionales: '',
   });
-  const [generated, setGenerated] = useState("");
-  const [generating, setGenerating] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [generando, setGenerando] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const [blog, setBlog] = useState<any>(null);
+  const [imagenPortada, setImagenPortada] = useState('');
+  const [previewMode, setPreviewMode] = useState(false);
 
-  const set = (k: keyof typeof form, v: string) => setForm((p) => ({ ...p, [k]: v }));
-
-  const generate = async () => {
-    if (!form.title.trim()) {
-      toast.error("El título es obligatorio");
-      return;
+  const generar = async () => {
+    if (!form.tema || !form.keyword_principal) {
+      toast.error('Tema y keyword son obligatorios'); return;
     }
-    setGenerating(true);
-    setGenerated("");
+    setGenerando(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-blog-post", { body: form });
+      const { data, error } = await supabase.functions.invoke('generate-blog-post', { body: form });
       if (error) throw error;
-      const d = data as { content?: string; error?: string };
-      if (d?.error) {
-        toast.error(d.error);
-        return;
-      }
-      if (!d?.content) {
-        toast.error("La IA no devolvió contenido");
-        return;
-      }
-      setGenerated(d.content);
-      toast.success("¡Artículo generado!");
-    } catch (e) {
-      toast.error("Error: " + (e as Error).message);
-    } finally {
-      setGenerating(false);
-    }
+      if (data?.error) throw new Error(data.error);
+      setBlog(data);
+      toast.success('Artículo generado');
+    } catch (e: any) {
+      toast.error('Error: ' + e.message);
+    } finally { setGenerando(false); }
   };
 
-  const save = async () => {
-    if (!form.title.trim() || !generated.trim()) return;
-    setSaving(true);
+  const guardar = async (publicar: boolean) => {
+    if (!blog) return;
+    setGuardando(true);
     try {
-      let content = generated;
-      let excerpt = "";
-      const m = generated.match(/EXCERPT:\s*(.+)$/im);
-      if (m) {
-        excerpt = m[1].trim().slice(0, 150);
-        content = generated.replace(/EXCERPT:.*$/im, "").trim();
-      }
-      const { error } = await supabase.from("blog_posts").upsert(
-        {
-          slug: slugify(form.title),
-          title: form.title,
-          content,
-          excerpt: excerpt || null,
-          category: form.category || null,
-          published: false,
-        },
-        { onConflict: "slug" },
-      );
+      const payload = {
+        slug: blog.slug, h1: blog.h1,
+        keyword_principal: blog.keyword_principal,
+        keywords_secundarias: blog.keywords_secundarias,
+        industria: blog.industria, tipo: blog.tipo,
+        frase_inicial: blog.frase_inicial,
+        resumen_intro: blog.resumen_intro,
+        contenido_html: blog.contenido_html,
+        cierre_html: blog.cierre_html,
+        meta_title: blog.meta_title,
+        meta_description: blog.meta_description,
+        imagen_portada: imagenPortada || null,
+        imagen_alt: blog.imagen_alt,
+        publicado: publicar,
+        fecha_publicacion: publicar ? new Date().toISOString() : null,
+      };
+      const { error } = await (supabase.from('blogs' as any) as any).upsert(payload, { onConflict: 'slug' });
       if (error) throw error;
-      toast.success("Artículo guardado (borrador)");
-    } catch (e) {
-      toast.error("Error: " + (e as Error).message);
-    } finally {
-      setSaving(false);
-    }
+      toast.success(publicar ? `Publicado en /blog/${blog.slug}` : 'Borrador guardado');
+    } catch (e: any) {
+      toast.error('Error guardando: ' + e.message);
+    } finally { setGuardando(false); }
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center gap-2 text-sm mb-6">
-          <Link to="/admin" className="inline-flex items-center text-muted-foreground hover:text-foreground gap-1">
-            <ArrowLeft className="w-4 h-4" /> Admin
-          </Link>
-          <span className="text-muted-foreground">|</span>
-          <div className="inline-flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-secondary" />
-            <h1 className="font-bold">Generador de Blog con IA</h1>
+    <main className="container mx-auto px-4 py-8 max-w-5xl">
+      <h1 className="text-3xl font-bold mb-2">Generador de blogs con IA</h1>
+      <p className="text-muted-foreground mb-8">Sigue la Guía Editorial de blogs Ferova</p>
+
+      <Card className="p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4">Brief del artículo</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <Label>Tema *</Label>
+            <Input value={form.tema} onChange={(e) => setForm({ ...form, tema: e.target.value })}
+              placeholder="Cómo elegir audífonos inalámbricos para trabajo remoto" />
+          </div>
+          <div>
+            <Label>Keyword principal *</Label>
+            <Input value={form.keyword_principal} onChange={(e) => setForm({ ...form, keyword_principal: e.target.value })}
+              placeholder="audífonos inalámbricos" />
+          </div>
+          <div>
+            <Label>Industria</Label>
+            <select className="w-full border rounded px-3 py-2 bg-background h-10"
+              value={form.industria} onChange={(e) => setForm({ ...form, industria: e.target.value })}>
+              {INDUSTRIAS.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label>Tipo de artículo</Label>
+            <select className="w-full border rounded px-3 py-2 bg-background h-10"
+              value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
+              {TIPOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label>Audiencia objetivo</Label>
+            <Input value={form.audiencia_objetivo} onChange={(e) => setForm({ ...form, audiencia_objetivo: e.target.value })}
+              placeholder="Profesionales de oficina" />
+          </div>
+          <div className="md:col-span-2">
+            <Label>Notas adicionales</Label>
+            <Textarea rows={3} value={form.notas_adicionales}
+              onChange={(e) => setForm({ ...form, notas_adicionales: e.target.value })} />
           </div>
         </div>
+        <Button onClick={generar} disabled={generando} className="mt-6" size="lg">
+          {generando ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+          Generar con IA
+        </Button>
+      </Card>
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          <div className="bg-card rounded-2xl border p-6 space-y-4">
-            <div>
-              <Label>Título *</Label>
-              <Input value={form.title} onChange={(e) => set("title", e.target.value)} className="h-11" />
-            </div>
-            <div>
-              <Label>Categoría</Label>
-              <Input value={form.category} onChange={(e) => set("category", e.target.value)} placeholder="Tecnología, Hogar..." />
-            </div>
-            <div>
-              <Label>Palabras clave SEO</Label>
-              <Input value={form.keywords} onChange={(e) => set("keywords", e.target.value)} placeholder="separadas por coma" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Tono</Label>
-                <select value={form.tone} onChange={(e) => set("tone", e.target.value)}
-                  className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background">
-                  <option value="profesional">Profesional</option>
-                  <option value="cercano">Cercano</option>
-                  <option value="tecnico">Técnico</option>
-                  <option value="educativo">Educativo</option>
-                </select>
-              </div>
-              <div>
-                <Label>Extensión</Label>
-                <select value={form.length} onChange={(e) => set("length", e.target.value)}
-                  className="w-full h-10 border border-input rounded-md px-3 text-sm bg-background">
-                  <option value="600">600 palabras</option>
-                  <option value="800">800 palabras</option>
-                  <option value="1200">1200 palabras</option>
-                  <option value="1600">1600 palabras</option>
-                </select>
-              </div>
-            </div>
-            <Button onClick={generate} disabled={generating || !form.title.trim()} className="w-full h-11 gap-2 font-bold">
-              <Sparkles className="w-4 h-4" />
-              {generating ? "Generando..." : "Generar artículo con IA"}
+      {blog && (
+        <Card className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Artículo generado</h2>
+            <Button variant="outline" size="sm" onClick={() => setPreviewMode(!previewMode)}>
+              <Eye className="w-4 h-4 mr-2" />{previewMode ? 'Editar' : 'Vista previa'}
             </Button>
-            {generated && (
-              <div className="flex gap-2 pt-2 border-t">
-                <Button onClick={save} disabled={saving} variant="outline" className="flex-1 gap-2">
-                  <Save className="w-4 h-4" /> {saving ? "Guardando..." : "Guardar (borrador)"}
-                </Button>
-                <Button variant="outline" size="icon"
-                  onClick={() => { navigator.clipboard.writeText(generated); toast.success("Copiado"); }}>
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </div>
-            )}
           </div>
 
-          <div className="bg-card rounded-2xl border p-6 space-y-4">
-            <h2 className="font-bold">Artículo generado</h2>
-            <Textarea
-              rows={28}
-              value={generated}
-              onChange={(e) => setGenerated(e.target.value)}
-              placeholder="Aquí aparecerá el artículo. Puedes editarlo antes de guardar."
-              className="font-mono text-xs resize-none bg-muted/40"
-            />
+          {previewMode ? (
+            <article className="prose prose-lg max-w-none">
+              <h1>{blog.h1}</h1>
+              <p className="lead text-xl"><strong>{blog.frase_inicial}</strong></p>
+              <p>{blog.resumen_intro}</p>
+              <div dangerouslySetInnerHTML={{ __html: blog.contenido_html }} />
+              <hr />
+              <div dangerouslySetInnerHTML={{ __html: blog.cierre_html }} />
+            </article>
+          ) : (
+            <div className="space-y-4">
+              <div><Label>Título ({blog.h1?.length || 0}/65)</Label>
+                <Input value={blog.h1} onChange={(e) => setBlog({ ...blog, h1: e.target.value })} /></div>
+              <div><Label>Slug</Label>
+                <Input value={blog.slug} onChange={(e) => setBlog({ ...blog, slug: e.target.value })} /></div>
+              <div><Label>Frase inicial</Label>
+                <Textarea rows={2} value={blog.frase_inicial}
+                  onChange={(e) => setBlog({ ...blog, frase_inicial: e.target.value })} /></div>
+              <div><Label>Resumen introductorio</Label>
+                <Textarea rows={4} value={blog.resumen_intro}
+                  onChange={(e) => setBlog({ ...blog, resumen_intro: e.target.value })} /></div>
+              <div><Label>Contenido HTML</Label>
+                <Textarea rows={15} className="font-mono text-xs" value={blog.contenido_html}
+                  onChange={(e) => setBlog({ ...blog, contenido_html: e.target.value })} /></div>
+              <div><Label>Cierre HTML</Label>
+                <Textarea rows={6} className="font-mono text-xs" value={blog.cierre_html}
+                  onChange={(e) => setBlog({ ...blog, cierre_html: e.target.value })} /></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><Label>Meta title ({blog.meta_title?.length || 0}/60)</Label>
+                  <Input value={blog.meta_title}
+                    onChange={(e) => setBlog({ ...blog, meta_title: e.target.value })} /></div>
+                <div><Label>Meta description ({blog.meta_description?.length || 0}/160)</Label>
+                  <Input value={blog.meta_description}
+                    onChange={(e) => setBlog({ ...blog, meta_description: e.target.value })} /></div>
+              </div>
+              <div><Label>URL imagen portada</Label>
+                <Input value={imagenPortada} onChange={(e) => setImagenPortada(e.target.value)}
+                  placeholder="https://..." /></div>
+              <div><Label>Alt imagen</Label>
+                <Input value={blog.imagen_alt}
+                  onChange={(e) => setBlog({ ...blog, imagen_alt: e.target.value })} /></div>
+            </div>
+          )}
+
+          <div className="mt-6 pt-6 border-t flex flex-col sm:flex-row gap-3">
+            <Button variant="outline" onClick={() => guardar(false)} disabled={guardando} size="lg" className="flex-1">
+              {guardando ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Guardar borrador
+            </Button>
+            <Button onClick={() => guardar(true)} disabled={guardando} size="lg" className="flex-1">
+              {guardando ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Publicar
+            </Button>
           </div>
-        </div>
-      </div>
-    </div>
+        </Card>
+      )}
+    </main>
   );
 }
+
+export const Route = createFileRoute('/admin/blog-generator')({ component: GeneradorBlogs });

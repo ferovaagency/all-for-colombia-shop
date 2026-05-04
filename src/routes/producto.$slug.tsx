@@ -1,10 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useCart, formatCOP } from "@/lib/cart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProductCard } from "@/components/shop/ProductCard";
+import { ProductCarousel } from "@/components/products/ProductCarousel";
 import { ShoppingCart, ChevronRight, Star, ShieldCheck, Package, Clock, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -58,19 +58,15 @@ type Review = {
 function ProductDetailPage() {
   const { slug } = Route.useParams();
   const { add } = useCart();
-  const navigate = useNavigate();
+  
   const [product, setProduct] = useState<DBProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [imageIdx, setImageIdx] = useState(0);
-  const [complements, setComplements] = useState<DBProduct[]>([]);
-  const [related, setRelated] = useState<DBProduct[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
     setLoading(true);
     setImageIdx(0);
-    setComplements([]);
-    setRelated([]);
     (async () => {
       const { data } = await supabase
         .from("products")
@@ -89,64 +85,30 @@ function ProductDetailPage() {
       .then(({ data }) => setReviews((data || []) as Review[]));
   }, [product?.id]);
 
-  useEffect(() => {
-    if (!product) return;
-    (async () => {
-      // Determine parent category
-      let parentId = product.categories?.parent_id ?? product.categories?.id ?? null;
-      if (!parentId && product.category_id) parentId = product.category_id;
+  // (carruseles delegados a <ProductCarousel />)
 
-      // Complements: same parent category, different products
-      let complementsRes;
-      if (parentId) {
-        const { data: siblingCats } = await supabase
-          .from("categories")
-          .select("id")
-          .or(`id.eq.${parentId},parent_id.eq.${parentId}`);
-        const ids = (siblingCats || []).map((c: { id: string }) => c.id);
-        complementsRes = await supabase
-          .from("products")
-          .select("*")
-          .in("category_id", ids.length ? ids : [parentId])
-          .eq("active", true)
-          .neq("id", product.id)
-          .order("updated_at", { ascending: false })
-          .limit(4);
-      } else {
-        complementsRes = { data: [] as DBProduct[] };
-      }
-      const comps = (complementsRes.data as DBProduct[] | null) ?? [];
-      setComplements(comps);
 
-      // Related: same exact category, exclude already shown
-      if (product.category_id) {
-        const excludeIds = [product.id, ...comps.map((c) => c.id)];
-        const { data: rel } = await supabase
-          .from("products")
-          .select("*")
-          .eq("category_id", product.category_id)
-          .eq("active", true)
-          .not("id", "in", `(${excludeIds.join(",")})`)
-          .order("updated_at", { ascending: false })
-          .limit(4);
-        setRelated((rel as DBProduct[] | null) ?? []);
-      }
-    })();
-  }, [product?.id]);
-
-  // Update document head with meta tags
+  // Update document head with meta tags + Open Graph
   useEffect(() => {
     if (!product) return;
     const title = product.meta_title || `${product.name} | All For All`;
     const desc = product.meta_description || product.short_description || "";
     document.title = title;
-    let meta = document.querySelector('meta[name="description"]');
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "description");
-      document.head.appendChild(meta);
-    }
-    meta.setAttribute("content", desc);
+    const setMeta = (name: string, content: string) => {
+      let m = document.querySelector(`meta[name="${name}"]`);
+      if (!m) { m = document.createElement("meta"); m.setAttribute("name", name); document.head.appendChild(m); }
+      m.setAttribute("content", content);
+    };
+    const setOG = (property: string, content: string) => {
+      let m = document.querySelector(`meta[property="${property}"]`);
+      if (!m) { m = document.createElement("meta"); m.setAttribute("property", property); document.head.appendChild(m); }
+      m.setAttribute("content", content);
+    };
+    setMeta("description", desc);
+    setOG("og:title", title);
+    setOG("og:description", desc);
+    setOG("og:type", "product");
+    if (product.images?.[0]) setOG("og:image", product.images[0]);
   }, [product?.id]);
 
   const finalPrice = product?.sale_price ?? product?.price ?? 0;
@@ -238,9 +200,9 @@ function ProductDetailPage() {
       <div className="grid md:grid-cols-2 gap-10">
         {/* Gallery */}
         <div>
-          <div className="aspect-square bg-muted rounded-xl overflow-hidden border">
+          <div className="aspect-square bg-white rounded-xl overflow-hidden border flex items-center justify-center p-8 md:p-12">
             {images[imageIdx] ? (
-              <img src={images[imageIdx]} alt={product.name} className="w-full h-full object-cover" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
+              <img src={images[imageIdx]} alt={product.name} className="max-w-full max-h-full object-contain" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">Sin imagen</div>
             )}
@@ -252,11 +214,11 @@ function ProductDetailPage() {
                   key={i}
                   onClick={() => setImageIdx(i)}
                   className={cn(
-                    "h-20 w-20 rounded-lg overflow-hidden border-2",
+                    "h-20 w-20 rounded-lg overflow-hidden border-2 bg-white flex items-center justify-center p-1",
                     i === imageIdx ? "border-primary" : "border-transparent",
                   )}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
+                  <img src={img} alt="" className="max-w-full max-h-full object-contain" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
                 </button>
               ))}
             </div>
@@ -313,29 +275,24 @@ function ProductDetailPage() {
           )}
 
           {inStock ? (
-            <div className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
+            <div className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
               <Clock className="h-3 w-3" /> Solo quedan {product.stock} unidades
             </div>
           ) : (
-            <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
-              Sin stock inmediato
+            <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              Agotado temporalmente
             </div>
           )}
 
-          <div className="flex items-start gap-2 bg-muted/50 border border-border rounded-lg p-3 mb-5 text-sm text-muted-foreground">
-            <ShieldCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <span>Solicita disponibilidad, confirmamos en 48h hábiles.</span>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <Button onClick={handleAdd} size="lg" className="flex-1 bg-primary">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            <Button onClick={handleAdd} size="lg" className="w-full h-12" disabled={!inStock}>
               <ShoppingCart className="h-4 w-4 mr-2" /> Agregar al carrito
             </Button>
             <a
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-8 rounded-md font-medium text-white shadow transition-colors"
+              className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-md font-medium text-white shadow transition-colors"
               style={{ backgroundColor: "#25D366" }}
             >
               <MessageCircle className="h-4 w-4" /> Consultar por WhatsApp
@@ -359,6 +316,18 @@ function ProductDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Complementarios bajo la grid principal */}
+      <ProductCarousel
+        title="Productos que complementan tu compra"
+        subtitle="De otras categorías que potencian este producto"
+        productId={product.id}
+        categoryId={product.category_id}
+        parentCategoryId={product.categories?.parent_id}
+        mode="complementary"
+        minItems={3}
+        maxItems={8}
+      />
 
       {/* Tabs */}
       <section className="mt-14">
@@ -540,24 +509,60 @@ function ProductDetailPage() {
         </Tabs>
       </section>
 
-      {/* Complements */}
-      {complements.length > 0 && (
-        <section className="mt-14">
-          <h2 className="text-2xl font-bold mb-6">Productos que complementan este producto</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {complements.map((c) => <ProductCard key={c.id} product={c} />)}
-          </div>
-        </section>
+
+      {/* Related al final */}
+      <ProductCarousel
+        title="Productos relacionados"
+        subtitle="Otras opciones de la misma categoría"
+        productId={product.id}
+        categoryId={product.category_id}
+        parentCategoryId={product.categories?.parent_id}
+        mode="related"
+        minItems={3}
+        maxItems={8}
+      />
+
+      {/* JSON-LD FAQ */}
+      {product.faq && product.faq.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: product.faq.map((f) => ({
+                '@type': 'Question',
+                name: f.pregunta,
+                acceptedAnswer: { '@type': 'Answer', text: f.respuesta },
+              })),
+            }),
+          }}
+        />
       )}
 
-      {/* Related */}
-      {related.length > 0 && (
-        <section className="mt-14">
-          <h2 className="text-2xl font-bold mb-6">Productos relacionados</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {related.map((r) => <ProductCard key={r.id} product={r} />)}
-          </div>
-        </section>
+      {/* JSON-LD Reviews */}
+      {reviews.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Product',
+              name: product.name,
+              review: reviews.map((r) => ({
+                '@type': 'Review',
+                author: { '@type': 'Person', name: r.nombre_completo },
+                reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5 },
+                reviewBody: r.contenido,
+              })),
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1),
+                reviewCount: reviews.length,
+              },
+            }),
+          }}
+        />
       )}
     </div>
   );
