@@ -239,7 +239,7 @@ function ProductDetailPage() {
                     i === imageIdx ? "border-primary" : "border-transparent",
                   )}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img src={img} alt="" className="w-full h-full object-cover" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
                 </button>
               ))}
             </div>
