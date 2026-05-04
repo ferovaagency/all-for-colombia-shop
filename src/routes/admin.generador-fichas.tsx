@@ -385,11 +385,11 @@ function ProductGeneratorPage() {
       const productShortDesc = (r.descripcion_corta || r.short_desc || r.resumen || r.short_description || '').trim() || null;
       const catData = categoryName ? (await supabase.from('categories').select('id').eq('name', categoryName).single()).data : null;
       const brandData = brandName ? (await supabase.from('brands').select('id').eq('name', brandName).single()).data : null;
-      const { error } = await supabase.from('products').upsert({
+      const productData: any = {
         slug: productSlug, name,
         sku: productSku || null,
         price: productPrice,
-        sale_price: productSalePrice,
+        sale_price: productSalePrice || null,
         stock: productStock,
         description: productDesc,
         short_description: productShortDesc,
@@ -398,7 +398,38 @@ function ProductGeneratorPage() {
         images: finalImageUrl ? [finalImageUrl] : [],
         condition: 'Nuevo', warranty: '12 meses con fabricante',
         active: true, updated_at: new Date().toISOString(),
-      }, { onConflict: 'slug' });
+      };
+
+      if (generateWithAI && !productDesc) {
+        setCurrentAction(`[${i + 1}/${csvPreview.length}] Generando ficha con IA: ${name}`);
+        try {
+          const { data: aiData } = await supabase.functions.invoke('generate-product-sheet', {
+            body: {
+              name,
+              price: productPrice?.toString() || '',
+              brand: brandName,
+              category: categoryName,
+              condition: 'Nuevo',
+              warranty: '12 meses con fabricante',
+              specs: '',
+            },
+          });
+          if (aiData?.description) {
+            productData.description = aiData.description;
+            productData.short_description = aiData.short_description || productShortDesc;
+            productData.meta_title = aiData.meta_title || null;
+            productData.meta_description = aiData.meta_description || null;
+            if (aiData.specs && typeof aiData.specs === 'object') {
+              productData.specs = aiData.specs;
+            }
+          }
+        } catch (err) {
+          console.error('Error IA:', err);
+        }
+        await new Promise(r => setTimeout(r, 1000));
+      }
+
+      const { error } = await supabase.from('products').upsert(productData, { onConflict: 'slug' });
       if (error) fail++; else ok++;
       setUploadProgress(i + 1);
       if (i % 5 === 4) await new Promise(res => setTimeout(res, 200));
