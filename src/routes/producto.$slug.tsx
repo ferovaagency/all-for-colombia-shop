@@ -84,6 +84,12 @@ function ProductDetailPage() {
   }, [slug]);
 
   useEffect(() => {
+    if (!product?.id) return;
+    supabase.from('product_reviews').select('*').eq('product_id', product.id).order('created_at', { ascending: true })
+      .then(({ data }) => setReviews((data || []) as Review[]));
+  }, [product?.id]);
+
+  useEffect(() => {
     if (!product) return;
     (async () => {
       // Determine parent category
