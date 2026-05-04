@@ -158,6 +158,9 @@ function ProductGeneratorPage() {
     setSelectedCategory(''); setSelectedBrand('');
     setMetaTitle(''); setMetaDesc(''); setImageUrls([]);
     setStock(''); setAiNotes('');
+    setEditorialAudiencia([]); setEditorialSpecsCtx([]); setEditorialBeneficios([]);
+    setEditorialPorQue([]); setEditorialFaq([]); setEditorialReviews([]);
+    setEditorialAfirmacion(''); setEditorialInfoFab(''); setEditorialCierre('');
   };
 
   const resetBlogForm = () => {
