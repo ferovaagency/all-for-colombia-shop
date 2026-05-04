@@ -182,6 +182,18 @@ function ProductGeneratorPage() {
     setMetaTitle(p.meta_title || ''); setMetaDesc(p.meta_description || '');
     setImageUrls((p.images || []).filter((u: any) => typeof u === 'string' && u.trim()));
     setStock(p.stock != null ? String(p.stock) : '');
+    setEditorialAudiencia(p.audiencia || []);
+    setEditorialSpecsCtx(p.specs_contexto || []);
+    setEditorialBeneficios(p.beneficios_reales || []);
+    setEditorialPorQue(p.por_que_comprar || []);
+    setEditorialFaq(p.faq || []);
+    setEditorialAfirmacion(p.afirmacion_inicial || '');
+    setEditorialInfoFab(p.info_fabricante || '');
+    setEditorialCierre(p.cierre_estrategico || '');
+    // Cargar reseñas guardadas
+    supabase.from('product_reviews').select('*').eq('product_id', p.id).then(({ data }) => {
+      setEditorialReviews(data || []);
+    });
     setTab('productos'); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
