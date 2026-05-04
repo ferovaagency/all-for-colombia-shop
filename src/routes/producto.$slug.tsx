@@ -85,50 +85,8 @@ function ProductDetailPage() {
       .then(({ data }) => setReviews((data || []) as Review[]));
   }, [product?.id]);
 
-  useEffect(() => {
-    if (!product) return;
-    (async () => {
-      // Determine parent category
-      let parentId = product.categories?.parent_id ?? product.categories?.id ?? null;
-      if (!parentId && product.category_id) parentId = product.category_id;
+  // (carruseles delegados a <ProductCarousel />)
 
-      // Complements: same parent category, different products
-      let complementsRes;
-      if (parentId) {
-        const { data: siblingCats } = await supabase
-          .from("categories")
-          .select("id")
-          .or(`id.eq.${parentId},parent_id.eq.${parentId}`);
-        const ids = (siblingCats || []).map((c: { id: string }) => c.id);
-        complementsRes = await supabase
-          .from("products")
-          .select("*")
-          .in("category_id", ids.length ? ids : [parentId])
-          .eq("active", true)
-          .neq("id", product.id)
-          .order("updated_at", { ascending: false })
-          .limit(4);
-      } else {
-        complementsRes = { data: [] as DBProduct[] };
-      }
-      const comps = (complementsRes.data as DBProduct[] | null) ?? [];
-      setComplements(comps);
-
-      // Related: same exact category, exclude already shown
-      if (product.category_id) {
-        const excludeIds = [product.id, ...comps.map((c) => c.id)];
-        const { data: rel } = await supabase
-          .from("products")
-          .select("*")
-          .eq("category_id", product.category_id)
-          .eq("active", true)
-          .not("id", "in", `(${excludeIds.join(",")})`)
-          .order("updated_at", { ascending: false })
-          .limit(4);
-        setRelated((rel as DBProduct[] | null) ?? []);
-      }
-    })();
-  }, [product?.id]);
 
   // Update document head with meta tags
   useEffect(() => {
