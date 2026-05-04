@@ -120,6 +120,17 @@ function ProductGeneratorPage() {
   const [currentAction, setCurrentAction] = useState('');
   const [generateWithAI, setGenerateWithAI] = useState(true);
 
+  // Campos editoriales generados por IA (Guía Ferova)
+  const [editorialAudiencia, setEditorialAudiencia] = useState<any[]>([]);
+  const [editorialSpecsCtx, setEditorialSpecsCtx] = useState<any[]>([]);
+  const [editorialBeneficios, setEditorialBeneficios] = useState<any[]>([]);
+  const [editorialPorQue, setEditorialPorQue] = useState<any[]>([]);
+  const [editorialFaq, setEditorialFaq] = useState<any[]>([]);
+  const [editorialReviews, setEditorialReviews] = useState<any[]>([]);
+  const [editorialAfirmacion, setEditorialAfirmacion] = useState('');
+  const [editorialInfoFab, setEditorialInfoFab] = useState('');
+  const [editorialCierre, setEditorialCierre] = useState('');
+
   const slug = slugify(name);
   const parentCats = categories.filter(c => !c.parent_id);
   const getChildren = (id: string) => categories.filter(c => c.parent_id === id);
@@ -147,6 +158,9 @@ function ProductGeneratorPage() {
     setSelectedCategory(''); setSelectedBrand('');
     setMetaTitle(''); setMetaDesc(''); setImageUrls([]);
     setStock(''); setAiNotes('');
+    setEditorialAudiencia([]); setEditorialSpecsCtx([]); setEditorialBeneficios([]);
+    setEditorialPorQue([]); setEditorialFaq([]); setEditorialReviews([]);
+    setEditorialAfirmacion(''); setEditorialInfoFab(''); setEditorialCierre('');
   };
 
   const resetBlogForm = () => {
@@ -168,6 +182,18 @@ function ProductGeneratorPage() {
     setMetaTitle(p.meta_title || ''); setMetaDesc(p.meta_description || '');
     setImageUrls((p.images || []).filter((u: any) => typeof u === 'string' && u.trim()));
     setStock(p.stock != null ? String(p.stock) : '');
+    setEditorialAudiencia(p.audiencia || []);
+    setEditorialSpecsCtx(p.specs_contexto || []);
+    setEditorialBeneficios(p.beneficios_reales || []);
+    setEditorialPorQue(p.por_que_comprar || []);
+    setEditorialFaq(p.faq || []);
+    setEditorialAfirmacion(p.afirmacion_inicial || '');
+    setEditorialInfoFab(p.info_fabricante || '');
+    setEditorialCierre(p.cierre_estrategico || '');
+    // Cargar reseñas guardadas
+    supabase.from('product_reviews').select('*').eq('product_id', p.id).then(({ data }) => {
+      setEditorialReviews(data || []);
+    });
     setTab('productos'); window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -242,11 +268,16 @@ function ProductGeneratorPage() {
     try {
       const { data, error } = await supabase.functions.invoke('generate-product-sheet', {
         body: {
-          name, price, brand: selectedBrand, category: selectedCategory,
-          condition, warranty, specs: aiNotes,
+          nombre: name, name,
+          precio: price, price,
+          marca: selectedBrand, brand: selectedBrand,
+          categoria: selectedCategory, category: selectedCategory,
+          condition, warranty,
+          specs_raw: aiNotes, specs: aiNotes,
         }
       });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       if (data.description) setDescription(data.description);
       if (data.short_description) setShortDesc(data.short_description);
       if (data.meta_title) setMetaTitle(data.meta_title);
@@ -257,7 +288,17 @@ function ProductGeneratorPage() {
       }
       if (data.category && !selectedCategory) setSelectedCategory(data.category);
       if (data.brand && !selectedBrand) setSelectedBrand(data.brand);
-      toast.success('Contenido generado con IA');
+      // Editorial Ferova
+      if (data.audiencia) setEditorialAudiencia(data.audiencia);
+      if (data.specs_contexto) setEditorialSpecsCtx(data.specs_contexto);
+      if (data.beneficios_reales) setEditorialBeneficios(data.beneficios_reales);
+      if (data.por_que_comprar) setEditorialPorQue(data.por_que_comprar);
+      if (data.faq) setEditorialFaq(data.faq);
+      if (data.reviews) setEditorialReviews(data.reviews);
+      if (data.afirmacion_inicial) setEditorialAfirmacion(data.afirmacion_inicial);
+      if (data.info_fabricante) setEditorialInfoFab(data.info_fabricante);
+      if (data.cierre_estrategico) setEditorialCierre(data.cierre_estrategico);
+      toast.success('Ficha editorial generada con IA');
     } catch (err: any) {
       toast.error('Error al generar: ' + err.message);
     } finally { setGeneratingAI(false); }
@@ -289,7 +330,7 @@ function ProductGeneratorPage() {
         ? (await supabase.from('categories').select('id').eq('name', selectedCategory).single()).data : null;
       const brandData = selectedBrand
         ? (await supabase.from('brands').select('id').eq('name', selectedBrand).single()).data : null;
-      const productData = {
+      const productData: any = {
         name, slug: finalSlug, price: Number(price),
         sale_price: salePrice ? Number(salePrice) : null,
         sku: sku || null, condition, warranty,
@@ -300,11 +341,38 @@ function ProductGeneratorPage() {
         specs: Object.keys(parseSpecs(specsText)).length > 0 ? parseSpecs(specsText) : null,
         meta_title: metaTitle || null, meta_description: metaDesc || null,
         images: finalImages, active: true, updated_at: new Date().toISOString(),
+        // Editorial Ferova
+        audiencia: editorialAudiencia.length ? editorialAudiencia : null,
+        specs_contexto: editorialSpecsCtx.length ? editorialSpecsCtx : null,
+        beneficios_reales: editorialBeneficios.length ? editorialBeneficios : null,
+        por_que_comprar: editorialPorQue.length ? editorialPorQue : null,
+        faq: editorialFaq.length ? editorialFaq : null,
+        afirmacion_inicial: editorialAfirmacion || null,
+        info_fabricante: editorialInfoFab || null,
+        cierre_estrategico: editorialCierre || null,
       };
-      const { error } = editingId
-        ? await supabase.from('products').update(productData).eq('id', editingId)
-        : await supabase.from('products').insert(productData);
-      if (error) throw error;
+      let savedId = editingId;
+      if (editingId) {
+        const { error } = await supabase.from('products').update(productData).eq('id', editingId);
+        if (error) throw error;
+      } else {
+        const { data: inserted, error } = await supabase.from('products').insert(productData).select('id').single();
+        if (error) throw error;
+        savedId = inserted?.id;
+      }
+      // Reseñas: borrar viejas e insertar nuevas (solo si vienen del generador IA)
+      if (savedId && editorialReviews.length > 0) {
+        await supabase.from('product_reviews').delete().eq('product_id', savedId);
+        const reviewsToInsert = editorialReviews.slice(0, 3).map(r => ({
+          product_id: savedId,
+          nombre_completo: r.nombre_completo || r.name || 'Cliente A.',
+          ciudad: r.ciudad || r.city || 'Bogotá, Colombia',
+          cargo: r.cargo || r.role || 'Profesional',
+          rating: Math.min(5, Math.max(4, parseInt(r.rating) || 5)),
+          contenido: r.contenido || r.text || '',
+        }));
+        await supabase.from('product_reviews').insert(reviewsToInsert);
+      }
       toast.success(editingId ? 'Producto actualizado' : 'Producto creado');
       resetForm(); fetchData();
     } catch (err: any) {
