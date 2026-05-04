@@ -369,7 +369,10 @@ function ProductDetailPage() {
             <TabsTrigger value="reviews">Reseñas</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="description" className="pt-6">
+          <TabsContent value="description" className="pt-6 space-y-8">
+            {product.afirmacion_inicial && (
+              <p className="text-lg font-medium leading-relaxed">{product.afirmacion_inicial}</p>
+            )}
             {product.description ? (
               product.description.trim().startsWith("<") ? (
                 <div
@@ -382,12 +385,103 @@ function ProductDetailPage() {
                 </p>
               )
             ) : (
-              <p className="text-muted-foreground">Sin descripción disponible.</p>
+              !product.afirmacion_inicial && <p className="text-muted-foreground">Sin descripción disponible.</p>
+            )}
+
+            {product.audiencia && product.audiencia.length > 0 && (
+              <div>
+                <h3 className="text-xl font-bold mb-3">¿Para quién es este producto?</h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {product.audiencia.map((a, i) => (
+                    <div key={i} className="border rounded-lg p-4 bg-card">
+                      <p className="font-semibold text-sm mb-1">{a.grupo}</p>
+                      <p className="text-xs text-muted-foreground mb-2">{a.perfil}</p>
+                      <p className="text-sm">{a.caso_uso}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {product.beneficios_reales && product.beneficios_reales.length > 0 && (
+              <div>
+                <h3 className="text-xl font-bold mb-3">Beneficios reales</h3>
+                <ul className="space-y-2">
+                  {product.beneficios_reales.map((b, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="text-primary font-bold">→</span>
+                      <span><strong>{b.feature}:</strong> {b.beneficio}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {product.info_fabricante && (
+              <div>
+                <h3 className="text-xl font-bold mb-2">Sobre la marca</h3>
+                <p className="text-muted-foreground leading-relaxed">{product.info_fabricante}</p>
+              </div>
+            )}
+
+            {product.por_que_comprar && product.por_que_comprar.length > 0 && (
+              <div>
+                <h3 className="text-xl font-bold mb-3">¿Por qué comprarlo en All For All?</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {product.por_que_comprar.map((p, i) => (
+                    <div key={i} className="border rounded-lg p-4 bg-muted/30">
+                      <p className="font-semibold text-sm mb-1">{p.argumento}</p>
+                      <p className="text-sm text-muted-foreground">{p.detalle}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {product.faq && product.faq.length > 0 && (
+              <div>
+                <h3 className="text-xl font-bold mb-3">Preguntas frecuentes</h3>
+                <div className="space-y-3">
+                  {product.faq.map((q, i) => (
+                    <details key={i} className="border rounded-lg p-4 bg-card">
+                      <summary className="font-semibold cursor-pointer">{q.pregunta}</summary>
+                      <p className="text-sm text-muted-foreground mt-2">{q.respuesta}</p>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {product.cierre_estrategico && (
+              <div className="border-l-4 border-primary bg-muted/30 p-4 rounded">
+                <p className="leading-relaxed">{product.cierre_estrategico}</p>
+              </div>
             )}
           </TabsContent>
 
           <TabsContent value="specs" className="pt-6">
-            {specsEntries.length > 0 ? (
+            {(product.specs_contexto && product.specs_contexto.length > 0) ? (
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="px-4 py-2 text-left">Especificación</th>
+                      <th className="px-4 py-2 text-left">Valor</th>
+                      <th className="px-4 py-2 text-left">¿Qué significa para ti?</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {product.specs_contexto.map((s, i) => (
+                      <tr key={i} className={i % 2 === 0 ? "bg-muted/30" : "bg-background"}>
+                        <td className="px-4 py-2.5 font-medium">{s.spec}</td>
+                        <td className="px-4 py-2.5">{s.valor}</td>
+                        <td className="px-4 py-2.5 text-muted-foreground">{s.significado}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : specsEntries.length > 0 ? (
               <div className="border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <tbody>
