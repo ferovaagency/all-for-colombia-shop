@@ -32,16 +32,27 @@ type DBProduct = {
   warranty: string | null;
   meta_title: string | null;
   meta_description: string | null;
+  // Editorial Ferova
+  afirmacion_inicial: string | null;
+  audiencia: Array<{ grupo: string; perfil: string; caso_uso: string }> | null;
+  specs_contexto: Array<{ spec: string; valor: string; significado: string }> | null;
+  beneficios_reales: Array<{ feature: string; beneficio: string }> | null;
+  info_fabricante: string | null;
+  por_que_comprar: Array<{ argumento: string; detalle: string }> | null;
+  faq: Array<{ pregunta: string; respuesta: string }> | null;
+  cierre_estrategico: string | null;
   brands?: { slug: string; name: string } | null;
   categories?: { id: string; slug: string; name: string; parent_id: string | null } | null;
 };
 
 type Review = {
   id: string;
-  name: string;
-  role?: string | null;
+  nombre_completo: string;
+  ciudad: string;
+  cargo: string;
   rating: number;
-  text: string;
+  contenido: string;
+  pie_nota?: string | null;
 };
 
 function ProductDetailPage() {
@@ -53,7 +64,7 @@ function ProductDetailPage() {
   const [imageIdx, setImageIdx] = useState(0);
   const [complements, setComplements] = useState<DBProduct[]>([]);
   const [related, setRelated] = useState<DBProduct[]>([]);
-  const [reviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
     setLoading(true);
