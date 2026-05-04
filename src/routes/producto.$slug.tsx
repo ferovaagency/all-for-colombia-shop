@@ -418,11 +418,11 @@ function ProductDetailPage() {
                   <div key={rev.id} className="border rounded-lg p-4 bg-card">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                        {rev.name.charAt(0).toUpperCase()}
+                        {rev.nombre_completo.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-semibold text-sm">{rev.name}</p>
-                        {rev.role && <p className="text-xs text-muted-foreground">{rev.role}</p>}
+                        <p className="font-semibold text-sm">{rev.nombre_completo}</p>
+                        <p className="text-xs text-muted-foreground">{rev.cargo} · {rev.ciudad}</p>
                       </div>
                     </div>
                     <div className="flex mb-2">
@@ -436,7 +436,8 @@ function ProductDetailPage() {
                         />
                       ))}
                     </div>
-                    <p className="text-sm text-muted-foreground">{rev.text}</p>
+                    <p className="text-sm text-muted-foreground">{rev.contenido}</p>
+                    {rev.pie_nota && <p className="text-[10px] text-muted-foreground italic mt-2">{rev.pie_nota}</p>}
                   </div>
                 ))}
               </div>
