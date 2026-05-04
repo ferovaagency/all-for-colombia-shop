@@ -837,6 +837,24 @@ ${catalog}`,
                 </div>
               </div>
 
+              <label className="flex items-start gap-3 bg-white border rounded-xl p-4 cursor-pointer hover:border-secondary transition-colors">
+                <input
+                  type="checkbox"
+                  checked={generateWithAI}
+                  onChange={(e) => setGenerateWithAI(e.target.checked)}
+                  className="mt-1 rounded border-border h-4 w-4"
+                />
+                <div className="flex-1">
+                  <p className="font-semibold text-sm flex items-center gap-1.5">
+                    <Sparkles className="h-4 w-4 text-secondary" />
+                    Generar descripciones con IA durante la subida
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Más lento pero crea fichas completas siguiendo la guía editorial
+                  </p>
+                </div>
+              </label>
+
               <label className="border-2 border-dashed border-border rounded-xl p-10 text-center cursor-pointer hover:border-secondary hover:bg-secondary/5 transition-all block group bg-white">
                 <input type="file" accept=".csv,.txt" onChange={handleCSV} className="hidden" />
                 <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-3 group-hover:text-secondary" />
