@@ -317,6 +317,18 @@ function ProductDetailPage() {
         </div>
       </div>
 
+      {/* Complementarios bajo la grid principal */}
+      <ProductCarousel
+        title="Productos que complementan tu compra"
+        subtitle="De otras categorías que potencian este producto"
+        productId={product.id}
+        categoryId={product.category_id}
+        parentCategoryId={product.categories?.parent_id}
+        mode="complementary"
+        minItems={3}
+        maxItems={8}
+      />
+
       {/* Tabs */}
       <section className="mt-14">
         <Tabs defaultValue="description">
