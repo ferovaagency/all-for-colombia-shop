@@ -67,8 +67,6 @@ function ProductDetailPage() {
   useEffect(() => {
     setLoading(true);
     setImageIdx(0);
-    setComplements([]);
-    setRelated([]);
     (async () => {
       const { data } = await supabase
         .from("products")
