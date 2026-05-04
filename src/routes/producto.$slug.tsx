@@ -88,19 +88,27 @@ function ProductDetailPage() {
   // (carruseles delegados a <ProductCarousel />)
 
 
-  // Update document head with meta tags
+  // Update document head with meta tags + Open Graph
   useEffect(() => {
     if (!product) return;
     const title = product.meta_title || `${product.name} | All For All`;
     const desc = product.meta_description || product.short_description || "";
     document.title = title;
-    let meta = document.querySelector('meta[name="description"]');
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "description");
-      document.head.appendChild(meta);
-    }
-    meta.setAttribute("content", desc);
+    const setMeta = (name: string, content: string) => {
+      let m = document.querySelector(`meta[name="${name}"]`);
+      if (!m) { m = document.createElement("meta"); m.setAttribute("name", name); document.head.appendChild(m); }
+      m.setAttribute("content", content);
+    };
+    const setOG = (property: string, content: string) => {
+      let m = document.querySelector(`meta[property="${property}"]`);
+      if (!m) { m = document.createElement("meta"); m.setAttribute("property", property); document.head.appendChild(m); }
+      m.setAttribute("content", content);
+    };
+    setMeta("description", desc);
+    setOG("og:title", title);
+    setOG("og:description", desc);
+    setOG("og:type", "product");
+    if (product.images?.[0]) setOG("og:image", product.images[0]);
   }, [product?.id]);
 
   const finalPrice = product?.sale_price ?? product?.price ?? 0;
