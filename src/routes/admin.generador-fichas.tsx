@@ -120,6 +120,17 @@ function ProductGeneratorPage() {
   const [currentAction, setCurrentAction] = useState('');
   const [generateWithAI, setGenerateWithAI] = useState(true);
 
+  // Campos editoriales generados por IA (Guía Ferova)
+  const [editorialAudiencia, setEditorialAudiencia] = useState<any[]>([]);
+  const [editorialSpecsCtx, setEditorialSpecsCtx] = useState<any[]>([]);
+  const [editorialBeneficios, setEditorialBeneficios] = useState<any[]>([]);
+  const [editorialPorQue, setEditorialPorQue] = useState<any[]>([]);
+  const [editorialFaq, setEditorialFaq] = useState<any[]>([]);
+  const [editorialReviews, setEditorialReviews] = useState<any[]>([]);
+  const [editorialAfirmacion, setEditorialAfirmacion] = useState('');
+  const [editorialInfoFab, setEditorialInfoFab] = useState('');
+  const [editorialCierre, setEditorialCierre] = useState('');
+
   const slug = slugify(name);
   const parentCats = categories.filter(c => !c.parent_id);
   const getChildren = (id: string) => categories.filter(c => c.parent_id === id);
