@@ -6,139 +6,111 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 };
 
+const SYSTEM_PROMPT = `Eres redactor experto de fichas de producto e-commerce siguiendo la GUÍA EDITORIAL FEROVA AGENCY para All For All.
+
+REGLAS ABSOLUTAS:
+1. SOLO 1 H1 con fórmula: "[Nombre] [Marca] [Modelo] – [Atributo diferenciador] | All For All" (máx 65 caracteres)
+2. Jerarquía H1>H2>H3>H4 sin saltar niveles
+3. Mínimo 800 palabras de contenido real
+4. Tono conversado pero profesional, NUNCA "somos los mejores", "¡compra ya!", adjetivos vacíos
+5. Mencionar "All For All" máximo 2 veces de forma contextual
+6. Cada spec con su impacto real para el usuario
+7. Beneficios = ganancias del comprador, NO features
+8. Keyword principal en H1, primer párrafo y al menos un H2 (densidad máx 2-3%)
+9. Las 3 reseñas son representativas (NO inventar nombres reales de personas conocidas) con nombre + inicial, ciudad colombiana, cargo profesional, 4-5 oraciones, beneficio específico medible
+10. FAQ entre 5 y 8 preguntas con respuestas de 2-4 oraciones
+11. NUNCA copiar texto del fabricante. Reescribir todo con voz propia.
+
+Responde EXCLUSIVAMENTE con JSON válido sin markdown, sin backticks, sin comentarios. Estructura exacta:
+
+{
+  "h1": "string máx 65 chars",
+  "afirmacion_inicial": "Sujeto + Verbo + Predicado técnico (1 oración)",
+  "descripcion_corta": "Resumen para listados (máx 160 chars)",
+  "descripcion_larga": "HTML con párrafos <p>, mínimo 3-5 oraciones, qué es, para qué sirve, qué gana el comprador",
+  "audiencia": [
+    {"grupo": "Nombre del perfil", "perfil": "H4 específico", "caso_uso": "Caso de uso concreto en 1-2 oraciones"}
+  ],
+  "specs_contexto": [
+    {"spec": "Nombre", "valor": "Valor técnico", "significado": "Qué significa para el usuario"}
+  ],
+  "beneficios_reales": [
+    {"feature": "Feature técnico", "beneficio": "Beneficio medible para el comprador"}
+  ],
+  "info_fabricante": "2-4 oraciones sobre la marca: trayectoria, posicionamiento, garantía oficial",
+  "por_que_comprar": [
+    {"argumento": "Garantía / Soporte / Pago / Entrega / Autenticidad", "detalle": "Detalle concreto"}
+  ],
+  "reviews": [
+    {"nombre_completo": "Carlos M.", "ciudad": "Bogotá, Colombia", "cargo": "Director Creativo", "rating": 5, "contenido": "4-5 oraciones con beneficio específico medible"}
+  ],
+  "faq": [
+    {"pregunta": "¿Pregunta?", "respuesta": "Respuesta de 2-4 oraciones"}
+  ],
+  "cierre_estrategico": "Resumen + diferencial All For All + CTA natural (3-4 oraciones)",
+  "specs": {"Spec1": "Valor1", "Spec2": "Valor2"},
+  "category": "categoría sugerida",
+  "brand": "marca identificada",
+  "meta_title": "máx 60 chars con keyword + marca",
+  "meta_description": "150-160 chars con propuesta de valor"
+}
+
+Reglas de cantidad mínima:
+- audiencia: exactamente 3 perfiles
+- specs_contexto: mínimo 6 specs
+- beneficios_reales: exactamente 5 beneficios
+- por_que_comprar: exactamente 5 argumentos
+- reviews: EXACTAMENTE 3 reseñas representativas
+- faq: entre 5 y 8 preguntas
+- specs (objeto plano): mínimo 5`;
+
 serve(async (req) => {
   if (req.method === 'OPTIONS')
     return new Response(null, { headers: corsHeaders });
 
   try {
     const body = await req.json();
-    const { name, price, brand, category, condition,
-            warranty, specs } = body;
+    // Acepta nombres en español (nuevo) o inglés (compat)
+    const nombre = body.nombre || body.name || '';
+    const marca = body.marca || body.brand || '';
+    const modelo = body.modelo || body.model || '';
+    const categoria = body.categoria || body.category || '';
+    const subcategoria = body.subcategoria || body.subcategory || '';
+    const precio = body.precio || body.price || '';
+    const condition = body.condition || 'Nuevo';
+    const warranty = body.warranty || '';
+    const specs_raw = body.specs_raw || body.specs || '';
+    const descripcion_fabricante = body.descripcion_fabricante || body.notes || '';
+
+    if (!nombre) {
+      return new Response(
+        JSON.stringify({ error: 'Falta el nombre del producto' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY no configurada');
+    if (!LOVABLE_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: 'LOVABLE_API_KEY no configurada' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    const systemPrompt = `Eres un experto en copywriting para
-e-commerce colombiano. Sigues estrictamente la Guía Editorial
-Ferova Agency para fichas de producto.
+    const userPrompt = `Genera la ficha completa para este producto siguiendo TODAS las reglas:
 
-REGLAS ABSOLUTAS:
-1. Generas contenido en español colombiano natural y profesional
-2. Nunca usas adjetivos vacíos como "increíble", "maravilloso",
-   "revolucionario" sin sustento técnico
-3. Cada beneficio debe ser concreto y medible
-4. La marca y "All For All" se mencionan máximo 2 veces cada una
-5. Siempre respondes SOLO con el JSON solicitado, sin texto extra
-6. El JSON debe ser válido y parseable`;
+Nombre: ${nombre}
+Marca: ${marca || 'Identifica por el nombre'}
+Modelo: ${modelo || 'N/A'}
+Categoría: ${categoria || 'N/A'}
+Subcategoría: ${subcategoria || 'N/A'}
+Estado: ${condition}
+Garantía: ${warranty || '12 meses con fabricante'}
+Precio: ${precio ? `$${precio} COP` : 'N/A'}
+Specs en bruto: ${specs_raw || 'No proporcionadas — infiere las más probables del modelo'}
+Descripción del fabricante (NO copiar, solo referencia): ${descripcion_fabricante || 'N/A'}
 
-    const userPrompt = `Genera la ficha completa de este producto
-para All For All (e-commerce colombiano de tecnología).
-
-DATOS DEL PRODUCTO:
-Nombre: ${name}
-${price ? `Precio: $${parseInt(price).toLocaleString('es-CO')} COP` : ''}
-${brand ? `Marca: ${brand}` : ''}
-${category ? `Categoría: ${category}` : ''}
-${condition ? `Estado: ${condition}` : ''}
-${warranty ? `Garantía: ${warranty}` : ''}
-${specs ? `Especificaciones proporcionadas:\n${specs}` : ''}
-
-ESTRUCTURA OBLIGATORIA — Sigue estas reglas al pie de la letra:
-
-DESCRIPCIÓN COMPLETA (campo "description" en HTML):
-Genera HTML completo con esta estructura exacta:
-
-<h2>[Nombre producto] — [atributo diferenciador principal]</h2>
-
-<p>[Primera oración OBLIGATORIA: Sujeto + Verbo + Predicado
-técnico con contexto de uso real. NUNCA preguntas. NUNCA
-"Este producto es...". Ejemplo: "El Logitech MX Master 3S
-combina precisión electromagnética con conectividad
-multidispositivo para profesionales que trabajan en múltiples
-pantallas."]</p>
-
-<p>[Párrafo introductorio de 3-5 oraciones: qué es el producto,
-para qué sirve en la práctica, qué gana el comprador.
-NO listar specs aquí. Tono conversado pero profesional.]</p>
-
-<h3>¿Para quién es este producto?</h3>
-<ul>
-  <li><strong>[Perfil 1 concreto con cargo o situación real]:</strong> [Caso de uso específico y medible]</li>
-  <li><strong>[Perfil 2 concreto]:</strong> [Caso de uso específico]</li>
-  <li><strong>[Perfil 3 concreto]:</strong> [Caso de uso específico]</li>
-</ul>
-
-<h3>Beneficios reales</h3>
-<ul>
-  <li><strong>[Feature]</strong> — [Beneficio concreto medible. Formato: qué tiene → qué gana el usuario.]</li>
-  <li>[4 beneficios más con el mismo formato]</li>
-</ul>
-
-<h3>Especificaciones técnicas con contexto</h3>
-<table>
-  <thead>
-    <tr><th>Especificación</th><th>Valor</th><th>¿Qué significa para ti?</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>[Spec]</td><td>[Valor técnico]</td><td>[Impacto real para el usuario]</td></tr>
-  </tbody>
-</table>
-
-<h3>Preguntas frecuentes</h3>
-<p><strong>[Pregunta real que haría un comprador indeciso]</strong></p>
-<p>[Respuesta honesta de 2-3 oraciones que genera confianza.]</p>
-<p><strong>[Segunda pregunta sobre compatibilidad o uso]</strong></p>
-<p>[Respuesta]</p>
-<p><strong>[Tercera pregunta sobre garantía, envío o soporte]</strong></p>
-<p>[Respuesta mencionando All For All y el proceso]</p>
-
-<h3>¿Por qué comprarlo en All For All?</h3>
-<ul>
-  <li>[Argumento 1 concreto: garantía, tiempo, soporte]</li>
-  <li>[Argumento 2: autenticidad, procedencia]</li>
-  <li>[Argumento 3: asesoría, proceso de compra]</li>
-</ul>
-
-<h3>Testimonio de cliente</h3>
-<blockquote>
-  "[Testimonio verosímil de 3-4 oraciones que menciona un beneficio específico medible.]"
-  <footer>— [Nombre colombiano real], [Cargo profesional], [Ciudad colombiana]</footer>
-</blockquote>
-
-DESCRIPCIÓN CORTA (campo "short_description"):
-Máximo 40 palabras. Resumen del beneficio principal.
-Formato: [Qué es] + [Para quién] + [Beneficio principal].
-
-META TITLE (campo "meta_title"):
-Máximo 60 caracteres.
-Formato: [Nombre producto] [Marca] | All For All
-
-META DESCRIPTION (campo "meta_description"):
-150-160 caracteres exactos.
-
-SPECS INFERIDAS (campo "specs"):
-Formato JSON: {"Especificación": "Valor técnico"}. Mínimo 5.
-
-CATEGORÍA SUGERIDA (campo "category"):
-De: Audio, Gaming, Computadores y Accesorios, Celulares y Tablets,
-Hogar y Tecnología, Impresión, Accesorios.
-
-MARCA IDENTIFICADA (campo "brand"):
-Si no se proporcionó, identifica la marca por el nombre.
-
-Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
-{
-  "description": "[HTML completo con toda la estructura]",
-  "short_description": "[máx 40 palabras]",
-  "meta_title": "[máx 60 chars]",
-  "meta_description": "[150-160 chars]",
-  "specs": {
-    "[Especificación 1]": "[Valor 1]",
-    "[Especificación 2]": "[Valor 2]"
-  },
-  "category": "[categoría sugerida o la proporcionada]",
-  "brand": "[marca identificada o la proporcionada]"
-}`;
+Genera el JSON completo. Si faltan specs, infiere las más probables del modelo según conocimiento técnico de la categoría.`;
 
     const response = await fetch(
       'https://ai.gateway.lovable.dev/v1/chat/completions',
@@ -151,73 +123,88 @@ Responde ÚNICAMENTE con este JSON válido, sin texto adicional:
         body: JSON.stringify({
           model: 'google/gemini-2.5-flash',
           messages: [
-            { role: 'system', content: systemPrompt },
+            { role: 'system', content: SYSTEM_PROMPT },
             { role: 'user', content: userPrompt },
           ],
-          max_tokens: 4000,
+          max_tokens: 8000,
+          temperature: 0.7,
         }),
       }
     );
 
     if (!response.ok) {
+      if (response.status === 429)
+        return new Response(JSON.stringify({ error: 'Límite de IA alcanzado, intenta en unos segundos' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (response.status === 402)
+        return new Response(JSON.stringify({ error: 'Créditos de IA agotados' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       const errText = await response.text();
       console.error('AI Gateway error:', response.status, errText);
-      if (response.status === 429)
-        return new Response(
-          JSON.stringify({ error: 'Límite de uso alcanzado. Intenta más tarde.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      if (response.status === 402)
-        return new Response(
-          JSON.stringify({ error: 'Se requieren créditos en Lovable AI.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
       throw new Error(`AI Gateway: ${response.status}`);
     }
 
     const data = await response.json();
-    const rawContent = data?.choices?.[0]?.message?.content ?? '';
+    let content = data?.choices?.[0]?.message?.content ?? '';
+    content = content.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
 
     let parsed: any = {};
     try {
-      let jsonStr = rawContent
-        .replace(/```json\s*/g, '')
-        .replace(/```\s*/g, '');
-      const start = jsonStr.indexOf('{');
-      const end = jsonStr.lastIndexOf('}');
-      if (start >= 0 && end > start) {
-        jsonStr = jsonStr.slice(start, end + 1);
-        parsed = JSON.parse(jsonStr);
+      parsed = JSON.parse(content);
+    } catch {
+      const match = content.match(/\{[\s\S]*\}/);
+      if (match) {
+        try { parsed = JSON.parse(match[0]); }
+        catch { throw new Error('La IA no devolvió JSON válido. Reintenta.'); }
       } else {
-        parsed = { description: rawContent };
+        throw new Error('La IA no devolvió JSON válido. Reintenta.');
       }
-    } catch (parseErr) {
-      console.error('Parse error:', parseErr);
-      parsed = { description: rawContent };
     }
 
-    if (parsed.description && !parsed.description.trim().startsWith('<')) {
-      const paragraphs = parsed.description
-        .split('\n\n')
-        .filter((p: string) => p.trim())
-        .map((p: string) => `<p>${p.trim()}</p>`)
-        .join('\n');
-      parsed.description = paragraphs;
+    // Forzar 3 reviews
+    if (!Array.isArray(parsed.reviews)) parsed.reviews = [];
+    parsed.reviews = parsed.reviews.slice(0, 3);
+    while (parsed.reviews.length < 3) {
+      parsed.reviews.push({
+        nombre_completo: 'Cliente A.',
+        ciudad: 'Bogotá, Colombia',
+        cargo: 'Profesional independiente',
+        rating: 5,
+        contenido: 'Producto con buen desempeño. La compra y el soporte de All For All fueron claros y rápidos.',
+      });
     }
 
-    return new Response(
-      JSON.stringify({
-        content: parsed.description || rawContent,
-        description: parsed.description,
-        short_description: parsed.short_description,
-        meta_title: parsed.meta_title,
-        meta_description: parsed.meta_description,
-        specs: parsed.specs,
-        category: parsed.category,
-        brand: parsed.brand,
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    // Normalizar para el cliente: incluir también campos en inglés que ya usa el admin
+    const out = {
+      // Editorial completo
+      h1: parsed.h1 || nombre,
+      afirmacion_inicial: parsed.afirmacion_inicial || null,
+      descripcion_corta: parsed.descripcion_corta || null,
+      descripcion_larga: parsed.descripcion_larga || null,
+      audiencia: parsed.audiencia || [],
+      specs_contexto: parsed.specs_contexto || [],
+      beneficios_reales: parsed.beneficios_reales || [],
+      info_fabricante: parsed.info_fabricante || null,
+      por_que_comprar: parsed.por_que_comprar || [],
+      reviews: parsed.reviews,
+      faq: parsed.faq || [],
+      cierre_estrategico: parsed.cierre_estrategico || null,
+      // Compat con admin actual (inglés)
+      description: parsed.descripcion_larga || null,
+      short_description: parsed.descripcion_corta || null,
+      meta_title: parsed.meta_title || null,
+      meta_description: parsed.meta_description || null,
+      specs: parsed.specs || (parsed.specs_contexto || []).reduce((acc: any, s: any) => {
+        if (s?.spec && s?.valor) acc[s.spec] = s.valor;
+        return acc;
+      }, {}),
+      category: parsed.category || categoria || null,
+      brand: parsed.brand || marca || null,
+    };
+
+    return new Response(JSON.stringify(out), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (e) {
     console.error('Error:', e);
     return new Response(
