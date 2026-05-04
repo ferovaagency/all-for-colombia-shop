@@ -1,55 +1,72 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
-export const Route = createFileRoute("/blog")({
-  head: () => ({
-    meta: [
-      { title: "Blog — All For All" },
-      { name: "description", content: "Guías, novedades y consejos sobre tecnología, hogar y soluciones empresariales." },
-    ],
-  }),
-  component: BlogPage,
-});
+interface Blog {
+  id: number; slug: string; h1: string; resumen_intro: string;
+  imagen_portada: string | null; imagen_alt: string | null;
+  industria: string; fecha_publicacion: string | null; autor: string;
+}
 
-function BlogPage() {
-  const [posts, setPosts] = useState<any[]>([]);
+const FALLBACK = '/placeholder.svg';
+
+function BlogIndex() {
+  const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false })
-      .then(({ data }) => { setPosts(data || []); setLoading(false); });
+    document.title = 'Blog | All For All';
+    (supabase.from('blogs' as any) as any)
+      .select('*').eq('publicado', true)
+      .order('fecha_publicacion', { ascending: false })
+      .then(({ data }: any) => { setBlogs((data as Blog[]) || []); setLoading(false); });
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold mb-2">Blog</h1>
-      <p className="text-muted-foreground mb-10">Novedades, guías y consejos.</p>
+    <main className="container mx-auto px-4 py-10 max-w-6xl">
+      <h1 className="text-4xl md:text-5xl font-bold mb-2 text-foreground">Blog</h1>
+      <p className="text-muted-foreground mb-10">Guías, comparativas y tendencias en tecnología</p>
 
       {loading ? (
         <div className="grid md:grid-cols-3 gap-6">
-          {Array.from({ length: 3 }).map((_, i) => <div key={i} className="aspect-video bg-muted rounded-xl animate-pulse" />)}
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-pulse bg-muted h-80 rounded-lg" />
+          ))}
         </div>
-      ) : posts.length === 0 ? (
-        <div className="bg-muted/40 border rounded-xl p-12 text-center text-muted-foreground">
-          Aún no hay publicaciones. Vuelve pronto.
-        </div>
+      ) : blogs.length === 0 ? (
+        <p className="text-muted-foreground py-20 text-center">Aún no hay artículos publicados.</p>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map((p) => (
-            <Link key={p.id} to="/blog/$slug" params={{ slug: p.slug }} className="group bg-card border rounded-xl overflow-hidden hover:shadow-elevated transition-smooth">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {blogs.map((b) => (
+            <Link key={b.id} to="/blog/$slug" params={{ slug: b.slug }}
+              className="group rounded-lg border bg-card hover:shadow-lg transition-shadow overflow-hidden">
               <div className="aspect-video bg-muted overflow-hidden">
-                {p.cover_image && <img src={p.cover_image} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-smooth" />}
+                <img src={b.imagen_portada || FALLBACK} alt={b.imagen_alt || b.h1}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK; }} />
               </div>
               <div className="p-5">
-                {p.category && <p className="text-xs text-secondary font-medium mb-1">{p.category}</p>}
-                <h2 className="font-semibold text-lg mb-2 group-hover:text-secondary transition-smooth">{p.title}</h2>
-                {p.excerpt && <p className="text-sm text-muted-foreground line-clamp-3">{p.excerpt}</p>}
+                <p className="text-xs uppercase text-muted-foreground tracking-wide mb-2">{b.industria}</p>
+                <h2 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary">{b.h1}</h2>
+                <p className="text-sm text-muted-foreground line-clamp-3">{b.resumen_intro}</p>
+                <p className="text-xs text-muted-foreground mt-3">
+                  {b.autor} · {b.fecha_publicacion ? new Date(b.fecha_publicacion).toLocaleDateString('es-CO') : ''}
+                </p>
               </div>
             </Link>
           ))}
         </div>
       )}
-    </div>
+    </main>
   );
 }
+
+export const Route = createFileRoute('/blog')({
+  head: () => ({
+    meta: [
+      { title: 'Blog — All For All' },
+      { name: 'description', content: 'Guías, comparativas y tendencias en tecnología.' },
+    ],
+  }),
+  component: BlogIndex,
+});
