@@ -62,8 +62,6 @@ function ProductDetailPage() {
   const [product, setProduct] = useState<DBProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [imageIdx, setImageIdx] = useState(0);
-  const [complements, setComplements] = useState<DBProduct[]>([]);
-  const [related, setRelated] = useState<DBProduct[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
