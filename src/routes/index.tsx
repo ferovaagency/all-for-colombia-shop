@@ -63,7 +63,7 @@ function HomePage() {
       const [cats, prods, brs, blog] = await Promise.all([
         supabase.from("categories").select("*").is("parent_id", null).order("sort_order"),
         supabase.from("products").select("*").eq("active", true).order("updated_at", { ascending: false }).limit(8),
-        supabase.from("brands").select("*").limit(12),
+        supabase.from("brands").select("*").eq("show_in_home", true).order("display_order", { ascending: true }).limit(20),
         supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false }).limit(3),
       ]);
       setCategories(cats.data || []);
