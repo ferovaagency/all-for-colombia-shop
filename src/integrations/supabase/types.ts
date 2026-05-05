@@ -164,6 +164,7 @@ export type Database = {
           display_order: number | null
           id: string
           logo: string | null
+          logo_url: string | null
           name: string
           show_in_home: boolean
           slug: string
@@ -173,6 +174,7 @@ export type Database = {
           display_order?: number | null
           id?: string
           logo?: string | null
+          logo_url?: string | null
           name: string
           show_in_home?: boolean
           slug: string
@@ -182,6 +184,7 @@ export type Database = {
           display_order?: number | null
           id?: string
           logo?: string | null
+          logo_url?: string | null
           name?: string
           show_in_home?: boolean
           slug?: string
