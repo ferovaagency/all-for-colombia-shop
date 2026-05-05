@@ -388,7 +388,7 @@ function ProductDetailPage() {
 
               {product.info_fabricante && (
                 <div className="manufacturer-block">
-                  <h2>Sobre {product.brand || "el fabricante"}</h2>
+                  <h2>Sobre {product.brands?.name || "el fabricante"}</h2>
                   <p>{product.info_fabricante}</p>
                 </div>
               )}
