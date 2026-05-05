@@ -721,7 +721,7 @@ function DistributorCredentialsDialog({
       `Contraseña: ${password}\n\n` +
       `¡Bienvenido!`;
     const phone = (distributor.phone || "").replace(/\D/g, "");
-    const waNumber = phone.length >= 10 ? (phone.startsWith("57") ? phone : `57${phone}`) : "573000000000";
+    const waNumber = phone.length >= 10 ? (phone.startsWith("57") ? phone : `57${phone}`) : "573218280762";
     window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
 
     onSaved();
