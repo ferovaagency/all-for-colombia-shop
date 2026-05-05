@@ -9,6 +9,7 @@ import { SocialProofPopup } from "@/components/layout/SocialProofPopup";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { DiscountWheel } from "@/components/DiscountWheel";
 import { Toaster } from "@/components/ui/sonner";
+import { Canonical } from "@/components/seo/Canonical";
 
 const ORG_SCHEMA = {
   "@context": "https://schema.org",
@@ -110,6 +111,7 @@ function RootComponent() {
   return (
     <>
       <ScrollToTop />
+      <Canonical />
       <div className="flex min-h-screen flex-col">
         <Header />
         <main className="flex-1">
