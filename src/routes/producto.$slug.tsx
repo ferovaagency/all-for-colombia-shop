@@ -338,94 +338,95 @@ function ProductDetailPage() {
             <TabsTrigger value="reviews">Reseñas</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="description" className="pt-6 space-y-8">
-            {product.afirmacion_inicial && (
-              <p className="text-lg font-medium leading-relaxed">{product.afirmacion_inicial}</p>
-            )}
-            {product.description ? (
-              product.description.trim().startsWith("<") ? (
-                <div
-                  className="product-description max-w-none"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-              ) : (
-                <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
-                  {product.description}
-                </p>
-              )
-            ) : (
-              !product.afirmacion_inicial && <p className="text-muted-foreground">Sin descripción disponible.</p>
-            )}
+          <TabsContent value="description" className="pt-6">
+            <div className="product-editorial">
+              {product.afirmacion_inicial && (
+                <p className="lead-paragraph">{product.afirmacion_inicial}</p>
+              )}
+              {product.description && (
+                product.description.trim().startsWith("<") ? (
+                  <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                ) : (
+                  <p className="whitespace-pre-wrap">{product.description}</p>
+                )
+              )}
+              {!product.afirmacion_inicial && !product.description && (
+                <p className="text-muted-foreground">Sin descripción disponible.</p>
+              )}
 
-            {product.audiencia && product.audiencia.length > 0 && (
-              <div>
-                <h3 className="text-xl font-bold mb-3">¿Para quién es este producto?</h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {product.audiencia.map((a, i) => (
-                    <div key={i} className="border rounded-lg p-4 bg-card">
-                      <p className="font-semibold text-sm mb-1">{a.grupo}</p>
-                      <p className="text-xs text-muted-foreground mb-2">{a.perfil}</p>
-                      <p className="text-sm">{a.caso_uso}</p>
-                    </div>
-                  ))}
+              {product.audiencia && product.audiencia.length > 0 && (
+                <>
+                  <h2>¿Para quién es este producto?</h2>
+                  <div className="grid md:grid-cols-3 gap-4 not-prose">
+                    {product.audiencia.map((a, i) => (
+                      <div key={i} className="audience-card">
+                        <p className="font-semibold text-sm mb-1">{a.grupo}</p>
+                        <p className="text-xs text-muted-foreground mb-2">{a.perfil}</p>
+                        <p className="text-sm">{a.caso_uso}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {product.beneficios_reales && product.beneficios_reales.length > 0 && (
+                <>
+                  <h2>Beneficios reales</h2>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {product.beneficios_reales.map((b, i) => (
+                      <div key={i} className="benefit-item">
+                        <span className="benefit-icon">{i + 1}</span>
+                        <div>
+                          <p className="font-semibold text-foreground mb-1">{b.feature}</p>
+                          <p className="text-sm text-muted-foreground m-0">{b.beneficio}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {product.info_fabricante && (
+                <div className="manufacturer-block">
+                  <h2>Sobre {product.brands?.name || "el fabricante"}</h2>
+                  <p>{product.info_fabricante}</p>
                 </div>
-              </div>
-            )}
+              )}
 
-            {product.beneficios_reales && product.beneficios_reales.length > 0 && (
-              <div>
-                <h3 className="text-xl font-bold mb-3">Beneficios reales</h3>
-                <ul className="space-y-2">
-                  {product.beneficios_reales.map((b, i) => (
-                    <li key={i} className="flex gap-2">
-                      <span className="text-primary font-bold">→</span>
-                      <span><strong>{b.feature}:</strong> {b.beneficio}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+              {product.por_que_comprar && product.por_que_comprar.length > 0 && (
+                <>
+                  <h2>¿Por qué comprarlo en All For All?</h2>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {product.por_que_comprar.map((p, i) => (
+                      <div key={i} className="why-buy-card">
+                        <h3>{p.argumento}</h3>
+                        <p className="text-sm text-muted-foreground m-0">{p.detalle}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
 
-            {product.info_fabricante && (
-              <div>
-                <h3 className="text-xl font-bold mb-2">Sobre la marca</h3>
-                <p className="text-muted-foreground leading-relaxed">{product.info_fabricante}</p>
-              </div>
-            )}
+              {product.faq && product.faq.length > 0 && (
+                <>
+                  <h2>Preguntas frecuentes</h2>
+                  <div>
+                    {product.faq.map((q, i) => (
+                      <details key={i} className="faq-item">
+                        <summary>{q.pregunta}</summary>
+                        <div className="faq-answer">{q.respuesta}</div>
+                      </details>
+                    ))}
+                  </div>
+                </>
+              )}
 
-            {product.por_que_comprar && product.por_que_comprar.length > 0 && (
-              <div>
-                <h3 className="text-xl font-bold mb-3">¿Por qué comprarlo en All For All?</h3>
-                <div className="grid md:grid-cols-2 gap-3">
-                  {product.por_que_comprar.map((p, i) => (
-                    <div key={i} className="border rounded-lg p-4 bg-muted/30">
-                      <p className="font-semibold text-sm mb-1">{p.argumento}</p>
-                      <p className="text-sm text-muted-foreground">{p.detalle}</p>
-                    </div>
-                  ))}
+              {product.cierre_estrategico && (
+                <div className="closing-block">
+                  <p>{product.cierre_estrategico}</p>
                 </div>
-              </div>
-            )}
-
-            {product.faq && product.faq.length > 0 && (
-              <div>
-                <h3 className="text-xl font-bold mb-3">Preguntas frecuentes</h3>
-                <div className="space-y-3">
-                  {product.faq.map((q, i) => (
-                    <details key={i} className="border rounded-lg p-4 bg-card">
-                      <summary className="font-semibold cursor-pointer">{q.pregunta}</summary>
-                      <p className="text-sm text-muted-foreground mt-2">{q.respuesta}</p>
-                    </details>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {product.cierre_estrategico && (
-              <div className="border-l-4 border-primary bg-muted/30 p-4 rounded">
-                <p className="leading-relaxed">{product.cierre_estrategico}</p>
-              </div>
-            )}
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="specs" className="pt-6">

@@ -31,28 +31,15 @@ export function Header() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase
-        .from("categories")
-        .select("id, slug, name, parent_id, sort_order")
-        .is("parent_id", null)
-        .in("slug", [
-          "audio",
-          "gaming",
-          "computadores-accesorios",
-          "celulares-tablets",
-          "hogar-tech",
-          "impresion",
-          "accesorios",
-        ])
+        .from("categories_with_products" as any)
+        .select("id, slug, name, parent_id, sort_order, product_count")
         .order("sort_order", { ascending: true });
-      setCats((data as Cat[]) || []);
-      const { data: prods } = await supabase
-        .from("products")
-        .select("category_id")
-        .eq("active", true);
+      const all = ((data as any) || []) as Cat[];
       const counts: Record<string, number> = {};
-      (prods || []).forEach((p: any) => {
-        if (p.category_id) counts[p.category_id] = (counts[p.category_id] || 0) + 1;
+      ((data as any) || []).forEach((c: any) => {
+        if (typeof c.product_count === "number") counts[c.id] = c.product_count;
       });
+      setCats(all);
       setProductCounts(counts);
     })();
   }, []);

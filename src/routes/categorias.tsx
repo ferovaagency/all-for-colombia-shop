@@ -24,23 +24,22 @@ function CategoriesPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: cats } = await supabase.from("categories").select("*").order("sort_order");
-      const all = cats || [];
+      const { data: cats } = await supabase
+        .from("categories_with_products" as any)
+        .select("*")
+        .order("sort_order");
+      const all = ((cats as any) || []);
       setParents(all.filter((c: any) => !c.parent_id));
       const ch: Record<string, any[]> = {};
+      const cnt: Record<string, number> = {};
       all.forEach((c: any) => {
         if (c.parent_id) {
           ch[c.parent_id] = ch[c.parent_id] || [];
           ch[c.parent_id].push(c);
         }
+        if (typeof c.product_count === "number") cnt[c.id] = c.product_count;
       });
       setChildren(ch);
-
-      const { data: prods } = await supabase.from("products").select("category_id").eq("active", true);
-      const cnt: Record<string, number> = {};
-      (prods || []).forEach((p: any) => {
-        if (p.category_id) cnt[p.category_id] = (cnt[p.category_id] || 0) + 1;
-      });
       setCounts(cnt);
     })();
   }, []);

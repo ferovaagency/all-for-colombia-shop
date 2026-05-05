@@ -1,0 +1,1 @@
+ALTER VIEW categories_with_products SET (security_invoker = true);
