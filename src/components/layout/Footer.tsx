@@ -67,6 +67,7 @@ export function Footer() {
             <li className="flex items-start gap-2"><Truck className="h-4 w-4 mt-0.5" /> Envíos a todo Colombia</li>
             <li className="flex items-start gap-2"><Clock className="h-4 w-4 mt-0.5" /> Lun-Vie 8am-5pm | Sáb 9am-1pm</li>
             <li className="flex items-start gap-2"><Mail className="h-4 w-4 mt-0.5" /> {CONTACT_EMAIL}</li>
+            <li className="flex items-start gap-2"><Phone className="h-4 w-4 mt-0.5" /> <a href="https://wa.me/573218280762" className="hover:text-white">+57 3218280762</a></li>
           </ul>
         </div>
       </div>
