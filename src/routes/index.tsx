@@ -248,14 +248,23 @@ function HomePage() {
       {/* Brands */}
       {brands.length > 0 && (
         <section className="container mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-center mb-8">Marcas que confían en nosotros</h2>
-          <div className="flex flex-wrap justify-center items-center gap-8">
+          <h2 className="text-2xl font-bold text-center mb-2">Marcas que confían en nosotros</h2>
+          <p className="text-center text-muted-foreground text-sm mb-8">Trabajamos con los líderes de la industria</p>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 items-center">
             {brands.map((b) => (
-              <div key={b.id} className="grayscale hover:grayscale-0 transition-smooth opacity-70 hover:opacity-100">
-                {b.logo ? (
-                  <img src={b.logo} alt={b.name} className="h-12 object-contain" />
+              <div key={b.id} className="aspect-[3/2] bg-white rounded-lg border border-border flex items-center justify-center p-3 hover:shadow-md transition-shadow">
+                {b.logo_url || b.logo ? (
+                  <img
+                    src={b.logo_url || b.logo}
+                    alt={b.name}
+                    loading="lazy"
+                    className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 opacity-80 hover:opacity-100 transition"
+                  />
                 ) : (
-                  <span className="text-lg font-semibold text-muted-foreground">{b.name}</span>
+                  <div className="text-center">
+                    <span className="block text-xs font-semibold text-foreground">{b.name}</span>
+                    <span className="block text-[9px] text-muted-foreground mt-0.5">Logo pendiente</span>
+                  </div>
                 )}
               </div>
             ))}
