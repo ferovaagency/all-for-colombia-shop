@@ -61,6 +61,8 @@ export const Route = createRootRoute({
       },
       { name: "author", content: "All For All" },
       { name: "theme-color", content: "#0a1f44" },
+      { name: "robots", content: "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" },
+      { name: "googlebot", content: "index, follow" },
       { property: "og:title", content: "All For All — Todo lo que necesitas, para todos" },
       { property: "og:description", content: "All For All is a comprehensive e-commerce web application for the Colombian market." },
       { property: "og:type", content: "website" },
