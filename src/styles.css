@@ -279,3 +279,37 @@
 .prose blockquote { border-left: 4px solid var(--color-primary); padding-left: 1rem; font-style: italic; color: var(--color-muted-foreground); margin: 1.5rem 0; }
 .prose a { color: var(--color-primary); text-decoration: underline; }
 .prose hr { margin: 2rem 0; border-color: var(--color-border); }
+
+/* ============================================
+   ESTILOS DE DESCRIPCIÓN EDITORIAL DE PRODUCTO
+   ============================================ */
+.product-editorial { --pe-ink:#020f1e; --pe-secondary:#3e4653; --pe-accent:#568baf; --pe-soft:#f5f7fa; }
+.product-editorial h2 { color: var(--pe-ink); font-size: 1.875rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; padding-left: 1rem; border-left: 4px solid var(--pe-accent); line-height: 1.2; }
+.product-editorial h3 { color: var(--pe-ink); font-size: 1.375rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.product-editorial p { color: var(--pe-secondary); line-height: 1.75; margin-bottom: 1rem; }
+.product-editorial .lead-paragraph { font-size: 1.1rem; color: var(--pe-ink); line-height: 1.7; padding: 1.25rem 1.5rem; background: var(--pe-soft); border-radius: 0.75rem; margin-bottom: 1.5rem; }
+.product-editorial .audience-card { background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.25rem; transition: all .2s; }
+.product-editorial .audience-card:hover { border-color: var(--pe-accent); box-shadow: 0 4px 12px rgba(86,139,175,.1); }
+.product-editorial .benefit-item { display: flex; gap: .75rem; align-items: flex-start; padding: 1rem; border-radius: .5rem; background: linear-gradient(135deg, rgba(86,139,175,.06), transparent); border-left: 3px solid var(--pe-accent); }
+.product-editorial .benefit-icon { flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 50%; background: var(--pe-accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .875rem; }
+.product-editorial .why-buy-card { background: white; border-radius: .75rem; padding: 1.25rem; border-top: 3px solid var(--pe-accent); box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.product-editorial .why-buy-card h3 { margin-top: 0; color: var(--pe-accent); font-size: 1.05rem; }
+.product-editorial .manufacturer-block { background: linear-gradient(135deg, var(--pe-ink) 0%, var(--pe-secondary) 100%); color: #fdfefe; padding: 1.75rem; border-radius: .75rem; margin: 1.5rem 0; }
+.product-editorial .manufacturer-block h2 { color: white; border-left-color: white; margin-top: 0; }
+.product-editorial .manufacturer-block p { color: rgba(255,255,255,.85); }
+.product-editorial .closing-block { background: linear-gradient(135deg, var(--pe-soft) 0%, white 100%); border: 2px solid var(--pe-accent); border-radius: 1rem; padding: 1.75rem; margin: 1.5rem 0; text-align: center; }
+.product-editorial .closing-block p { font-size: 1.05rem; color: var(--pe-ink); }
+.product-editorial .faq-item { border: 1px solid #e5e7eb; border-radius: .5rem; margin-bottom: .75rem; overflow: hidden; transition: all .2s; }
+.product-editorial .faq-item:hover { border-color: var(--pe-accent); }
+.product-editorial .faq-item summary { padding: 1rem 1.25rem; cursor: pointer; font-weight: 600; color: var(--pe-ink); display: flex; justify-content: space-between; align-items: center; list-style: none; }
+.product-editorial .faq-item summary::-webkit-details-marker { display: none; }
+.product-editorial .faq-item summary::after { content: '+'; font-size: 1.5rem; color: var(--pe-accent); transition: transform .2s; }
+.product-editorial .faq-item[open] summary::after { transform: rotate(45deg); }
+.product-editorial .faq-item[open] summary { background: var(--pe-soft); border-bottom: 1px solid #e5e7eb; }
+.product-editorial .faq-item .faq-answer { padding: 1rem 1.25rem; color: var(--pe-secondary); line-height: 1.7; }
+@media (max-width: 768px) {
+  .product-editorial h2 { font-size: 1.5rem; }
+  .product-editorial h3 { font-size: 1.2rem; }
+  .product-editorial .lead-paragraph { font-size: 1rem; padding: 1rem; }
+  .product-editorial .manufacturer-block, .product-editorial .closing-block { padding: 1.25rem; }
+}
