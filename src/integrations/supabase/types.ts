@@ -161,23 +161,29 @@ export type Database = {
       brands: {
         Row: {
           created_at: string | null
+          display_order: number | null
           id: string
           logo: string | null
           name: string
+          show_in_home: boolean
           slug: string
         }
         Insert: {
           created_at?: string | null
+          display_order?: number | null
           id?: string
           logo?: string | null
           name: string
+          show_in_home?: boolean
           slug: string
         }
         Update: {
           created_at?: string | null
+          display_order?: number | null
           id?: string
           logo?: string | null
           name?: string
+          show_in_home?: boolean
           slug?: string
         }
         Relationships: []
@@ -219,6 +225,13 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories_with_products"
             referencedColumns: ["id"]
           },
         ]
@@ -570,11 +583,46 @@ export type Database = {
             referencedRelation: "categories"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories_with_products"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      categories_with_products: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          image: string | null
+          name: string | null
+          parent_id: string | null
+          product_count: number | null
+          slug: string | null
+          sort_order: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories_with_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
