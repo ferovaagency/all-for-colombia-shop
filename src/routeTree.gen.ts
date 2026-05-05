@@ -28,6 +28,7 @@ import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
 import { Route as DistribuidoresRegistroRouteImport } from './routes/distribuidores.registro'
 import { Route as DistribuidoresPortalRouteImport } from './routes/distribuidores.portal'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AdminMarcasRouteImport } from './routes/admin.marcas'
 import { Route as AdminGeneradorFichasRouteImport } from './routes/admin.generador-fichas'
 import { Route as AdminBlogGeneratorRouteImport } from './routes/admin.blog-generator'
 import { Route as DistribuidoresPortalIndexRouteImport } from './routes/distribuidores.portal.index'
@@ -130,6 +131,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const AdminMarcasRoute = AdminMarcasRouteImport.update({
+  id: '/marcas',
+  path: '/marcas',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminGeneradorFichasRoute = AdminGeneradorFichasRouteImport.update({
   id: '/generador-fichas',
   path: '/generador-fichas',
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/ventas-corporativas': typeof VentasCorporativasRoute
   '/admin/blog-generator': typeof AdminBlogGeneratorRoute
   '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
+  '/admin/marcas': typeof AdminMarcasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/ventas-corporativas': typeof VentasCorporativasRoute
   '/admin/blog-generator': typeof AdminBlogGeneratorRoute
   '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
+  '/admin/marcas': typeof AdminMarcasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/producto/$slug': typeof ProductoSlugRoute
@@ -233,6 +241,7 @@ export interface FileRoutesById {
   '/ventas-corporativas': typeof VentasCorporativasRoute
   '/admin/blog-generator': typeof AdminBlogGeneratorRoute
   '/admin/generador-fichas': typeof AdminGeneradorFichasRoute
+  '/admin/marcas': typeof AdminMarcasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
@@ -262,6 +271,7 @@ export interface FileRouteTypes {
     | '/ventas-corporativas'
     | '/admin/blog-generator'
     | '/admin/generador-fichas'
+    | '/admin/marcas'
     | '/blog/$slug'
     | '/distribuidores/portal'
     | '/distribuidores/registro'
@@ -288,6 +298,7 @@ export interface FileRouteTypes {
     | '/ventas-corporativas'
     | '/admin/blog-generator'
     | '/admin/generador-fichas'
+    | '/admin/marcas'
     | '/blog/$slug'
     | '/distribuidores/registro'
     | '/producto/$slug'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/ventas-corporativas'
     | '/admin/blog-generator'
     | '/admin/generador-fichas'
+    | '/admin/marcas'
     | '/blog/$slug'
     | '/distribuidores/portal'
     | '/distribuidores/registro'
@@ -482,6 +494,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/admin/marcas': {
+      id: '/admin/marcas'
+      path: '/marcas'
+      fullPath: '/admin/marcas'
+      preLoaderRoute: typeof AdminMarcasRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/generador-fichas': {
       id: '/admin/generador-fichas'
       path: '/generador-fichas'
@@ -530,12 +549,14 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminBlogGeneratorRoute: typeof AdminBlogGeneratorRoute
   AdminGeneradorFichasRoute: typeof AdminGeneradorFichasRoute
+  AdminMarcasRoute: typeof AdminMarcasRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBlogGeneratorRoute: AdminBlogGeneratorRoute,
   AdminGeneradorFichasRoute: AdminGeneradorFichasRoute,
+  AdminMarcasRoute: AdminMarcasRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
