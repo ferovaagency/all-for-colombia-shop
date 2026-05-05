@@ -80,8 +80,8 @@ export function formatCOP(value: number): string {
   }).format(value || 0);
 }
 
-export const WHATSAPP_NUMBER = "573000000000"; // +57 300 000 0000 (placeholder)
-export const CONTACT_EMAIL = "info@allforall.co";
+export const WHATSAPP_NUMBER = "573218280762"; // Updated to the one used in product page
+export const CONTACT_EMAIL = "ventas.marketplace@allforall.com.co";
 export const SITE_DOMAIN = "https://allforall.co";
 
 export function whatsappUrl(message: string) {
