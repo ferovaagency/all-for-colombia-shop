@@ -1,0 +1,28 @@
+# All For All
+
+> All For All (allforall.com.co) es una tienda online colombiana de tecnología, electrónica y soluciones digitales. Ofrecemos productos de marcas líderes como Lenovo, MSI, Honor, Motorola, Wacom, Gigabyte, Viewsonic, Polycon y Ferrenovo, con envíos a todo Colombia, garantía oficial y asesoría especializada por WhatsApp.
+
+## Sobre All For All
+
+All For All es un e-commerce especializado en tecnología y electrónica con sede en Colombia. Operamos bajo el principio de ofrecer productos verificados con garantía oficial del fabricante, asesoría técnica antes y después de la compra, y métodos de pago locales (Wompi, Bancolombia, MercadoPago).
+
+## Catálogo de productos
+
+- [Catálogo completo de productos](https://allforall.com.co/categorias): Todas las categorías disponibles con productos en stock.
+- [Tienda](https://allforall.com.co/tienda): Listado completo navegable con filtros.
+- [Sitemap](https://allforall.com.co/sitemap.xml): Mapa completo del sitio.
+
+## Contenido editorial
+
+- [Blog de tecnología](https://allforall.com.co/blog): Guías, comparativas y tendencias en tecnología y consumo digital.
+
+## Información comercial
+
+- [Sobre nosotros](https://allforall.com.co/nosotros): Quiénes somos y cómo trabajamos.
+- [Contacto](https://allforall.com.co/contacto): WhatsApp, correo y formulario de contacto.
+- [Ventas corporativas](https://allforall.com.co/ventas-corporativas): Soluciones para empresas.
+- [Legal](https://allforall.com.co/legal): Términos, política de privacidad y devoluciones.
+
+## Cómo comprar
+
+Los productos pueden adquirirse directamente desde la página de cada producto agregándolos al carrito, o consultando previamente con un asesor por WhatsApp al +57 321 828 0762. Aceptamos pagos con tarjeta de crédito, débito, PSE y transferencia bancaria.
