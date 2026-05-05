@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VentasCorporativasRouteImport } from './routes/ventas-corporativas'
 import { Route as TiendaRouteImport } from './routes/tienda'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResultadoPagoRouteImport } from './routes/resultado-pago'
 import { Route as NosotrosRouteImport } from './routes/nosotros'
 import { Route as MiCuentaRouteImport } from './routes/mi-cuenta'
@@ -44,6 +45,11 @@ const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
 const TiendaRoute = TiendaRouteImport.update({
   id: '/tienda',
   path: '/tienda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResultadoPagoRoute = ResultadoPagoRouteImport.update({
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
   '/resultado-pago': typeof ResultadoPagoRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tienda': typeof TiendaRoute
   '/ventas-corporativas': typeof VentasCorporativasRoute
   '/admin/blog-generator': typeof AdminBlogGeneratorRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
   '/resultado-pago': typeof ResultadoPagoRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tienda': typeof TiendaRoute
   '/ventas-corporativas': typeof VentasCorporativasRoute
   '/admin/blog-generator': typeof AdminBlogGeneratorRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
   '/resultado-pago': typeof ResultadoPagoRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tienda': typeof TiendaRoute
   '/ventas-corporativas': typeof VentasCorporativasRoute
   '/admin/blog-generator': typeof AdminBlogGeneratorRoute
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/mi-cuenta'
     | '/nosotros'
     | '/resultado-pago'
+    | '/sitemap.xml'
     | '/tienda'
     | '/ventas-corporativas'
     | '/admin/blog-generator'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/mi-cuenta'
     | '/nosotros'
     | '/resultado-pago'
+    | '/sitemap.xml'
     | '/tienda'
     | '/ventas-corporativas'
     | '/admin/blog-generator'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/mi-cuenta'
     | '/nosotros'
     | '/resultado-pago'
+    | '/sitemap.xml'
     | '/tienda'
     | '/ventas-corporativas'
     | '/admin/blog-generator'
@@ -350,6 +362,7 @@ export interface RootRouteChildren {
   MiCuentaRoute: typeof MiCuentaRoute
   NosotrosRoute: typeof NosotrosRoute
   ResultadoPagoRoute: typeof ResultadoPagoRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TiendaRoute: typeof TiendaRoute
   VentasCorporativasRoute: typeof VentasCorporativasRoute
   DistribuidoresPortalRoute: typeof DistribuidoresPortalRouteWithChildren
@@ -373,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/tienda'
       fullPath: '/tienda'
       preLoaderRoute: typeof TiendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/resultado-pago': {
@@ -599,6 +619,7 @@ const rootRouteChildren: RootRouteChildren = {
   MiCuentaRoute: MiCuentaRoute,
   NosotrosRoute: NosotrosRoute,
   ResultadoPagoRoute: ResultadoPagoRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TiendaRoute: TiendaRoute,
   VentasCorporativasRoute: VentasCorporativasRoute,
   DistribuidoresPortalRoute: DistribuidoresPortalRouteWithChildren,

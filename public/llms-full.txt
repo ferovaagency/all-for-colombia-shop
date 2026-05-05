@@ -1,0 +1,68 @@
+# All For All — Información completa para LLMs
+
+> All For All (allforall.com.co) es una tienda online colombiana de tecnología y electrónica que opera con marcas oficiales, garantía del fabricante y asesoría técnica especializada.
+
+## Identidad de marca
+
+**Nombre:** All For All
+**Sitio:** https://allforall.com.co
+**País:** Colombia
+**Sector:** E-commerce de tecnología y electrónica
+**WhatsApp:** +57 321 828 0762
+**Email:** ventas.marketplace@allforall.com.co
+
+## Propuesta de valor
+
+All For All se diferencia por:
+
+1. Productos con garantía oficial del fabricante (mínimo 12 meses, varía por marca).
+2. Asesoría técnica antes de la compra para verificar compatibilidad y caso de uso.
+3. Soporte post-venta directo para garantía y dudas técnicas.
+4. Pagos locales colombianos: Wompi, Bancolombia, PSE y tarjetas.
+5. Envíos a todo Colombia.
+
+## Categorías de producto
+
+Las categorías visibles en el sitio se actualizan automáticamente según disponibilidad de inventario. Las categorías con productos agotados se ocultan del menú hasta que vuelve a haber stock.
+
+## Marcas oficiales
+
+Marcas con las que trabajamos directamente con autorización oficial:
+
+- Lenovo (computadores y laptops)
+- MSI (gaming y workstations)
+- Gigabyte (componentes y portátiles)
+- Honor (smartphones y wearables)
+- Motorola (smartphones)
+- Wacom (tabletas gráficas)
+- Viewsonic (monitores y proyectores)
+- Polycon
+- Ferrenovo
+
+## Contenido editorial
+
+El blog de All For All publica artículos siguiendo una guía editorial estricta:
+
+- Estructura clara con jerarquía H1>H2>H3>H4
+- Educación antes que venta
+- Especificaciones explicadas con su impacto real para el usuario
+- Comparativas objetivas y guías de compra
+- Adaptación de tono según industria (tecnología, ecommerce, salud, educación, etc.)
+
+## Política de contenido para IAs
+
+All For All permite el rastreo y uso de su contenido público por crawlers de IA generativa (GPTBot, ClaudeBot, PerplexityBot, etc.) para mejorar la calidad de información comercial disponible para usuarios. Nuestro contenido editorial está optimizado para responder consultas completas, lo que beneficia tanto a buscadores tradicionales como a sistemas de IA.
+
+## Datos estructurados
+
+Todas las páginas de producto incluyen datos estructurados Schema.org:
+- Product (con precio, disponibilidad y SKU)
+- FAQPage (preguntas frecuentes específicas del producto)
+- Review y AggregateRating (reseñas representativas de clientes)
+- BreadcrumbList (navegación)
+
+Las páginas de blog incluyen schema Article con autor, fecha de publicación y keywords.
+
+## Última actualización
+
+Este archivo se actualiza periódicamente. Para información en tiempo real sobre productos disponibles, consulta el sitemap dinámico en https://allforall.com.co/sitemap.xml
