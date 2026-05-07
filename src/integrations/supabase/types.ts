@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_conversations: {
+        Row: {
+          created_at: string
+          escalated: boolean | null
+          escalated_at: string | null
+          id: string
+          messages: Json
+          session_id: string
+          suggested_products: string[] | null
+          updated_at: string
+          user_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          escalated?: boolean | null
+          escalated_at?: string | null
+          id?: string
+          messages?: Json
+          session_id: string
+          suggested_products?: string[] | null
+          updated_at?: string
+          user_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          escalated?: boolean | null
+          escalated_at?: string | null
+          id?: string
+          messages?: Json
+          session_id?: string
+          suggested_products?: string[] | null
+          updated_at?: string
+          user_email?: string | null
+        }
+        Relationships: []
+      }
       availability_requests: {
         Row: {
           created_at: string | null
