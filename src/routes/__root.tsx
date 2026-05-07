@@ -110,6 +110,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const location = useLocation();
+  const hiddenRoutes = ['/checkout', '/admin', '/distribuidores/portal'];
+  const showChat = !hiddenRoutes.some((r) => location.pathname.startsWith(r));
+
   return (
     <>
       <ScrollToTop />
@@ -122,7 +126,7 @@ function RootComponent() {
         <Footer />
       </div>
       <WhatsAppButton />
-      <AIChatWidget />
+      {showChat && <AIAssistant />}
       <SocialProofPopup />
       <DiscountWheel />
       <CookieBanner />
