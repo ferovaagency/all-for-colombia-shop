@@ -335,6 +335,89 @@ export type Database = {
         }
         Relationships: []
       }
+      distributor_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string
+          product_name: string
+          product_sku: string | null
+          quantity: number
+          subtotal: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id: string
+          product_name: string
+          product_sku?: string | null
+          quantity: number
+          subtotal: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string
+          product_name?: string
+          product_sku?: string | null
+          quantity?: number
+          subtotal?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distributor_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "distributor_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      distributor_orders: {
+        Row: {
+          created_at: string
+          distributor_id: string
+          id: string
+          notes: string | null
+          order_number: string
+          payment_status: string
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          distributor_id: string
+          id?: string
+          notes?: string | null
+          order_number: string
+          payment_status?: string
+          status?: string
+          subtotal: number
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          distributor_id?: string
+          id?: string
+          notes?: string | null
+          order_number?: string
+          payment_status?: string
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       distributors: {
         Row: {
           address: string | null
@@ -345,14 +428,23 @@ export type Database = {
           company_name: string
           contact_name: string
           created_at: string | null
+          credit_limit: number | null
+          discount_percentage: number | null
           email: string
           id: string
+          min_order_value: number | null
+          monthly_purchase_estimate: number | null
           nit: string
+          notes: string | null
           password_hash: string | null
+          payment_terms: string | null
           phone: string
           products_sold: string | null
+          rejection_reason: string | null
           status: string | null
+          updated_at: string | null
           username: string | null
+          years_active: number | null
         }
         Insert: {
           address?: string | null
@@ -363,14 +455,23 @@ export type Database = {
           company_name: string
           contact_name: string
           created_at?: string | null
+          credit_limit?: number | null
+          discount_percentage?: number | null
           email: string
           id?: string
+          min_order_value?: number | null
+          monthly_purchase_estimate?: number | null
           nit: string
+          notes?: string | null
           password_hash?: string | null
+          payment_terms?: string | null
           phone: string
           products_sold?: string | null
+          rejection_reason?: string | null
           status?: string | null
+          updated_at?: string | null
           username?: string | null
+          years_active?: number | null
         }
         Update: {
           address?: string | null
@@ -381,14 +482,50 @@ export type Database = {
           company_name?: string
           contact_name?: string
           created_at?: string | null
+          credit_limit?: number | null
+          discount_percentage?: number | null
           email?: string
           id?: string
+          min_order_value?: number | null
+          monthly_purchase_estimate?: number | null
           nit?: string
+          notes?: string | null
           password_hash?: string | null
+          payment_terms?: string | null
           phone?: string
           products_sold?: string | null
+          rejection_reason?: string | null
           status?: string | null
+          updated_at?: string | null
           username?: string | null
+          years_active?: number | null
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          brevo_synced: boolean | null
+          brevo_synced_at: string | null
+          created_at: string
+          email: string
+          id: string
+          source: string | null
+        }
+        Insert: {
+          brevo_synced?: boolean | null
+          brevo_synced_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          source?: string | null
+        }
+        Update: {
+          brevo_synced?: boolean | null
+          brevo_synced_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string | null
         }
         Relationships: []
       }
@@ -509,6 +646,7 @@ export type Database = {
           active: boolean | null
           afirmacion_inicial: string | null
           audiencia: Json | null
+          available_for_distributors: boolean | null
           beneficios_reales: Json | null
           brand: string | null
           brand_id: string | null
@@ -538,11 +676,14 @@ export type Database = {
           stock: number | null
           updated_at: string | null
           warranty: string | null
+          wholesale_min_quantity: number | null
+          wholesale_price: number | null
         }
         Insert: {
           active?: boolean | null
           afirmacion_inicial?: string | null
           audiencia?: Json | null
+          available_for_distributors?: boolean | null
           beneficios_reales?: Json | null
           brand?: string | null
           brand_id?: string | null
@@ -572,11 +713,14 @@ export type Database = {
           stock?: number | null
           updated_at?: string | null
           warranty?: string | null
+          wholesale_min_quantity?: number | null
+          wholesale_price?: number | null
         }
         Update: {
           active?: boolean | null
           afirmacion_inicial?: string | null
           audiencia?: Json | null
+          available_for_distributors?: boolean | null
           beneficios_reales?: Json | null
           brand?: string | null
           brand_id?: string | null
@@ -606,6 +750,8 @@ export type Database = {
           stock?: number | null
           updated_at?: string | null
           warranty?: string | null
+          wholesale_min_quantity?: number | null
+          wholesale_price?: number | null
         }
         Relationships: [
           {
@@ -664,7 +810,7 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      generate_distributor_order_number: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never

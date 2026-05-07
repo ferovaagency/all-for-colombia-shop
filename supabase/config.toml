@@ -3,3 +3,7 @@ project_id = "mtnkiwjzdxqezelmvtot"
 verify_jwt = false
 [functions.sales-chat]
 verify_jwt = false
+[functions.brevo-sync]
+verify_jwt = false
+[functions.send-distributor-welcome]
+verify_jwt = false
