@@ -1,9 +1,9 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useLocation } from "@tanstack/react-router";
 import appCss from "../styles.css?url";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
-import { AIChatWidget } from "@/components/layout/AIChatWidget";
+import { AIAssistant } from "@/components/chat/AIAssistant";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { SocialProofPopup } from "@/components/layout/SocialProofPopup";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
@@ -110,6 +110,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const location = useLocation();
+  const hiddenRoutes = ['/checkout', '/admin', '/distribuidores/portal'];
+  const showChat = !hiddenRoutes.some((r) => location.pathname.startsWith(r));
+
   return (
     <>
       <ScrollToTop />
@@ -122,7 +126,7 @@ function RootComponent() {
         <Footer />
       </div>
       <WhatsAppButton />
-      <AIChatWidget />
+      {showChat && <AIAssistant />}
       <SocialProofPopup />
       <DiscountWheel />
       <CookieBanner />
