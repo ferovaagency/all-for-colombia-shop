@@ -1,3 +1,5 @@
 project_id = "mtnkiwjzdxqezelmvtot"
 [functions.al-chat]
 verify_jwt = false
+[functions.sales-chat]
+verify_jwt = false
