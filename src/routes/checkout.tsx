@@ -17,6 +17,8 @@ const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
   email: z.string().trim().email("Email inválido").max(255),
   phone: z.string().trim().min(7, "Teléfono requerido").max(20),
+  customer_id_type: z.enum(["CC", "CE", "NIT", "PA"], { message: "Selecciona tipo de documento" }),
+  customer_id_number: z.string().trim().regex(/^[\d-]+$/, "Solo números y guion").min(5, "Número requerido").max(20),
   address: z.string().trim().min(5, "Dirección requerida").max(200),
   city: z.string().trim().min(2, "Ciudad requerida").max(80),
   notes: z.string().max(500).optional(),
