@@ -32,6 +32,10 @@ export const startAddiCheckout = createServerFn({ method: "POST" })
           name: order.customer_name || "",
           email: order.customer_email || "",
           phone: order.customer_phone || "",
+          document_type: (order as any).customer_id_type || undefined,
+          document_number: (order as any).customer_id_number
+            ? String((order as any).customer_id_number).replace(/[^\d-]/g, "")
+            : undefined,
         },
         items: items.map((it) => ({
           name: it.name,
