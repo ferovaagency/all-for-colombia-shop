@@ -85,12 +85,16 @@ function HomePage() {
     <>
       {/* Hero - banner se adapta a la proporción real de la imagen */}
       <section className="relative overflow-hidden bg-muted">
+        <h1 className="sr-only">All For All — Tienda online de tecnología, hogar y soluciones empresariales en Colombia</h1>
         <Link to="/tienda" className="block w-full">
           <img
             src={bannerPadre}
             alt="Día del Padre Logitech — G923 + A30"
             className="block w-full h-auto"
+            width={1920}
+            height={600}
             fetchPriority="high"
+            decoding="async"
           />
         </Link>
 

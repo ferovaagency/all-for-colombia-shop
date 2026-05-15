@@ -27,13 +27,25 @@ function BlogPost() {
         setLoading(false);
         if (b) {
           document.title = b.meta_title || b.h1;
-          let meta = document.querySelector('meta[name="description"]');
-          if (!meta) {
-            meta = document.createElement('meta');
-            meta.setAttribute('name', 'description');
-            document.head.appendChild(meta);
-          }
-          meta.setAttribute('content', b.meta_description || b.resumen_intro);
+          const setMeta = (selector: string, attr: string, key: string, content: string) => {
+            let el = document.querySelector(selector) as HTMLMetaElement | null;
+            if (!el) {
+              el = document.createElement('meta');
+              el.setAttribute(attr, key);
+              document.head.appendChild(el);
+            }
+            el.setAttribute('content', content);
+          };
+          const desc = b.meta_description || b.resumen_intro;
+          const img = b.imagen_portada || 'https://allforall.com.co/og-image.jpg';
+          setMeta('meta[name="description"]', 'name', 'description', desc);
+          setMeta('meta[property="og:title"]', 'property', 'og:title', b.meta_title || b.h1);
+          setMeta('meta[property="og:description"]', 'property', 'og:description', desc);
+          setMeta('meta[property="og:type"]', 'property', 'og:type', 'article');
+          setMeta('meta[property="og:image"]', 'property', 'og:image', img);
+          setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', b.meta_title || b.h1);
+          setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', desc);
+          setMeta('meta[name="twitter:image"]', 'name', 'twitter:image', img);
         }
       });
   }, [slug]);
