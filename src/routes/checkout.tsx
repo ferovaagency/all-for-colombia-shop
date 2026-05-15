@@ -126,6 +126,8 @@ function CheckoutPage() {
       customer_name: form.name,
       customer_email: form.email,
       customer_phone: form.phone,
+      customer_id_type: form.customer_id_type,
+      customer_id_number: form.customer_id_number.replace(/[^\d-]/g, ""),
       status: "pending",
       items: items,
       subtotal,
