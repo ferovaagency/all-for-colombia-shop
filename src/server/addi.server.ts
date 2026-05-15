@@ -76,7 +76,11 @@ export async function createAddiApplication(input: AddiApplicationInput) {
       lastName,
       email: input.customer.email,
       phoneNumber: input.customer.phone,
-      ...(input.customer.document ? { document: { type: "CC", number: input.customer.document } } : {}),
+      ...(input.customer.document_number
+        ? { document: { type: input.customer.document_type || "CC", number: input.customer.document_number } }
+        : input.customer.document
+        ? { document: { type: "CC", number: input.customer.document } }
+        : {}),
     },
     ...(input.shippingAddress
       ? {
