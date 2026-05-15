@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useCart, formatCOP } from "@/lib/cart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCarousel } from "@/components/products/ProductCarousel";
+import { PaymentMethodsBadges } from "@/components/products/PaymentMethodsBadges";
 import { ShoppingCart, ChevronRight, Star, ShieldCheck, Package, Clock, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -298,6 +299,8 @@ function ProductDetailPage() {
               <MessageCircle className="h-4 w-4" /> Consultar por WhatsApp
             </a>
           </div>
+
+          <PaymentMethodsBadges />
 
           {specsEntries.length > 0 && (
             <div className="bg-muted/40 border rounded-lg p-4">
