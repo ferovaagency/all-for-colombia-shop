@@ -204,7 +204,7 @@ export function AIAssistant() {
                 disabled={loading}
                 className="flex-1"
               />
-              <Button onClick={send} disabled={loading || !input.trim()} size="icon">
+              <Button onClick={send} disabled={loading || !input.trim()} size="icon" aria-label="Enviar mensaje">
                 <Send className="w-4 h-4" />
               </Button>
             </div>
