@@ -83,17 +83,13 @@ function HomePage() {
 
   return (
     <>
-      {/* Hero - Día del Padre Logitech */}
+      {/* Hero - banner se adapta a la proporción real de la imagen */}
       <section className="relative overflow-hidden bg-muted">
-        <Link
-          to="/tienda"
-          className="block relative w-full"
-          style={{ aspectRatio: "16 / 6", maxHeight: "600px", minHeight: "260px" }}
-        >
+        <Link to="/tienda" className="block w-full">
           <img
             src={bannerPadre}
             alt="Día del Padre Logitech — G923 + A30"
-            className="absolute inset-0 h-full w-full object-center object-contain"
+            className="block w-full h-auto"
             fetchPriority="high"
           />
         </Link>
@@ -180,7 +176,7 @@ function HomePage() {
             </div>
             <Link to="/tienda" className="text-secondary text-sm font-medium hover:underline">Ver todos →</Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {products.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
         </section>
