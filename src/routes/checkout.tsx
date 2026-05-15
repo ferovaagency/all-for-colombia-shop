@@ -22,7 +22,7 @@ const schema = z.object({
   notes: z.string().max(500).optional(),
 });
 
-const REQUIRES_RECEIPT = ["bancolombia", "davivienda", "nequi"] as const;
+const REQUIRES_RECEIPT = ["bancolombia", "davivienda", "nequi", "breb"] as const;
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — All For All" }] }),
@@ -35,6 +35,7 @@ type PaymentMethod =
   | "bancolombia"
   | "davivienda"
   | "nequi"
+  | "breb"
   | "telefono";
 
 const PAYMENT_OPTIONS: {
@@ -47,6 +48,7 @@ const PAYMENT_OPTIONS: {
   { value: "bancolombia", label: "🏦 Transferencia Bancolombia", description: "Transfiere y sube tu comprobante" },
   { value: "davivienda", label: "🏦 Transferencia Davivienda", description: "Transfiere y sube tu comprobante" },
   { value: "nequi", label: "📱 Nequi", description: "Transfiere por Nequi y sube comprobante" },
+  { value: "breb", label: "⚡ Bre-B", description: "Transferencia inmediata sin pasar por entidad bancaria" },
   { value: "telefono", label: "📞 Transferencia directa", description: "Llama o escribe al 321 828 0762" },
 ];
 
@@ -265,6 +267,16 @@ function CheckoutPage() {
                 items={[
                   ["Llave Nequi", "@9010093108"],
                   ["Titular", "ALL FOR ALL SAS"],
+                ]}
+              />
+            )}
+
+            {payment === "breb" && (
+              <BankDetails
+                items={[
+                  ["Llave Bre-B", "@9010093108"],
+                  ["Titular", "ALL FOR ALL SAS"],
+                  ["Tipo", "Empresa"],
                 ]}
               />
             )}

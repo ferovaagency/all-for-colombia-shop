@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
-import heroMama from "@/assets/hero-mama-pink.png";
 import bannerPadre from "@/assets/banner-padre-logitech.jpg";
 import bannerA50 from "@/assets/banner-a50x.jpg";
 
@@ -23,13 +22,17 @@ export const Route = createFileRoute("/")({
 });
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  audio: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80&auto=format",
+  audio: "/categorias/audio.jpg",
   gaming: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80&auto=format",
+  computadores: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80&auto=format",
   "computadores-accesorios": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80&auto=format",
   "celulares-tablets": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80&auto=format",
+  hogar: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format",
   "hogar-tech": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format",
-  impresion: "https://images.unsplash.com/photo-1601524909162-ae8725290836?w=600&q=80&auto=format",
-  accesorios: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&q=80&auto=format",
+  impresion: "/categorias/impresion.jpg",
+  accesorios: "/categorias/accesorios.jpg",
+  "ferreteria-hogar-inteligente": "/categorias/ferreteria.jpg",
+  "tv-y-video": "/categorias/tv-video.jpg",
 };
 
 const PROMO_BANNERS = [
@@ -80,33 +83,16 @@ function HomePage() {
 
   return (
     <>
-      {/* Hero - single slide Día de la Madre */}
+      {/* Hero - Día del Padre Logitech */}
       <section className="relative overflow-hidden">
-        <div className="relative h-[400px] md:h-[560px]">
+        <Link to="/tienda" className="block relative h-[260px] md:h-[420px]">
           <img
-            src={heroMama}
-            alt="Día de la Madre - Logitech"
+            src={bannerPadre}
+            alt="Día del Padre Logitech — G923 + A30"
             className="absolute inset-0 h-full w-full object-cover object-center"
             fetchPriority="high"
           />
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="container relative mx-auto h-full px-4 flex items-end md:items-center pb-10 md:pb-0">
-            <div className="max-w-2xl text-white">
-              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1 rounded-full text-xs font-bold mb-4">
-                <Sparkles className="h-3.5 w-3.5" /> 🌸 Día de la Madre
-              </div>
-              <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 whitespace-pre-line">
-                {"Regala tecnología\neste Día de la Madre"}
-              </h1>
-              <p className="text-base md:text-lg text-white/90 mb-6 whitespace-pre-line">
-                {"Ofertas especiales Logitech.\nEnvío gratis en compras mayores a $150.000"}
-              </p>
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
-                <Link to="/tienda">Ver ofertas <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-            </div>
-          </div>
-        </div>
+        </Link>
 
         <div className="container mx-auto px-4 -mt-10 relative z-20">
           <form onSubmit={onSearch} className="max-w-2xl mx-auto">
