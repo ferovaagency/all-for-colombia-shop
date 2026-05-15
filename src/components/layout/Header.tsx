@@ -147,7 +147,7 @@ export function Header() {
               <Download className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Catálogo</span>
             </a>
-            <Link to="/carrito" className="relative inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-white/10 transition-smooth">
+            <Link to="/carrito" aria-label={`Carrito de compras${count > 0 ? `, ${count} artículos` : ''}`} className="relative inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-white/10 transition-smooth">
               <ShoppingCart className="h-5 w-5" />
               {count > 0 && (
                 <span className="absolute -top-1 -right-1 h-5 min-w-5 px-1 rounded-full bg-secondary text-secondary-foreground text-xs font-bold flex items-center justify-center">
