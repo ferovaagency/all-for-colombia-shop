@@ -83,17 +83,13 @@ function HomePage() {
 
   return (
     <>
-      {/* Hero - Día del Padre Logitech */}
+      {/* Hero - banner se adapta a la proporción real de la imagen */}
       <section className="relative overflow-hidden bg-muted">
-        <Link
-          to="/tienda"
-          className="block relative w-full"
-          style={{ aspectRatio: "16 / 6", maxHeight: "600px", minHeight: "260px" }}
-        >
+        <Link to="/tienda" className="block w-full">
           <img
             src={bannerPadre}
             alt="Día del Padre Logitech — G923 + A30"
-            className="absolute inset-0 h-full w-full object-center object-contain"
+            className="block w-full h-auto"
             fetchPriority="high"
           />
         </Link>
