@@ -4,6 +4,26 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Vista global más alejada — equivalente a zoom ~81% (13/16) */
+html { font-size: 13px; }
+@media (max-width: 768px) {
+  html { font-size: 14px; }
+}
+
+/* Hover de logos de marca: grayscale → color */
+.brand-logo {
+  filter: grayscale(100%);
+  -webkit-filter: grayscale(100%);
+  opacity: 0.65;
+  transition: filter .3s ease, opacity .3s ease, transform .3s ease;
+}
+.brand-logo-card:hover .brand-logo {
+  filter: grayscale(0%);
+  -webkit-filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
 @theme inline {
   --font-sans: "Noah", "Inter", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
