@@ -62,13 +62,13 @@ export function ProductCard({ product }: { product: Product }) {
         )}
       </Link>
 
-      <div className="p-4 flex flex-col flex-1">
+      <div className="p-2 md:p-3 flex flex-col flex-1">
         <Link to="/producto/$slug" params={{ slug: product.slug }} className="block">
-          <h3 className="font-semibold line-clamp-2 mb-1 group-hover:text-secondary transition-smooth">
+          <h3 className="font-semibold text-xs md:text-sm line-clamp-2 mb-1 min-h-[2rem] group-hover:text-secondary transition-smooth">
             {product.name}
           </h3>
         </Link>
-        {product.sku && <p className="text-xs text-muted-foreground mb-2">SKU: {product.sku}</p>}
+        {product.sku && <p className="text-[10px] text-muted-foreground mb-1.5">SKU: {product.sku}</p>}
 
         <div className="mt-auto">
           {hasStock ? (
