@@ -84,8 +84,12 @@ function HomePage() {
   return (
     <>
       {/* Hero - Día del Padre Logitech */}
-      <section className="relative overflow-hidden">
-        <Link to="/tienda" className="block relative h-[260px] md:h-[420px]">
+      <section className="relative overflow-hidden bg-muted">
+        <Link
+          to="/tienda"
+          className="block relative w-full"
+          style={{ aspectRatio: "16 / 6", maxHeight: "600px", minHeight: "260px" }}
+        >
           <img
             src={bannerPadre}
             alt="Día del Padre Logitech — G923 + A30"
