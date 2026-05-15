@@ -17,7 +17,13 @@ const ORG_SCHEMA = {
   name: "All For All",
   description:
     "Tienda online de tecnología, hogar, equipos corporativos, aires acondicionados y plóters en Colombia.",
-  url: "https://allforall.co",
+  url: "https://allforall.com.co",
+  telephone: "+57-300-000-0000",
+  openingHoursSpecification: [{
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+    opens: "08:00", closes: "18:00",
+  }],
   areaServed: "CO",
   address: {
     "@type": "PostalAddress",
