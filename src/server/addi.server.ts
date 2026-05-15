@@ -48,6 +48,8 @@ export type AddiApplicationInput = {
     email: string;
     phone: string;
     document?: string;
+    document_type?: string;
+    document_number?: string;
   };
   items: Array<{ name: string; quantity: number; price: number; sku?: string }>;
   shippingAddress?: { address: string; city: string };
@@ -74,7 +76,11 @@ export async function createAddiApplication(input: AddiApplicationInput) {
       lastName,
       email: input.customer.email,
       phoneNumber: input.customer.phone,
-      ...(input.customer.document ? { document: { type: "CC", number: input.customer.document } } : {}),
+      ...(input.customer.document_number
+        ? { document: { type: input.customer.document_type || "CC", number: input.customer.document_number } }
+        : input.customer.document
+        ? { document: { type: "CC", number: input.customer.document } }
+        : {}),
     },
     ...(input.shippingAddress
       ? {

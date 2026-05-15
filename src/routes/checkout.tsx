@@ -17,6 +17,8 @@ const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
   email: z.string().trim().email("Email inválido").max(255),
   phone: z.string().trim().min(7, "Teléfono requerido").max(20),
+  customer_id_type: z.enum(["CC", "CE", "NIT", "PA"], { message: "Selecciona tipo de documento" }),
+  customer_id_number: z.string().trim().regex(/^[\d-]+$/, "Solo números y guion").min(5, "Número requerido").max(20),
   address: z.string().trim().min(5, "Dirección requerida").max(200),
   city: z.string().trim().min(2, "Ciudad requerida").max(80),
   notes: z.string().max(500).optional(),
@@ -58,7 +60,7 @@ function CheckoutPage() {
   const startAddi = useServerFn(startAddiCheckout);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    name: "", email: "", phone: "", address: "", city: "", notes: "",
+    name: "", email: "", phone: "", customer_id_type: "CC", customer_id_number: "", address: "", city: "", notes: "",
   });
   const [payment, setPayment] = useState<PaymentMethod>("wompi");
   const [receipt, setReceipt] = useState<File | null>(null);
@@ -124,6 +126,8 @@ function CheckoutPage() {
       customer_name: form.name,
       customer_email: form.email,
       customer_phone: form.phone,
+      customer_id_type: form.customer_id_type,
+      customer_id_number: form.customer_id_number.replace(/[^\d-]/g, ""),
       status: "pending",
       items: items,
       subtotal,
@@ -187,7 +191,32 @@ function CheckoutPage() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div><Label>Nombre completo *</Label><Input value={form.name} onChange={e => setField("name", e.target.value)} required maxLength={100} /></div>
               <div><Label>Email *</Label><Input type="email" value={form.email} onChange={e => setField("email", e.target.value)} required maxLength={255} /></div>
-              <div className="sm:col-span-2"><Label>Teléfono *</Label><Input value={form.phone} onChange={e => setField("phone", e.target.value)} required maxLength={20} /></div>
+              <div><Label>Teléfono *</Label><Input value={form.phone} onChange={e => setField("phone", e.target.value)} required maxLength={20} /></div>
+              <div>
+                <Label>Tipo de documento *</Label>
+                <select
+                  value={form.customer_id_type}
+                  onChange={e => setField("customer_id_type", e.target.value)}
+                  required
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="CC">Cédula de Ciudadanía (CC)</option>
+                  <option value="CE">Cédula de Extranjería (CE)</option>
+                  <option value="NIT">NIT</option>
+                  <option value="PA">Pasaporte (PA)</option>
+                </select>
+              </div>
+              <div>
+                <Label>Número de documento *</Label>
+                <Input
+                  value={form.customer_id_number}
+                  onChange={e => setField("customer_id_number", e.target.value.replace(/[^\d-]/g, ""))}
+                  required
+                  maxLength={20}
+                  placeholder="Solo números y guion"
+                  inputMode="numeric"
+                />
+              </div>
             </div>
           </section>
 

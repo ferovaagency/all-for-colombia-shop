@@ -536,6 +536,8 @@ export type Database = {
           addi_status: string | null
           created_at: string | null
           customer_email: string | null
+          customer_id_number: string | null
+          customer_id_type: string | null
           customer_name: string | null
           customer_phone: string | null
           distributor_id: string | null
@@ -555,6 +557,8 @@ export type Database = {
           addi_status?: string | null
           created_at?: string | null
           customer_email?: string | null
+          customer_id_number?: string | null
+          customer_id_type?: string | null
           customer_name?: string | null
           customer_phone?: string | null
           distributor_id?: string | null
@@ -574,6 +578,8 @@ export type Database = {
           addi_status?: string | null
           created_at?: string | null
           customer_email?: string | null
+          customer_id_number?: string | null
+          customer_id_type?: string | null
           customer_name?: string | null
           customer_phone?: string | null
           distributor_id?: string | null
