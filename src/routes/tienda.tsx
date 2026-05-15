@@ -267,7 +267,7 @@ function ShopPage() {
 
         <div>
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="bg-muted aspect-[3/4] rounded-xl animate-pulse" />
               ))}
@@ -282,7 +282,7 @@ function ShopPage() {
                 {filtered.length} producto{filtered.length === 1 ? "" : "s"} encontrado{filtered.length === 1 ? "" : "s"}
                 {search.q && ` para "${search.q}"`}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
                 {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
               </div>
             </>
