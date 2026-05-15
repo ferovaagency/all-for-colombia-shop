@@ -48,6 +48,8 @@ export type AddiApplicationInput = {
     email: string;
     phone: string;
     document?: string;
+    document_type?: string;
+    document_number?: string;
   };
   items: Array<{ name: string; quantity: number; price: number; sku?: string }>;
   shippingAddress?: { address: string; city: string };
