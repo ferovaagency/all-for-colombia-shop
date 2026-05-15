@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
-import heroMama from "@/assets/hero-mama-pink.png";
 import bannerPadre from "@/assets/banner-padre-logitech.jpg";
 import bannerA50 from "@/assets/banner-a50x.jpg";
 
