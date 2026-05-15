@@ -60,7 +60,7 @@ function CheckoutPage() {
   const startAddi = useServerFn(startAddiCheckout);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    name: "", email: "", phone: "", address: "", city: "", notes: "",
+    name: "", email: "", phone: "", customer_id_type: "CC", customer_id_number: "", address: "", city: "", notes: "",
   });
   const [payment, setPayment] = useState<PaymentMethod>("wompi");
   const [receipt, setReceipt] = useState<File | null>(null);
