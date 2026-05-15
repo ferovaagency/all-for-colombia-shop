@@ -93,7 +93,7 @@ function HomePage() {
           <img
             src={bannerPadre}
             alt="Día del Padre Logitech — G923 + A30"
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="absolute inset-0 h-full w-full object-center object-contain"
             fetchPriority="high"
           />
         </Link>
