@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useCart, formatCOP } from "@/lib/cart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCarousel } from "@/components/products/ProductCarousel";
+import { PaymentMethodsBadges } from "@/components/products/PaymentMethodsBadges";
 import { ShoppingCart, ChevronRight, Star, ShieldCheck, Package, Clock, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -200,7 +201,7 @@ function ProductDetailPage() {
       <div className="grid md:grid-cols-2 gap-10">
         {/* Gallery */}
         <div>
-          <div className="aspect-square bg-white rounded-xl overflow-hidden border flex items-center justify-center p-8 md:p-12">
+          <div className="aspect-square max-w-md mx-auto md:mx-0 bg-white rounded-xl overflow-hidden border flex items-center justify-center p-6 md:p-10">
             {images[imageIdx] ? (
               <img src={images[imageIdx]} alt={product.name} className="max-w-full max-h-full object-contain" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
             ) : (
@@ -208,14 +209,14 @@ function ProductDetailPage() {
             )}
           </div>
           {images.length > 1 && (
-            <div className="flex gap-2 mt-3 flex-wrap">
-              {images.map((img: string, i: number) => (
+            <div className="grid grid-cols-5 gap-2 mt-3 max-w-md mx-auto md:mx-0">
+              {images.slice(0, 5).map((img: string, i: number) => (
                 <button
                   key={i}
                   onClick={() => setImageIdx(i)}
                   className={cn(
-                    "h-20 w-20 rounded-lg overflow-hidden border-2 bg-white flex items-center justify-center p-1",
-                    i === imageIdx ? "border-primary" : "border-transparent",
+                    "aspect-square rounded-lg overflow-hidden border-2 bg-white flex items-center justify-center p-1",
+                    i === imageIdx ? "border-primary" : "border-transparent hover:border-muted-foreground/30",
                   )}
                 >
                   <img src={img} alt="" className="max-w-full max-h-full object-contain" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
@@ -298,6 +299,8 @@ function ProductDetailPage() {
               <MessageCircle className="h-4 w-4" /> Consultar por WhatsApp
             </a>
           </div>
+
+          <PaymentMethodsBadges />
 
           {specsEntries.length > 0 && (
             <div className="bg-muted/40 border rounded-lg p-4">

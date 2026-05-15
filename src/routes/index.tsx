@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
 import heroMama from "@/assets/hero-mama-pink.png";
-import bannerMamaPink from "@/assets/hero-mama-pink.png";
-import bannerMamaWhite from "@/assets/banner-mama-white.png";
+import bannerPadre from "@/assets/banner-padre-logitech.jpg";
+import bannerA50 from "@/assets/banner-a50x.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,8 +33,8 @@ const CATEGORY_IMAGES: Record<string, string> = {
 };
 
 const PROMO_BANNERS = [
-  { id: 1, image: bannerMamaPink, link: "/tienda", alt: "Sorprende a mamá con Logitech" },
-  { id: 2, image: bannerMamaWhite, link: "/tienda", alt: "Logitech para mamá - bienestar" },
+  { id: 1, image: bannerPadre, link: "/tienda", alt: "Día del Padre Logitech — G923 + A30" },
+  { id: 2, image: bannerA50, link: "/tienda", alt: "Auricular Astro A50 X — Diseñados para jugar" },
 ];
 
 function HomePage() {
@@ -252,13 +252,13 @@ function HomePage() {
           <p className="text-center text-muted-foreground text-sm mb-8">Trabajamos con los líderes de la industria</p>
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 items-center">
             {brands.map((b) => (
-              <div key={b.id} className="aspect-[3/2] bg-white rounded-lg border border-border flex items-center justify-center p-3 hover:shadow-md transition-shadow">
+              <div key={b.id} className="brand-logo-card aspect-[3/2] bg-white rounded-lg border border-border flex items-center justify-center p-3 hover:shadow-md transition-shadow">
                 {b.logo_url || b.logo ? (
                   <img
                     src={b.logo_url || b.logo}
                     alt={b.name}
                     loading="lazy"
-                    className="max-w-full max-h-full object-contain grayscale hover:grayscale-0 opacity-80 hover:opacity-100 transition"
+                    className="brand-logo max-w-full max-h-full object-contain"
                   />
                 ) : (
                   <div className="text-center">
