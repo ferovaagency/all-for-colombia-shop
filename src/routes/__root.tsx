@@ -2,7 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts, useLocation } from
 import appCss from "../styles.css?url";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import { AIAssistant } from "@/components/chat/AIAssistant";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { SocialProofPopup } from "@/components/layout/SocialProofPopup";

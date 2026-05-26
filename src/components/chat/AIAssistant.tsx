@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageCircle, X, Send, ExternalLink, Loader2 } from 'lucide-react';
+import { X, Send, ExternalLink, Loader2, Bot, Sparkles } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
 interface SuggestedProduct {
@@ -41,6 +42,7 @@ function getOrCreateSessionId(): string {
 
 export function AIAssistant() {
   const [open, setOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -54,7 +56,23 @@ export function AIAssistant() {
 
   useEffect(() => {
     sessionId.current = getOrCreateSessionId();
+    const shown = localStorage.getItem('allforall_chat_shown');
+    if (!shown) {
+      const timer = setTimeout(() => setShowPopup(true), 4000);
+      return () => clearTimeout(timer);
+    }
   }, []);
+
+  const closePopup = () => {
+    setShowPopup(false);
+    localStorage.setItem('allforall_chat_shown', 'true');
+  };
+
+  const openChat = () => {
+    setShowPopup(false);
+    setOpen(true);
+    localStorage.setItem('allforall_chat_shown', 'true');
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -107,15 +125,53 @@ export function AIAssistant() {
 
   return (
     <>
-      {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-elevated flex items-center justify-center transition-transform hover:scale-105 bg-primary text-primary-foreground"
-          aria-label="Abrir asesor Ali"
-        >
-          <MessageCircle className="w-6 h-6" />
-        </button>
+      {showPopup && !open && (
+        <div className="fixed bottom-24 right-6 z-50 bg-white border-2 border-primary rounded-2xl shadow-xl p-4 max-w-[260px]">
+          <button onClick={closePopup} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600" aria-label="Cerrar">
+            <X className="w-4 h-4" />
+          </button>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="font-bold text-primary text-sm">Ali</p>
+              <p className="text-xs text-green-500 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block animate-pulse" />
+                En línea ahora
+              </p>
+            </div>
+          </div>
+          <p className="text-sm text-foreground font-medium leading-relaxed">
+            ¡Hola! Soy Ali 👋 Te ayudo a encontrar el equipo perfecto para lo que necesitas.
+          </p>
+          <button onClick={openChat} className="w-full mt-3 bg-primary text-white py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
+            Chatear con Ali →
+          </button>
+        </div>
       )}
+
+      <AnimatePresence>
+        {!open && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed bottom-6 right-24 z-50 flex flex-col items-end gap-2"
+          >
+            <button
+              onClick={() => setOpen(true)}
+              className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+              aria-label="Chat con asesor IA"
+            >
+              <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
+              <span className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" />
+              <Sparkles className="relative z-10 w-7 h-7" />
+              <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-green-500 border-2 border-white" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {open && (
         <div className="fixed bottom-6 right-6 z-50 w-[calc(100vw-3rem)] sm:w-[400px] h-[600px] max-h-[calc(100vh-3rem)] bg-card border rounded-2xl shadow-elevated flex flex-col overflow-hidden">
