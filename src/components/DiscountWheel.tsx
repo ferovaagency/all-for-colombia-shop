@@ -5,16 +5,14 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const SEGMENTS = [
-  { label: "5% OFF", code: "AFA5OFF" },
-  { label: "10% OFF", code: "AFA10OFF" },
-  { label: "Envío gratis", code: "ENVIOAFA" },
-  { label: "8% OFF", code: "AFA8OFF" },
-  { label: "15% OFF", code: "AFA15OFF" },
-  { label: "3% OFF", code: "AFA3OFF" },
+  { id: "discount_5", label: "5% OFF", code: "BIENVENIDA5", winnable: true },
+  { id: "free_shipping", label: "Envío gratis", code: "ENVIOGRATIS", winnable: true },
+  { id: "discount_3", label: "3% OFF", code: "EXTRA3", winnable: true },
+  { id: "no_prize", label: "¡Suerte para la próxima!", code: null, winnable: false },
 ] as const;
 
-const COLORS = ["#020f1e", "#568baf"]; // brand-dark / brand-blue
 const SEGMENT_DEG = 360 / SEGMENTS.length;
+
 
 const getClientId = () => {
   if (typeof window === "undefined") return "";
@@ -49,6 +47,7 @@ export function DiscountWheel() {
     if (typeof window === "undefined") return;
     const clientId = getClientId();
     if (localStorage.getItem(`afa_wheel_${clientId}`)) return;
+    if (localStorage.getItem("roulette_spun") === "true") return;
     const t = setTimeout(() => setOpen(true), 2000);
     return () => clearTimeout(t);
   }, [mounted]);
@@ -71,23 +70,42 @@ export function DiscountWheel() {
 
   const spin = () => {
     if (spinning) return;
+    if (typeof window !== "undefined" && localStorage.getItem("roulette_spun") === "true") return;
     setSpinning(true);
-    const winnerIndex = Math.floor(Math.random() * SEGMENTS.length);
+
+    // 1 de cada 10 activaciones gana
+    const activations = Number(localStorage.getItem("roulette_activations") || "0") + 1;
+    localStorage.setItem("roulette_activations", String(activations));
+    const isWinningTurn = activations % 10 === 0;
+
+    let winnerIndex: number;
+    if (isWinningTurn) {
+      const winnableIdx = SEGMENTS.map((s, i) => (s.winnable ? i : -1)).filter((i) => i >= 0);
+      winnerIndex = winnableIdx[Math.floor(Math.random() * winnableIdx.length)];
+    } else {
+      winnerIndex = SEGMENTS.findIndex((s) => s.id === "no_prize");
+    }
+
     const targetSegmentCenter = winnerIndex * SEGMENT_DEG + SEGMENT_DEG / 2;
-    // Pointer is at the top (0deg). We rotate the wheel CW so the chosen
-    // segment lands under the pointer. Add several full turns for effect.
     const fullTurns = 6;
     const finalRotation = fullTurns * 360 + (360 - targetSegmentCenter);
     setRotation(finalRotation);
     setTimeout(() => {
-      setWinner(SEGMENTS[winnerIndex]);
+      const prize = SEGMENTS[winnerIndex];
+      setWinner(prize);
       setSpinning(false);
       setStep("result");
+      try {
+        localStorage.setItem("roulette_spun", "true");
+        if (prize.code) localStorage.setItem("active_coupon", prize.code);
+      } catch {
+        /* ignore */
+      }
     }, 4200);
   };
 
   const copyCode = async () => {
-    if (!winner) return;
+    if (!winner || !winner.code) return;
     try {
       await navigator.clipboard.writeText(winner.code);
       setCopied(true);
@@ -96,6 +114,7 @@ export function DiscountWheel() {
       /* ignore */
     }
   };
+
 
   if (!mounted || !open) return null;
 
@@ -264,37 +283,46 @@ export function DiscountWheel() {
         {step === "result" && winner && (
           <div className="p-6 md:p-8 text-center">
             <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-3xl">
-              🎉
+              {winner.winnable ? "🎉" : "🍀"}
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-1">¡Felicitaciones, {name.split(" ")[0]}!</h2>
-            <p className="text-sm text-muted-foreground mb-6">Ganaste:</p>
+            <h2 className="text-2xl font-bold text-foreground mb-1">
+              {winner.winnable ? `¡Felicitaciones, ${name.split(" ")[0]}!` : `¡Gracias por participar, ${name.split(" ")[0]}!`}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              {winner.winnable ? "Ganaste:" : "Esta vez no fue, pero te esperamos en la tienda:"}
+            </p>
             <div className="bg-gradient-hero text-primary-foreground rounded-xl p-6 mb-4">
               <div className="text-3xl font-extrabold mb-1">{winner.label}</div>
-              <p className="text-xs text-white/80">en tu próxima compra</p>
+              {winner.winnable && <p className="text-xs text-white/80">en tu próxima compra</p>}
             </div>
-            <div className="flex items-center gap-2 mb-4">
-              <code className="flex-1 bg-muted text-foreground font-mono text-sm font-bold py-3 px-4 rounded-lg tracking-wider">
-                {winner.code}
-              </code>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={copyCode}
-                aria-label="Copiar código"
-                className={cn(copied && "text-success border-success")}
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground mb-4">
-              Usa este código al finalizar tu compra. Te enviaremos un recordatorio a {email}.
-            </p>
+            {winner.code && (
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  <code className="flex-1 bg-muted text-foreground font-mono text-sm font-bold py-3 px-4 rounded-lg tracking-wider">
+                    {winner.code}
+                  </code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={copyCode}
+                    aria-label="Copiar código"
+                    className={cn(copied && "text-success border-success")}
+                  >
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Usa este código al finalizar tu compra. Te enviaremos un recordatorio a {email}.
+                </p>
+              </>
+            )}
             <Button onClick={close} size="lg" className="w-full bg-secondary hover:bg-secondary/90">
-              ¡Empezar a comprar!
+              {winner.winnable ? "¡Empezar a comprar!" : "Ir a la tienda"}
             </Button>
           </div>
         )}
+
       </div>
     </div>
   );
