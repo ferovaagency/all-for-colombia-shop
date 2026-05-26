@@ -283,37 +283,46 @@ export function DiscountWheel() {
         {step === "result" && winner && (
           <div className="p-6 md:p-8 text-center">
             <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-3xl">
-              🎉
+              {winner.winnable ? "🎉" : "🍀"}
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-1">¡Felicitaciones, {name.split(" ")[0]}!</h2>
-            <p className="text-sm text-muted-foreground mb-6">Ganaste:</p>
+            <h2 className="text-2xl font-bold text-foreground mb-1">
+              {winner.winnable ? `¡Felicitaciones, ${name.split(" ")[0]}!` : `¡Gracias por participar, ${name.split(" ")[0]}!`}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              {winner.winnable ? "Ganaste:" : "Esta vez no fue, pero te esperamos en la tienda:"}
+            </p>
             <div className="bg-gradient-hero text-primary-foreground rounded-xl p-6 mb-4">
               <div className="text-3xl font-extrabold mb-1">{winner.label}</div>
-              <p className="text-xs text-white/80">en tu próxima compra</p>
+              {winner.winnable && <p className="text-xs text-white/80">en tu próxima compra</p>}
             </div>
-            <div className="flex items-center gap-2 mb-4">
-              <code className="flex-1 bg-muted text-foreground font-mono text-sm font-bold py-3 px-4 rounded-lg tracking-wider">
-                {winner.code}
-              </code>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={copyCode}
-                aria-label="Copiar código"
-                className={cn(copied && "text-success border-success")}
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground mb-4">
-              Usa este código al finalizar tu compra. Te enviaremos un recordatorio a {email}.
-            </p>
+            {winner.code && (
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  <code className="flex-1 bg-muted text-foreground font-mono text-sm font-bold py-3 px-4 rounded-lg tracking-wider">
+                    {winner.code}
+                  </code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={copyCode}
+                    aria-label="Copiar código"
+                    className={cn(copied && "text-success border-success")}
+                  >
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Usa este código al finalizar tu compra. Te enviaremos un recordatorio a {email}.
+                </p>
+              </>
+            )}
             <Button onClick={close} size="lg" className="w-full bg-secondary hover:bg-secondary/90">
-              ¡Empezar a comprar!
+              {winner.winnable ? "¡Empezar a comprar!" : "Ir a la tienda"}
             </Button>
           </div>
         )}
+
       </div>
     </div>
   );
