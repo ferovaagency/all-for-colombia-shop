@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MessageCircle, X, Send, ExternalLink, Loader2 } from 'lucide-react';
+import { X, Send, ExternalLink, Loader2, Bot, Sparkles } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 
 interface SuggestedProduct {
