@@ -21,7 +21,7 @@ export function CookieBanner() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 left-4 sm:left-auto z-30 max-w-md bg-card border shadow-elevated rounded-lg p-4 animate-fade-in-up">
+    <div className="fixed bottom-6 left-6 right-auto z-40 max-w-md w-[calc(100vw-3rem)] md:w-auto bg-card border shadow-elevated rounded-lg p-4 animate-fade-in-up">
       <p className="text-sm text-foreground mb-3">
         Usamos cookies para mejorar tu experiencia. Al continuar, aceptas nuestra{" "}
         <Link to="/legal" className="underline text-secondary">política de privacidad</Link>.
