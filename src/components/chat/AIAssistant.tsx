@@ -42,6 +42,7 @@ function getOrCreateSessionId(): string {
 
 export function AIAssistant() {
   const [open, setOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
