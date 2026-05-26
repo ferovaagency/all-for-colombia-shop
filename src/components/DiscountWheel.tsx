@@ -47,6 +47,7 @@ export function DiscountWheel() {
     if (typeof window === "undefined") return;
     const clientId = getClientId();
     if (localStorage.getItem(`afa_wheel_${clientId}`)) return;
+    if (localStorage.getItem("roulette_spun") === "true") return;
     const t = setTimeout(() => setOpen(true), 2000);
     return () => clearTimeout(t);
   }, [mounted]);
@@ -69,23 +70,42 @@ export function DiscountWheel() {
 
   const spin = () => {
     if (spinning) return;
+    if (typeof window !== "undefined" && localStorage.getItem("roulette_spun") === "true") return;
     setSpinning(true);
-    const winnerIndex = Math.floor(Math.random() * SEGMENTS.length);
+
+    // 1 de cada 10 activaciones gana
+    const activations = Number(localStorage.getItem("roulette_activations") || "0") + 1;
+    localStorage.setItem("roulette_activations", String(activations));
+    const isWinningTurn = activations % 10 === 0;
+
+    let winnerIndex: number;
+    if (isWinningTurn) {
+      const winnableIdx = SEGMENTS.map((s, i) => (s.winnable ? i : -1)).filter((i) => i >= 0);
+      winnerIndex = winnableIdx[Math.floor(Math.random() * winnableIdx.length)];
+    } else {
+      winnerIndex = SEGMENTS.findIndex((s) => s.id === "no_prize");
+    }
+
     const targetSegmentCenter = winnerIndex * SEGMENT_DEG + SEGMENT_DEG / 2;
-    // Pointer is at the top (0deg). We rotate the wheel CW so the chosen
-    // segment lands under the pointer. Add several full turns for effect.
     const fullTurns = 6;
     const finalRotation = fullTurns * 360 + (360 - targetSegmentCenter);
     setRotation(finalRotation);
     setTimeout(() => {
-      setWinner(SEGMENTS[winnerIndex]);
+      const prize = SEGMENTS[winnerIndex];
+      setWinner(prize);
       setSpinning(false);
       setStep("result");
+      try {
+        localStorage.setItem("roulette_spun", "true");
+        if (prize.code) localStorage.setItem("active_coupon", prize.code);
+      } catch {
+        /* ignore */
+      }
     }, 4200);
   };
 
   const copyCode = async () => {
-    if (!winner) return;
+    if (!winner || !winner.code) return;
     try {
       await navigator.clipboard.writeText(winner.code);
       setCopied(true);
@@ -94,6 +114,7 @@ export function DiscountWheel() {
       /* ignore */
     }
   };
+
 
   if (!mounted || !open) return null;
 
