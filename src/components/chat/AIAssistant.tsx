@@ -56,7 +56,23 @@ export function AIAssistant() {
 
   useEffect(() => {
     sessionId.current = getOrCreateSessionId();
+    const shown = localStorage.getItem('allforall_chat_shown');
+    if (!shown) {
+      const timer = setTimeout(() => setShowPopup(true), 4000);
+      return () => clearTimeout(timer);
+    }
   }, []);
+
+  const closePopup = () => {
+    setShowPopup(false);
+    localStorage.setItem('allforall_chat_shown', 'true');
+  };
+
+  const openChat = () => {
+    setShowPopup(false);
+    setOpen(true);
+    localStorage.setItem('allforall_chat_shown', 'true');
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
