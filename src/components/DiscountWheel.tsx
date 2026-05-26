@@ -5,16 +5,14 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const SEGMENTS = [
-  { label: "5% OFF", code: "AFA5OFF" },
-  { label: "10% OFF", code: "AFA10OFF" },
-  { label: "Envío gratis", code: "ENVIOAFA" },
-  { label: "8% OFF", code: "AFA8OFF" },
-  { label: "15% OFF", code: "AFA15OFF" },
-  { label: "3% OFF", code: "AFA3OFF" },
+  { id: "discount_5", label: "5% OFF", code: "BIENVENIDA5", winnable: true },
+  { id: "free_shipping", label: "Envío gratis", code: "ENVIOGRATIS", winnable: true },
+  { id: "discount_3", label: "3% OFF", code: "EXTRA3", winnable: true },
+  { id: "no_prize", label: "¡Suerte para la próxima!", code: null, winnable: false },
 ] as const;
 
-const COLORS = ["#020f1e", "#568baf"]; // brand-dark / brand-blue
 const SEGMENT_DEG = 360 / SEGMENTS.length;
+
 
 const getClientId = () => {
   if (typeof window === "undefined") return "";
