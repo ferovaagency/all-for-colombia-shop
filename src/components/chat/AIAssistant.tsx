@@ -58,8 +58,7 @@ export function AIAssistant() {
     sessionId.current = getOrCreateSessionId();
     const shown = localStorage.getItem('allforall_chat_shown');
     if (!shown) {
-      const timer = setTimeout(() => setShowPopup(true), 4000);
-      return () => clearTimeout(timer);
+      setShowPopup(true);
     }
   }, []);
 
