@@ -423,6 +423,7 @@ export type Database = {
           address: string | null
           approved_at: string | null
           approved_by: string | null
+          auth_user_id: string | null
           business_type: string | null
           city: string
           company_name: string
@@ -436,7 +437,6 @@ export type Database = {
           monthly_purchase_estimate: number | null
           nit: string
           notes: string | null
-          password_hash: string | null
           payment_terms: string | null
           phone: string
           products_sold: string | null
@@ -450,6 +450,7 @@ export type Database = {
           address?: string | null
           approved_at?: string | null
           approved_by?: string | null
+          auth_user_id?: string | null
           business_type?: string | null
           city: string
           company_name: string
@@ -463,7 +464,6 @@ export type Database = {
           monthly_purchase_estimate?: number | null
           nit: string
           notes?: string | null
-          password_hash?: string | null
           payment_terms?: string | null
           phone: string
           products_sold?: string | null
@@ -477,6 +477,7 @@ export type Database = {
           address?: string | null
           approved_at?: string | null
           approved_by?: string | null
+          auth_user_id?: string | null
           business_type?: string | null
           city?: string
           company_name?: string
@@ -490,7 +491,6 @@ export type Database = {
           monthly_purchase_estimate?: number | null
           nit?: string
           notes?: string | null
-          password_hash?: string | null
           payment_terms?: string | null
           phone?: string
           products_sold?: string | null

@@ -46,6 +46,7 @@ function AdminPage() {
   const [orderFilter, setOrderFilter] = useState<"all" | "retail" | "distributor">("all");
 
   const reload = async () => {
+    const { adminListDistributors } = await import("@/lib/distributors.functions");
     const [oRes, p, c, b, cu, po, conv, dist] = await Promise.all([
       supabase.from("orders").select("*, distributors(company_name)").order("created_at", { ascending: false }).limit(100),
       supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
@@ -54,7 +55,7 @@ function AdminPage() {
       supabase.from("customers").select("*").order("created_at", { ascending: false }),
       supabase.from("blog_posts").select("*").order("created_at", { ascending: false }),
       supabase.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(100),
-      supabase.from("distributors").select("*").order("created_at", { ascending: false }),
+      adminListDistributors().catch(() => ({ distributors: [] })),
     ]);
     if (oRes.error) {
       setOrdersError(oRes.error.message);
@@ -69,7 +70,7 @@ function AdminPage() {
     setCustomers(cu.data || []);
     setPosts(po.data || []);
     setConversations(conv.data || []);
-    setDistributors(dist.data || []);
+    setDistributors(dist.distributors || []);
   };
 
   useEffect(() => {
@@ -95,12 +96,17 @@ function AdminPage() {
   };
 
   const setDistStatus = async (id: string, status: "approved" | "rejected") => {
-    const patch: any = { status };
-    if (status === "approved") patch.approved_at = new Date().toISOString();
-    const { error } = await supabase.from("distributors").update(patch).eq("id", id);
-    if (error) toast.error(error.message);
-    else toast.success(status === "approved" ? "Distribuidor aprobado" : "Solicitud rechazada");
-    reload();
+    if (status === "rejected") {
+      try {
+        const { adminRejectDistributor } = await import("@/lib/distributors.functions");
+        await adminRejectDistributor({ data: { id } });
+        toast.success("Solicitud rechazada");
+        reload();
+      } catch (e: any) {
+        toast.error(e?.message || "No se pudo rechazar");
+      }
+    }
+    // Approval is handled via the credentials dialog
   };
 
   const filteredOrders = orders.filter((o) => {
@@ -688,51 +694,51 @@ function DistributorCredentialsDialog({
 
   useEffect(() => {
     if (distributor) {
-      setPassword(distributor.password_hash || "");
+      // Auto-suggest a strong temp password
+      setPassword(
+        Array.from(crypto.getRandomValues(new Uint8Array(9)))
+          .map((b) => "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$"[b % 60])
+          .join(""),
+      );
     }
   }, [distributor]);
 
   const save = async () => {
     if (!distributor) return;
-    if (!password || password.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres");
+    if (!password || password.length < 8) {
+      toast.error("La contraseña debe tener al menos 8 caracteres");
       return;
     }
     setSaving(true);
-    const { error } = await supabase
-      .from("distributors")
-      .update({
-        status: "approved",
-        password_hash: password,
-        approved_at: new Date().toISOString(),
-      })
-      .eq("id", distributor.id);
-    setSaving(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const { adminApproveDistributor } = await import("@/lib/distributors.functions");
+      await adminApproveDistributor({ data: { id: distributor.id, password } });
+      toast.success("Distribuidor aprobado y cuenta creada");
+
+      const msg =
+        `Hola ${distributor.contact_name}, tu solicitud como distribuidor de All For All fue aprobada.\n\n` +
+        `Accede al portal en: allforall.com.co/distribuidores\n` +
+        `Usuario: ${distributor.email}\n` +
+        `Contraseña: ${password}\n\n` +
+        `¡Bienvenido!`;
+      const phone = (distributor.phone || "").replace(/\D/g, "");
+      const waNumber = phone.length >= 10 ? (phone.startsWith("57") ? phone : `57${phone}`) : "573218280762";
+      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
+
+      onSaved();
+      onClose();
+    } catch (e: any) {
+      toast.error(e?.message || "No se pudo aprobar");
+    } finally {
+      setSaving(false);
     }
-    toast.success("Credenciales guardadas");
-
-    const msg =
-      `Hola ${distributor.contact_name}, tu solicitud como distribuidor de All For All fue aprobada.\n\n` +
-      `Accede al portal en: allforall.com.co/distribuidores\n` +
-      `Usuario: ${distributor.email}\n` +
-      `Contraseña: ${password}\n\n` +
-      `¡Bienvenido!`;
-    const phone = (distributor.phone || "").replace(/\D/g, "");
-    const waNumber = phone.length >= 10 ? (phone.startsWith("57") ? phone : `57${phone}`) : "573218280762";
-    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`, "_blank");
-
-    onSaved();
-    onClose();
   };
 
   return (
     <Dialog open={!!distributor} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Credenciales del distribuidor</DialogTitle>
+          <DialogTitle>Aprobar distribuidor y crear cuenta</DialogTitle>
         </DialogHeader>
         {distributor && (
           <div className="space-y-4">
@@ -741,13 +747,16 @@ function DistributorCredentialsDialog({
               <div><span className="font-semibold text-foreground">Email:</span> {distributor.email}</div>
             </div>
             <div>
-              <Label>Contraseña a asignar</Label>
+              <Label>Contraseña temporal</Label>
               <Input
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 maxLength={100}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Se crea su cuenta de acceso con esta contraseña. Pídele que la cambie en su primer ingreso.
+              </p>
             </div>
             <p className="text-xs text-muted-foreground">
               Al confirmar se aprueba al distribuidor y se abre WhatsApp con el mensaje de bienvenida.
@@ -757,10 +766,11 @@ function DistributorCredentialsDialog({
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
           <Button onClick={save} disabled={saving} className="bg-primary">
-            {saving ? "Guardando..." : "Aprobar y enviar"}
+            {saving ? "Procesando..." : "Aprobar y enviar"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

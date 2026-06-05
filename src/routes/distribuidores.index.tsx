@@ -31,32 +31,39 @@ function DistributorLandingPage() {
   const handleLogin = async () => {
     setLoginError("");
     setLoading(true);
-    const { data, error } = await supabase
+
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email: loginEmail.trim().toLowerCase(),
+      password: loginPassword,
+    });
+
+    if (authError || !authData.user) {
+      setLoading(false);
+      setLoginError("Credenciales incorrectas");
+      return;
+    }
+
+    // Verify the signed-in user is a distributor with approved status
+    const { data: dist, error: distErr } = await supabase
       .from("distributors")
-      .select("*")
-      .eq("email", loginEmail.trim().toLowerCase())
-      .eq("status", "approved")
+      .select("id, company_name, status")
+      .eq("auth_user_id", authData.user.id)
       .maybeSingle();
+
     setLoading(false);
 
-    if (error || !data) {
-      setLoginError("Credenciales incorrectas o cuenta pendiente de aprobación");
+    if (distErr || !dist) {
+      await supabase.auth.signOut();
+      setLoginError("Esta cuenta no está registrada como distribuidor");
       return;
     }
-    if (data.password_hash !== loginPassword) {
-      setLoginError("Contraseña incorrecta");
+    if (dist.status !== "approved") {
+      await supabase.auth.signOut();
+      setLoginError("Tu cuenta aún no está aprobada");
       return;
     }
 
-    localStorage.setItem(
-      "afa_distributor",
-      JSON.stringify({
-        id: data.id,
-        company: data.company_name,
-        email: data.email,
-      }),
-    );
-    toast.success(`Bienvenido, ${data.company_name}`);
+    toast.success(`Bienvenido, ${dist.company_name}`);
     navigate({ to: "/distribuidores/portal" });
   };
 
