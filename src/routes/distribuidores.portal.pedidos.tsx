@@ -25,16 +25,24 @@ function DistributorOrdersPage() {
 
   useEffect(() => {
     (async () => {
-      const raw = localStorage.getItem("afa_distributor");
-      if (!raw) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         setLoading(false);
         return;
       }
-      const distributor = JSON.parse(raw);
+      const { data: dist } = await supabase
+        .from("distributors")
+        .select("id")
+        .eq("auth_user_id", session.user.id)
+        .maybeSingle();
+      if (!dist) {
+        setLoading(false);
+        return;
+      }
       const { data } = await supabase
         .from("orders")
         .select("*")
-        .eq("distributor_id", distributor.id)
+        .eq("distributor_id", dist.id)
         .order("created_at", { ascending: false });
       setOrders(data || []);
       setLoading(false);

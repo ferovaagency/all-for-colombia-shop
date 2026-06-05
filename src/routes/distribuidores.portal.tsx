@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate, Outlet } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, Package, FileDown, ShoppingBag, LayoutGrid } from "lucide-react";
+import { LogOut, Package, ShoppingBag, LayoutGrid } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/distribuidores/portal")({
   head: () => ({
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/distribuidores/portal")({
   component: DistributorPortalLayout,
 });
 
-type Distributor = { id: string; company: string; email: string };
+type Distributor = { id: string; company_name: string; email: string };
 
 function DistributorPortalLayout() {
   const navigate = useNavigate();
@@ -21,29 +22,45 @@ function DistributorPortalLayout() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = typeof window !== "undefined" ? localStorage.getItem("afa_distributor") : null;
-      if (!stored) {
+    let active = true;
+
+    const load = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        if (active) navigate({ to: "/distribuidores" });
+        return;
+      }
+      const { data, error } = await supabase
+        .from("distributors")
+        .select("id, company_name, email, status")
+        .eq("auth_user_id", session.user.id)
+        .maybeSingle();
+      if (!active) return;
+      if (error || !data || data.status !== "approved") {
+        await supabase.auth.signOut();
         navigate({ to: "/distribuidores" });
         return;
       }
-      const parsed = JSON.parse(stored);
-      if (!parsed?.email) {
-        localStorage.removeItem("afa_distributor");
-        navigate({ to: "/distribuidores" });
-        return;
-      }
-      setDistributor(parsed);
-    } catch {
-      localStorage.removeItem("afa_distributor");
-      navigate({ to: "/distribuidores" });
-    } finally {
+      setDistributor({ id: data.id, company_name: data.company_name, email: data.email });
       setLoaded(true);
-    }
+    };
+    load();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setDistributor(null);
+        navigate({ to: "/distribuidores" });
+      }
+    });
+
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, [navigate]);
 
-  const logout = () => {
-    localStorage.removeItem("afa_distributor");
+  const logout = async () => {
+    await supabase.auth.signOut();
     navigate({ to: "/distribuidores" });
   };
 
@@ -62,7 +79,7 @@ function DistributorPortalLayout() {
         <div className="container mx-auto px-4 py-6 flex items-center justify-between gap-4 flex-wrap">
           <div>
             <p className="text-xs uppercase tracking-wide text-white/60">Portal Distribuidor — All For All</p>
-            <h1 className="text-xl md:text-2xl font-bold">{distributor.company}</h1>
+            <h1 className="text-xl md:text-2xl font-bold">{distributor.company_name}</h1>
             <p className="text-xs text-white/70">{distributor.email}</p>
           </div>
           <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20" onClick={logout}>
@@ -96,14 +113,4 @@ function PortalLink({ to, label, icon, exact }: { to: string; label: string; ico
       {icon} {label}
     </Link>
   );
-}
-
-export function getDistributor(): Distributor | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("afa_distributor");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
 }
