@@ -46,6 +46,7 @@ function AdminPage() {
   const [orderFilter, setOrderFilter] = useState<"all" | "retail" | "distributor">("all");
 
   const reload = async () => {
+    const { adminListDistributors } = await import("@/lib/distributors.functions");
     const [oRes, p, c, b, cu, po, conv, dist] = await Promise.all([
       supabase.from("orders").select("*, distributors(company_name)").order("created_at", { ascending: false }).limit(100),
       supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
@@ -54,7 +55,7 @@ function AdminPage() {
       supabase.from("customers").select("*").order("created_at", { ascending: false }),
       supabase.from("blog_posts").select("*").order("created_at", { ascending: false }),
       supabase.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(100),
-      supabase.from("distributors").select("*").order("created_at", { ascending: false }),
+      adminListDistributors().catch(() => ({ distributors: [] })),
     ]);
     if (oRes.error) {
       setOrdersError(oRes.error.message);
@@ -69,7 +70,7 @@ function AdminPage() {
     setCustomers(cu.data || []);
     setPosts(po.data || []);
     setConversations(conv.data || []);
-    setDistributors(dist.data || []);
+    setDistributors(dist.distributors || []);
   };
 
   useEffect(() => {
@@ -95,12 +96,17 @@ function AdminPage() {
   };
 
   const setDistStatus = async (id: string, status: "approved" | "rejected") => {
-    const patch: any = { status };
-    if (status === "approved") patch.approved_at = new Date().toISOString();
-    const { error } = await supabase.from("distributors").update(patch).eq("id", id);
-    if (error) toast.error(error.message);
-    else toast.success(status === "approved" ? "Distribuidor aprobado" : "Solicitud rechazada");
-    reload();
+    if (status === "rejected") {
+      try {
+        const { adminRejectDistributor } = await import("@/lib/distributors.functions");
+        await adminRejectDistributor({ data: { id } });
+        toast.success("Solicitud rechazada");
+        reload();
+      } catch (e: any) {
+        toast.error(e?.message || "No se pudo rechazar");
+      }
+    }
+    // Approval is handled via the credentials dialog
   };
 
   const filteredOrders = orders.filter((o) => {
