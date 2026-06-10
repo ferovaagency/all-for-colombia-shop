@@ -95,6 +95,18 @@ function AdminPage() {
     reload();
   };
 
+  const downloadReceipt = async (path: string) => {
+    if (!path) return;
+    const { data, error } = await supabase.storage
+      .from("payment-receipts")
+      .createSignedUrl(path, 60, { download: true });
+    if (error || !data?.signedUrl) {
+      toast.error("No se pudo generar el enlace de descarga");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
   const setDistStatus = async (id: string, status: "approved" | "rejected") => {
     if (status === "rejected") {
       try {
