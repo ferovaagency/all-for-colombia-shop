@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, MessageSquare, Handshake, Check, X as XIcon, Send } from "lucide-react";
+import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, MessageSquare, Handshake, Check, X as XIcon, Send, Download } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { formatCOP, whatsappUrl } from "@/lib/cart";
@@ -93,6 +93,18 @@ function AdminPage() {
     if (error) toast.error(error.message);
     else toast.success("Estado actualizado");
     reload();
+  };
+
+  const downloadReceipt = async (path: string) => {
+    if (!path) return;
+    const { data, error } = await supabase.storage
+      .from("payment-receipts")
+      .createSignedUrl(path, 60, { download: true });
+    if (error || !data?.signedUrl) {
+      toast.error("No se pudo generar el enlace de descarga");
+      return;
+    }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
   const setDistStatus = async (id: string, status: "approved" | "rejected") => {
@@ -223,14 +235,26 @@ function AdminPage() {
                       </TableCell>
                       <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
                       <TableCell>
-                        <a
-                          href={whatsappUrl(`Hola ${o.customer_name}, soy de All For All. Tu pedido ${o.id.slice(0, 8)} está siendo procesado.`)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-secondary hover:underline text-xs inline-flex items-center gap-1"
-                        >
-                          WhatsApp <ExternalLink className="h-3 w-3" />
-                        </a>
+                        <div className="flex items-center gap-2">
+                          {o.receipt_url && (
+                            <button
+                              type="button"
+                              onClick={() => downloadReceipt(o.receipt_url)}
+                              className="text-secondary hover:underline text-xs inline-flex items-center gap-1"
+                              title="Descargar comprobante de pago"
+                            >
+                              <Download className="h-3 w-3" /> Comprobante
+                            </button>
+                          )}
+                          <a
+                            href={whatsappUrl(`Hola ${o.customer_name}, soy de All For All. Tu pedido ${o.id.slice(0, 8)} está siendo procesado.`)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-secondary hover:underline text-xs inline-flex items-center gap-1"
+                          >
+                            WhatsApp <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

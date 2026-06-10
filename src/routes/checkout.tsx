@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Upload, FileCheck2, Info, X, ExternalLink } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { startAddiCheckout } from "@/lib/addi.functions";
+import { startMercadoPagoCheckout } from "@/lib/mercadopago.functions";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -32,8 +32,7 @@ export const Route = createFileRoute("/checkout")({
 });
 
 type PaymentMethod =
-  | "wompi"
-  | "addi"
+  | "mercadopago"
   | "bancolombia"
   | "davivienda"
   | "nequi"
@@ -45,8 +44,7 @@ const PAYMENT_OPTIONS: {
   label: string;
   description: string;
 }[] = [
-  { value: "wompi", label: "💳 Tarjeta crédito/débito", description: "Pago inmediato y seguro con Wompi" },
-  { value: "addi", label: "🛍️ Addi — Compra ahora, paga después", description: "Divide tu compra en cuotas sin interés" },
+  { value: "mercadopago", label: "💳 Tarjeta, PSE y más — Mercado Pago", description: "Pago inmediato y seguro con Mercado Pago" },
   { value: "bancolombia", label: "🏦 Transferencia Bancolombia", description: "Transfiere y sube tu comprobante" },
   { value: "davivienda", label: "🏦 Transferencia Davivienda", description: "Transfiere y sube tu comprobante" },
   { value: "nequi", label: "📱 Nequi", description: "Transfiere por Nequi y sube comprobante" },
@@ -57,12 +55,12 @@ const PAYMENT_OPTIONS: {
 function CheckoutPage() {
   const { items, subtotal, clear, count } = useCart();
   const navigate = useNavigate();
-  const startAddi = useServerFn(startAddiCheckout);
+  const startMP = useServerFn(startMercadoPagoCheckout);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", customer_id_type: "CC", customer_id_number: "", address: "", city: "", notes: "",
   });
-  const [payment, setPayment] = useState<PaymentMethod>("wompi");
+  const [payment, setPayment] = useState<PaymentMethod>("mercadopago");
   const [receipt, setReceipt] = useState<File | null>(null);
 
   const requiresReceipt = (REQUIRES_RECEIPT as readonly string[]).includes(payment);
@@ -153,16 +151,16 @@ function CheckoutPage() {
     const summary = items.map(i => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`).join("\n");
     const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${data.id.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
 
-    // Addi: crear aplicación y redirigir al checkout de Addi
-    if (payment === "addi") {
-      const toastId = toast.loading("Conectando con Addi...");
+    // Mercado Pago: crear preferencia y redirigir al checkout
+    if (payment === "mercadopago") {
+      const toastId = toast.loading("Conectando con Mercado Pago...");
       try {
-        const result = await startAddi({
+        const result = await startMP({
           data: { orderId: data.id, origin: window.location.origin },
         });
         toast.dismiss(toastId);
         if (!result.ok || !result.redirectUrl) {
-          toast.error(result.ok ? "Addi no devolvió URL de pago" : result.error);
+          toast.error(result.ok ? "Mercado Pago no devolvió URL de pago" : result.error);
           return;
         }
         clear();
@@ -170,7 +168,7 @@ function CheckoutPage() {
         return;
       } catch (err: any) {
         toast.dismiss(toastId);
-        toast.error("No se pudo iniciar Addi: " + (err?.message || "error"));
+        toast.error("No se pudo iniciar Mercado Pago: " + (err?.message || "error"));
         return;
       }
     }
@@ -249,20 +247,20 @@ function CheckoutPage() {
             </RadioGroup>
 
             {/* Detalles según método seleccionado */}
-            {payment === "addi" && (
+            {payment === "mercadopago" && (
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
-                <p className="font-semibold mb-1">Paga con Addi</p>
+                <p className="font-semibold mb-1">Paga con Mercado Pago</p>
                 <p className="text-sm text-muted-foreground mb-2">
-                  Al confirmar el pedido te llevaremos al checkout seguro de Addi
-                  para validar tu identidad y aprobar tu crédito en minutos.
+                  Al confirmar el pedido te llevaremos al checkout seguro de Mercado Pago,
+                  donde puedes pagar con tarjeta de crédito/débito, PSE, Efecty o saldo en tu cuenta.
                 </p>
                 <a
-                  href="https://www.addi.com/co/como-funciona"
+                  href="https://www.mercadopago.com.co/ayuda"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-sm text-secondary hover:underline"
                 >
-                  ¿Cómo funciona Addi? <ExternalLink className="h-3 w-3" />
+                  ¿Cómo funciona Mercado Pago? <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
             )}

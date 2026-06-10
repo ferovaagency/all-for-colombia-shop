@@ -36,6 +36,7 @@ import { Route as AdminBlogGeneratorRouteImport } from './routes/admin.blog-gene
 import { Route as DistribuidoresPortalIndexRouteImport } from './routes/distribuidores.portal.index'
 import { Route as DistribuidoresPortalPedidosRouteImport } from './routes/distribuidores.portal.pedidos'
 import { Route as DistribuidoresPortalCatalogoRouteImport } from './routes/distribuidores.portal.catalogo'
+import { Route as ApiPublicMercadopagoWebhookRouteImport } from './routes/api/public/mercadopago-webhook'
 import { Route as ApiPublicAddiWebhookRouteImport } from './routes/api/public/addi-webhook'
 
 const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
@@ -176,6 +177,12 @@ const DistribuidoresPortalCatalogoRoute =
     path: '/catalogo',
     getParentRoute: () => DistribuidoresPortalRoute,
   } as any)
+const ApiPublicMercadopagoWebhookRoute =
+  ApiPublicMercadopagoWebhookRouteImport.update({
+    id: '/api/public/mercadopago-webhook',
+    path: '/api/public/mercadopago-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicAddiWebhookRoute = ApiPublicAddiWebhookRouteImport.update({
   id: '/api/public/addi-webhook',
   path: '/api/public/addi-webhook',
@@ -208,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
+  '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
   '/distribuidores/portal/pedidos': typeof DistribuidoresPortalPedidosRoute
   '/distribuidores/portal/': typeof DistribuidoresPortalIndexRoute
@@ -236,6 +244,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/distribuidores': typeof DistribuidoresIndexRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
+  '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
   '/distribuidores/portal/pedidos': typeof DistribuidoresPortalPedidosRoute
   '/distribuidores/portal': typeof DistribuidoresPortalIndexRoute
@@ -267,6 +276,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
+  '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
   '/distribuidores/portal/catalogo': typeof DistribuidoresPortalCatalogoRoute
   '/distribuidores/portal/pedidos': typeof DistribuidoresPortalPedidosRoute
   '/distribuidores/portal/': typeof DistribuidoresPortalIndexRoute
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/distribuidores/'
     | '/api/public/addi-webhook'
+    | '/api/public/mercadopago-webhook'
     | '/distribuidores/portal/catalogo'
     | '/distribuidores/portal/pedidos'
     | '/distribuidores/portal/'
@@ -327,6 +338,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/distribuidores'
     | '/api/public/addi-webhook'
+    | '/api/public/mercadopago-webhook'
     | '/distribuidores/portal/catalogo'
     | '/distribuidores/portal/pedidos'
     | '/distribuidores/portal'
@@ -357,6 +369,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/distribuidores/'
     | '/api/public/addi-webhook'
+    | '/api/public/mercadopago-webhook'
     | '/distribuidores/portal/catalogo'
     | '/distribuidores/portal/pedidos'
     | '/distribuidores/portal/'
@@ -383,6 +396,7 @@ export interface RootRouteChildren {
   ProductoSlugRoute: typeof ProductoSlugRoute
   DistribuidoresIndexRoute: typeof DistribuidoresIndexRoute
   ApiPublicAddiWebhookRoute: typeof ApiPublicAddiWebhookRoute
+  ApiPublicMercadopagoWebhookRoute: typeof ApiPublicMercadopagoWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -576,6 +590,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DistribuidoresPortalCatalogoRouteImport
       parentRoute: typeof DistribuidoresPortalRoute
     }
+    '/api/public/mercadopago-webhook': {
+      id: '/api/public/mercadopago-webhook'
+      path: '/api/public/mercadopago-webhook'
+      fullPath: '/api/public/mercadopago-webhook'
+      preLoaderRoute: typeof ApiPublicMercadopagoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/addi-webhook': {
       id: '/api/public/addi-webhook'
       path: '/api/public/addi-webhook'
@@ -648,16 +669,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProductoSlugRoute: ProductoSlugRoute,
   DistribuidoresIndexRoute: DistribuidoresIndexRoute,
   ApiPublicAddiWebhookRoute: ApiPublicAddiWebhookRoute,
+  ApiPublicMercadopagoWebhookRoute: ApiPublicMercadopagoWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
