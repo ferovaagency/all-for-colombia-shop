@@ -203,8 +203,9 @@ function AdminPage() {
                   const items: any[] = Array.isArray(o.items) ? o.items : [];
                   const addr = o.shipping_address || {};
                   return (
-                    <>
-                    <TableRow key={o.id}>
+                    <React.Fragment key={o.id}>
+                    <TableRow>
+
                       <TableCell className="font-mono text-xs">
                         <button
                           type="button"
