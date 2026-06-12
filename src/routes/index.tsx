@@ -34,6 +34,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
   accesorios: "/categorias/accesorios.jpg",
   "ferreteria-hogar-inteligente": "/categorias/ferreteria.jpg",
   "tv-y-video": "/categorias/tv-video.jpg",
+  monitores: monitorGamer,
 };
 
 const PROMO_BANNERS = [
