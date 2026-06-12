@@ -89,7 +89,7 @@ function HomePage() {
         <Link to="/tienda" className="block w-full">
           <img
             src={bannerPadre}
-            alt="Día del Padre Logitech — G923 + A30"
+            alt="Si es Logitech, es gol — Mundial Colombia"
             className="block w-full h-auto"
             width={1920}
             height={600}
