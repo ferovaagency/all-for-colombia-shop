@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
-import bannerPadre from "@/assets/banner-padre-logitech.jpg";
+import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerA50 from "@/assets/banner-a50x.jpg";
 
 export const Route = createFileRoute("/")({
@@ -36,7 +36,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
 };
 
 const PROMO_BANNERS = [
-  { id: 1, image: bannerPadre, link: "/tienda", alt: "Día del Padre Logitech — G923 + A30" },
+  { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 2, image: bannerA50, link: "/tienda", alt: "Auricular Astro A50 X — Diseñados para jugar" },
 ];
 
@@ -89,7 +89,7 @@ function HomePage() {
         <Link to="/tienda" className="block w-full">
           <img
             src={bannerPadre}
-            alt="Día del Padre Logitech — G923 + A30"
+            alt="Si es Logitech, es gol — Mundial Colombia"
             className="block w-full h-auto"
             width={1920}
             height={600}
