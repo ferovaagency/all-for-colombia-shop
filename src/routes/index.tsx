@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
-import bannerA50 from "@/assets/banner-a50x.jpg";
+import bannerA50 from "@/assets/banner-logitech-gol.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,7 +37,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
 
 const PROMO_BANNERS = [
   { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
-  { id: 2, image: bannerA50, link: "/tienda", alt: "Auricular Astro A50 X — Diseñados para jugar" },
+  { id: 2, image: bannerA50, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
 ];
 
 function HomePage() {
@@ -189,7 +189,7 @@ function HomePage() {
       {/* Promo banners slider */}
       <section className="py-6 bg-background">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-2xl h-[160px] md:h-[220px]">
+          <div className="relative overflow-hidden rounded-2xl w-full aspect-[1920/600] bg-background">
             {PROMO_BANNERS.map((banner, i) => (
               <Link
                 key={banner.id}
@@ -204,7 +204,7 @@ function HomePage() {
                   alt={banner.alt}
                   width={1920}
                   height={600}
-                  className="w-full h-full object-cover object-center"
+                  className="w-full h-full object-contain object-center"
                   loading={i === 0 ? "eager" : "lazy"}
                   fetchPriority={i === 0 ? "high" : "auto"}
                   decoding="async"
