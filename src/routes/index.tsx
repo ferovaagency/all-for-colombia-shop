@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
-import bannerPadre from "@/assets/banner-padre-logitech.jpg";
+import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerA50 from "@/assets/banner-a50x.jpg";
 
 export const Route = createFileRoute("/")({
