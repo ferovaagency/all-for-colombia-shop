@@ -350,7 +350,7 @@ function AdminPage() {
                         </TableCell>
                       </TableRow>
                     )}
-                    </>
+                    </React.Fragment>
                   );
                 })}
                 {filteredOrders.length === 0 && !ordersError && (
