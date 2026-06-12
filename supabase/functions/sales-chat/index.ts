@@ -69,20 +69,19 @@ serve(async (req) => {
 
     const { data: products } = await supabase
       .from('products')
-      .select('id, name, slug, brand, price, sale_price, short_description, description, stock, specs, category_id, categories(name, slug)')
+      .select('id, name, slug, brand, price, sale_price, short_description, description, stock, specs, category_id, categories(name, slug), brands(name, slug)')
       .eq('active', true)
-      .gt('stock', 0)
-      .limit(80);
+      .limit(150);
 
     const relevantProducts = (products || []).filter((p: any) => {
       const searchable = [
-        p.name, p.brand, p.short_description, p.description,
+        p.name, p.brand, p.brands?.name, p.short_description, p.description,
         p.categories?.name, JSON.stringify(p.specs || {})
       ].join(' ').toLowerCase();
       return searchTerms.some((term: string) => searchable.includes(term));
-    }).slice(0, 15);
+    }).slice(0, 20);
 
-    const productsContext = relevantProducts.length > 0 ? relevantProducts : (products || []).slice(0, 10);
+    const productsContext = relevantProducts.length > 0 ? relevantProducts : (products || []).slice(0, 30);
 
     const { data: blogs } = await supabase
       .from('blogs')
@@ -103,7 +102,7 @@ serve(async (req) => {
 
     const catalogContext = productsContext.map((p: any) => {
       const finalPrice = p.sale_price || p.price;
-      return `ID:${p.id} | ${p.name} | Marca:${p.brand || 'N/A'} | $${Number(finalPrice).toLocaleString('es-CO')} COP | ${p.short_description || ''} | Stock:${p.stock} | Cat:${p.categories?.name || 'N/A'}`;
+      return `ID:${p.id} | ${p.name} | Marca:${p.brand || p.brands?.name || 'N/A'} | $${Number(finalPrice).toLocaleString('es-CO')} COP | ${p.short_description || ''} | Stock:${p.stock ?? 'consultar'} | Cat:${p.categories?.name || 'N/A'} | /producto/${p.slug}`;
     }).join('\n');
 
     const blogsContext = (blogs || []).map((b: any) =>
@@ -177,8 +176,7 @@ ${blogsContext || 'Sin blogs disponibles.'}`;
         .from('products')
         .select('id, name, slug, brand, price, sale_price, short_description, images, stock')
         .in('id', suggestedProductIds.slice(0, 3))
-        .eq('active', true)
-        .gt('stock', 0);
+        .eq('active', true);
       suggestedProducts = prods || [];
     }
 

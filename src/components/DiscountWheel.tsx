@@ -47,7 +47,6 @@ export function DiscountWheel() {
     if (typeof window === "undefined") return;
     const clientId = getClientId();
     if (localStorage.getItem(`afa_wheel_${clientId}`)) return;
-    if (localStorage.getItem("roulette_spun") === "true") return;
     const t = setTimeout(() => setOpen(true), 2000);
     return () => clearTimeout(t);
   }, [mounted]);
