@@ -3,7 +3,7 @@ import { Bot, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { WHATSAPP_NUMBER } from "@/lib/cart";
-import { supabase } from "@/integrations/supabase/client";
+import { saveChatConversation } from "@/lib/public.functions";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -51,17 +51,13 @@ export function AIChatWidget() {
     if (typeof window === "undefined") return;
     const sessionId = getOrCreateSessionId();
     try {
-      await supabase.from("chat_conversations").upsert(
-        [
-          {
-            session_id: sessionId,
-            messages: JSON.parse(JSON.stringify(msgs)),
-            page_url: window.location.href,
-            updated_at: new Date().toISOString(),
-          },
-        ],
-        { onConflict: "session_id" },
-      );
+      await saveChatConversation({
+        data: {
+          session_id: sessionId,
+          messages: JSON.parse(JSON.stringify(msgs)),
+          page_url: window.location.href,
+        },
+      });
     } catch {
       /* ignore — chat must keep working */
     }

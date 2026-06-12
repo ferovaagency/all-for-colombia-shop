@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ShoppingBag, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getSocialProofOrders } from "@/lib/public.functions";
 
 type RealOrder = {
   customerFirstName: string;
@@ -8,107 +8,70 @@ type RealOrder = {
   productName: string;
 };
 
-function firstName(name: string | null | undefined): string {
-  if (!name) return "Alguien";
-  const parts = name.trim().split(/\s+/);
-  return parts[0] || "Alguien";
-}
-
-function extractCity(addr: unknown): string | null {
-  if (!addr || typeof addr !== "object") return null;
-  const a = addr as Record<string, unknown>;
-  const candidates = [a.city, a.ciudad, a.locality, a.town];
-  for (const c of candidates) {
-    if (typeof c === "string" && c.trim()) return c.trim();
-  }
-  return null;
-}
-
-function extractProductName(items: unknown): string | null {
-  if (!Array.isArray(items) || items.length === 0) return null;
-  const first = items[0] as Record<string, unknown>;
-  const candidates = [first?.name, first?.product_name, first?.title];
-  for (const c of candidates) {
-    if (typeof c === "string" && c.trim()) return c.trim();
-  }
-  return null;
-}
-
 export function SocialProofPopup() {
   const [item, setItem] = useState<RealOrder | null>(null);
   const [orders, setOrders] = useState<RealOrder[]>([]);
 
-  // Fetch real completed orders. If none, the popup never shows.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("customer_name, items, created_at, shipping_address")
-        .eq("status", "completed")
-        .order("created_at", { ascending: false })
-        .limit(10);
-      if (cancelled || error || !data) return;
-
-      const parsed: RealOrder[] = data
-        .map((row: any) => {
-          const productName = extractProductName(row.items);
-          if (!productName) return null;
-          return {
-            customerFirstName: firstName(row.customer_name),
-            city: extractCity(row.shipping_address),
-            productName,
-          } as RealOrder;
-        })
-        .filter((o): o is RealOrder => o !== null);
-
-      setOrders(parsed);
+      try {
+        const res = await getSocialProofOrders();
+        if (cancelled) return;
+        const parsed: RealOrder[] = (res.orders || []).map((o) => ({
+          customerFirstName: o.firstName,
+          city: o.city,
+          productName: o.productName,
+        }));
+        setOrders(parsed);
+      } catch {
+        /* ignore — popup is non-critical */
+      }
     })();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // Rotation loop: only runs if we actually have real orders.
   useEffect(() => {
     if (orders.length === 0) return;
-    let timer: ReturnType<typeof setTimeout>;
-    const showOne = () => {
-      const next = orders[Math.floor(Math.random() * orders.length)];
-      setItem(next);
-      timer = setTimeout(() => {
-        setItem(null);
-        timer = setTimeout(showOne, 12000 + Math.random() * 8000);
-      }, 6000);
+    let i = 0;
+    const show = () => {
+      setItem(orders[i % orders.length]);
+      i++;
+      setTimeout(() => setItem(null), 6000);
     };
-    timer = setTimeout(showOne, 15000);
-    return () => clearTimeout(timer);
+    const initial = setTimeout(show, 12000);
+    const interval = setInterval(show, 45000);
+    return () => {
+      clearTimeout(initial);
+      clearInterval(interval);
+    };
   }, [orders]);
 
   if (!item) return null;
 
-  const place = item.city ? `${item.customerFirstName} en ${item.city}` : `${item.customerFirstName}`;
-
   return (
-    <div
-      className="fixed bottom-24 left-6 z-30 max-w-xs bg-card border shadow-elevated rounded-lg p-3 flex items-start gap-3 animate-fade-in-up"
-      role="status"
-      aria-live="polite"
-    >
-      <div className="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
-        <ShoppingBag className="h-5 w-5 text-secondary" />
+    <div className="fixed bottom-24 left-4 z-40 max-w-xs animate-in slide-in-from-bottom-4 fade-in duration-500">
+      <div className="bg-card border shadow-lg rounded-xl p-3 pr-8 flex gap-3 items-start relative">
+        <button
+          onClick={() => setItem(null)}
+          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
+          aria-label="Cerrar"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+        <div className="h-9 w-9 rounded-full bg-secondary/10 text-secondary flex items-center justify-center flex-shrink-0">
+          <ShoppingBag className="h-4 w-4" />
+        </div>
+        <div className="text-xs leading-relaxed">
+          <p>
+            <span className="font-semibold">{item.customerFirstName}</span>
+            {item.city ? ` desde ${item.city}` : ""} acaba de comprar
+          </p>
+          <p className="text-muted-foreground truncate">{item.productName}</p>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-muted-foreground">{place}</p>
-        <p className="text-sm font-medium line-clamp-2">acaba de comprar {item.productName}</p>
-      </div>
-      <button
-        onClick={() => setItem(null)}
-        aria-label="Cerrar"
-        className="text-muted-foreground hover:text-foreground"
-      >
-        <X className="h-4 w-4" />
-      </button>
     </div>
   );
 }
