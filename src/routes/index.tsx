@@ -189,7 +189,7 @@ function HomePage() {
       {/* Promo banners slider */}
       <section className="py-6 bg-background">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-2xl h-[160px] md:h-[220px]">
+          <div className="relative overflow-hidden rounded-2xl w-full aspect-[1920/600] bg-background">
             {PROMO_BANNERS.map((banner, i) => (
               <Link
                 key={banner.id}
