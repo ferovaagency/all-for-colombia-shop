@@ -36,7 +36,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
 };
 
 const PROMO_BANNERS = [
-  { id: 1, image: bannerPadre, link: "/tienda", alt: "Día del Padre Logitech — G923 + A30" },
+  { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 2, image: bannerA50, link: "/tienda", alt: "Auricular Astro A50 X — Diseñados para jugar" },
 ];
 
