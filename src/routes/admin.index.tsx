@@ -199,9 +199,22 @@ function AdminPage() {
               <TableBody>
                 {filteredOrders.map((o) => {
                   const isDist = o.order_type === "distributor" || !!o.distributor_id;
+                  const isOpen = expandedOrder === o.id;
+                  const items: any[] = Array.isArray(o.items) ? o.items : [];
+                  const addr = o.shipping_address || {};
                   return (
+                    <>
                     <TableRow key={o.id}>
-                      <TableCell className="font-mono text-xs">{o.id.slice(0, 8)}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedOrder(isOpen ? null : o.id)}
+                          className="hover:underline"
+                          title="Ver detalle"
+                        >
+                          {isOpen ? "▼ " : "▶ "}{o.id.slice(0, 8)}
+                        </button>
+                      </TableCell>
                       <TableCell>
                         {isDist ? (
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
@@ -216,6 +229,9 @@ function AdminPage() {
                       <TableCell>
                         <div className="font-medium">{o.customer_name}</div>
                         <div className="text-xs text-muted-foreground">{o.customer_email}</div>
+                        {o.customer_phone && (
+                          <div className="text-xs text-muted-foreground">📞 {o.customer_phone}</div>
+                        )}
                         {isDist && o.distributors?.company_name && (
                           <div className="text-xs text-blue-600 font-medium">🏢 {o.distributors.company_name}</div>
                         )}
@@ -237,6 +253,13 @@ function AdminPage() {
                       <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedOrder(isOpen ? null : o.id)}
+                            className="text-secondary hover:underline text-xs inline-flex items-center gap-1"
+                          >
+                            <Eye className="h-3 w-3" /> {isOpen ? "Ocultar" : "Ver"}
+                          </button>
                           {o.receipt_url && (
                             <button
                               type="button"
@@ -258,6 +281,75 @@ function AdminPage() {
                         </div>
                       </TableCell>
                     </TableRow>
+                    {isOpen && (
+                      <TableRow key={o.id + "-detail"} className="bg-muted/30">
+                        <TableCell colSpan={7} className="p-4">
+                          <div className="grid md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <div className="font-semibold mb-2">Productos pedidos ({items.length})</div>
+                              {items.length === 0 ? (
+                                <div className="text-xs text-muted-foreground">Sin items registrados</div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {items.map((it, idx) => (
+                                    <div key={idx} className="flex items-start gap-2 border-b pb-2">
+                                      {it.image && (
+                                        <img src={it.image} alt={it.name || it.title} className="w-12 h-12 object-cover rounded border" />
+                                      )}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-medium text-xs">{it.name || it.title || it.product_name || "Producto"}</div>
+                                        {it.sku && <div className="text-[10px] text-muted-foreground">SKU: {it.sku}</div>}
+                                        <div className="text-xs">
+                                          {it.quantity || it.qty || 1} × {formatCOP(Number(it.price || it.unit_price || 0))}
+                                        </div>
+                                      </div>
+                                      <div className="font-semibold text-xs">
+                                        {formatCOP(Number((it.price || it.unit_price || 0)) * Number(it.quantity || it.qty || 1))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="mt-3 text-xs space-y-1">
+                                <div>Subtotal: <span className="font-medium">{formatCOP(Number(o.subtotal || 0))}</span></div>
+                                <div>Total: <span className="font-bold">{formatCOP(Number(o.total || 0))}</span></div>
+                                <div>Método de pago: <span className="font-medium">{o.payment_method || "—"}</span></div>
+                                {o.addi_status && <div>Addi: {o.addi_status}</div>}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="font-semibold mb-2">Datos de envío y contacto</div>
+                              <div className="text-xs space-y-1">
+                                <div><span className="text-muted-foreground">Nombre:</span> {o.customer_name}</div>
+                                <div><span className="text-muted-foreground">Email:</span> {o.customer_email}</div>
+                                <div><span className="text-muted-foreground">Teléfono:</span> {o.customer_phone || "—"}</div>
+                                {(o.customer_id_type || o.customer_id_number) && (
+                                  <div><span className="text-muted-foreground">Documento:</span> {o.customer_id_type} {o.customer_id_number}</div>
+                                )}
+                                <div className="pt-2 border-t mt-2">
+                                  <div className="font-medium mb-1">Dirección:</div>
+                                  {addr && Object.keys(addr).length > 0 ? (
+                                    <div className="space-y-0.5">
+                                      {addr.address && <div>{addr.address}</div>}
+                                      {addr.address_line && <div>{addr.address_line}</div>}
+                                      {(addr.city || addr.department) && <div>{addr.city}{addr.city && addr.department ? ", " : ""}{addr.department}</div>}
+                                      {addr.postal_code && <div>CP: {addr.postal_code}</div>}
+                                      {addr.notes && <div className="italic text-muted-foreground">Notas: {addr.notes}</div>}
+                                    </div>
+                                  ) : (
+                                    <div className="text-muted-foreground">Sin dirección registrada</div>
+                                  )}
+                                </div>
+                                <div className="pt-2 mt-2">
+                                  ID completo: <span className="font-mono">{o.id}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    </>
                   );
                 })}
                 {filteredOrders.length === 0 && !ordersError && (
