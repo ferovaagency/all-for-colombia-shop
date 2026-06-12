@@ -102,7 +102,7 @@ serve(async (req) => {
 
     const catalogContext = productsContext.map((p: any) => {
       const finalPrice = p.sale_price || p.price;
-      return `ID:${p.id} | ${p.name} | Marca:${p.brand || 'N/A'} | $${Number(finalPrice).toLocaleString('es-CO')} COP | ${p.short_description || ''} | Stock:${p.stock} | Cat:${p.categories?.name || 'N/A'}`;
+      return `ID:${p.id} | ${p.name} | Marca:${p.brand || p.brands?.name || 'N/A'} | $${Number(finalPrice).toLocaleString('es-CO')} COP | ${p.short_description || ''} | Stock:${p.stock ?? 'consultar'} | Cat:${p.categories?.name || 'N/A'} | /producto/${p.slug}`;
     }).join('\n');
 
     const blogsContext = (blogs || []).map((b: any) =>
