@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerA50 from "@/assets/banner-logitech-gol.jpg";
+import monitorGamer from "@/assets/monitor-gamer.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,6 +34,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
   accesorios: "/categorias/accesorios.jpg",
   "ferreteria-hogar-inteligente": "/categorias/ferreteria.jpg",
   "tv-y-video": "/categorias/tv-video.jpg",
+  monitores: monitorGamer,
 };
 
 const PROMO_BANNERS = [
