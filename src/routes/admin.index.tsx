@@ -44,6 +44,7 @@ function AdminPage() {
   const [distributors, setDistributors] = useState<any[]>([]);
   const [credDist, setCredDist] = useState<any | null>(null);
   const [orderFilter, setOrderFilter] = useState<"all" | "retail" | "distributor">("all");
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   const reload = async () => {
     const { adminListDistributors } = await import("@/lib/distributors.functions");
