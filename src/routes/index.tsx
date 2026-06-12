@@ -246,26 +246,29 @@ function HomePage() {
 
       {/* Brands */}
       {brands.length > 0 && (
-        <section className="container mx-auto px-4 py-16">
+        <section className="container mx-auto px-4 py-12">
           <h2 className="text-2xl font-bold text-center mb-2">Marcas que confían en nosotros</h2>
           <p className="text-center text-muted-foreground text-sm mb-8">Trabajamos con los líderes de la industria</p>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 items-center">
+          <div className="flex flex-wrap justify-center items-center gap-3 md:gap-4">
             {brands.map((b) => (
-              <div key={b.id} className="brand-logo-card aspect-[3/2] bg-white rounded-lg border border-border flex items-center justify-center p-3 hover:shadow-md transition-shadow">
+              <Link
+                key={b.id}
+                to="/tienda"
+                search={{ marca: b.slug } as any}
+                aria-label={`Ver productos de ${b.name}`}
+                className="group bg-white rounded-lg border border-border h-16 w-28 md:h-20 md:w-32 flex items-center justify-center p-2 hover:shadow-md hover:border-secondary/40 transition-all"
+              >
                 {b.logo_url || b.logo ? (
                   <img
                     src={b.logo_url || b.logo}
                     alt={b.name}
                     loading="lazy"
-                    className="brand-logo max-w-full max-h-full object-contain"
+                    className="h-10 md:h-12 w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity"
                   />
                 ) : (
-                  <div className="text-center">
-                    <span className="block text-xs font-semibold text-foreground">{b.name}</span>
-                    <span className="block text-[9px] text-muted-foreground mt-0.5">Logo pendiente</span>
-                  </div>
+                  <span className="text-xs font-semibold text-foreground">{b.name}</span>
                 )}
-              </div>
+              </Link>
             ))}
           </div>
         </section>
