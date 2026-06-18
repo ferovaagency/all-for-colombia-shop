@@ -51,12 +51,14 @@ function ShopPage() {
   const getChildren = (parentId: string) => categories.filter((c: any) => c.parent_id === parentId);
 
   useEffect(() => {
-    (async () => {
+    let cancelled = false;
+    const fetchAll = async () => {
       const [p, c, b] = await Promise.all([
         supabase.from("products").select("*, categories(slug,name), brands(slug,name)").eq("active", true),
         supabase.from("categories").select("*").order("sort_order"),
         supabase.from("brands").select("*"),
       ]);
+      if (cancelled) return;
       setProducts(p.data || []);
       setCategories(c.data || []);
       setBrands(b.data || []);
@@ -64,8 +66,22 @@ function ShopPage() {
       setMaxPrice(max);
       setPriceRange([0, max]);
       setLoading(false);
-    })();
+    };
+    fetchAll();
+
+    const channel = supabase
+      .channel("tienda-products")
+      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, fetchAll)
+      .on("postgres_changes", { event: "*", schema: "public", table: "categories" }, fetchAll)
+      .on("postgres_changes", { event: "*", schema: "public", table: "brands" }, fetchAll)
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, []);
+
 
   const updateSearch = (patch: Partial<SearchParams>) => {
     navigate({ to: "/tienda", search: (prev: any) => ({ ...prev, ...patch }) });

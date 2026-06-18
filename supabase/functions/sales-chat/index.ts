@@ -71,7 +71,7 @@ serve(async (req) => {
       .from('products')
       .select('id, name, slug, brand, price, sale_price, short_description, description, stock, specs, category_id, categories(name, slug), brands(name, slug)')
       .eq('active', true)
-      .limit(150);
+      .limit(1000);
 
     const relevantProducts = (products || []).filter((p: any) => {
       const searchable = [
@@ -79,9 +79,10 @@ serve(async (req) => {
         p.categories?.name, JSON.stringify(p.specs || {})
       ].join(' ').toLowerCase();
       return searchTerms.some((term: string) => searchable.includes(term));
-    }).slice(0, 20);
+    }).slice(0, 25);
 
-    const productsContext = relevantProducts.length > 0 ? relevantProducts : (products || []).slice(0, 30);
+    const productsContext = relevantProducts.length > 0 ? relevantProducts : (products || []).slice(0, 60);
+
 
     const { data: blogs } = await supabase
       .from('blogs')
