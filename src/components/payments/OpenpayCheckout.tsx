@@ -287,9 +287,11 @@ type QrStatus = "idle" | "loading" | "active" | "expired" | "paid" | "error";
 function QrPanel({
   qrUrl,
   statusUrl,
+  amount,
 }: {
   qrUrl: string;
   statusUrl: (id: string) => string;
+  amount?: number;
 }) {
   const [status, setStatus] = useState<QrStatus>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -332,12 +334,22 @@ function QrPanel({
 
   async function handleQrPayment() {
     setError(null);
+    if (!amount || amount <= 0) {
+      setError("Monto inválido para generar QR.");
+      setStatus("error");
+      return;
+    }
     setStatus("loading");
     setQrBase64(null);
     stopTimers();
     try {
-      const res = await fetch(qrUrl, { method: "POST" });
-      if (!res.ok) throw new Error("No se pudo generar el QR. Intenta de nuevo.");
+      const res = await fetch(qrUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, description: "Pago QR Bre-B" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.description || "No se pudo generar el QR. Intenta de nuevo.");
       const data = await res.json();
       const b64: string | undefined = data?.qr_base64 ?? data?.qrBase64 ?? data?.qr;
       const id: string | undefined = data?.id ?? data?.charge_id;
