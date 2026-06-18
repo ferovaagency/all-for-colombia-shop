@@ -1,17 +1,16 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, FileCheck2, Info, X, ExternalLink } from "lucide-react";
-import { useServerFn } from "@tanstack/react-start";
-import { startMercadoPagoCheckout } from "@/lib/mercadopago.functions";
+import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode } from "lucide-react";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -25,6 +24,8 @@ const schema = z.object({
 });
 
 const REQUIRES_RECEIPT = ["bancolombia", "davivienda", "nequi", "breb"] as const;
+const QR_TOTAL_SECONDS = 10 * 60;
+const POLL_INTERVAL_MS = 30_000;
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — All For All" }] }),
@@ -32,7 +33,8 @@ export const Route = createFileRoute("/checkout")({
 });
 
 type PaymentMethod =
-  | "mercadopago"
+  | "openpay_pse"
+  | "openpay_qr_breb"
   | "bancolombia"
   | "davivienda"
   | "nequi"
@@ -44,24 +46,74 @@ const PAYMENT_OPTIONS: {
   label: string;
   description: string;
 }[] = [
-  { value: "mercadopago", label: "💳 Tarjeta, PSE y más — Mercado Pago", description: "Pago inmediato y seguro con Mercado Pago" },
+  { value: "openpay_pse", label: "🏛️ PSE — Openpay", description: "Débito desde tu banco con PSE (procesado por Openpay)" },
+  { value: "openpay_qr_breb", label: "📲 QR Bre-B — Openpay", description: "Escanea el QR desde tu app bancaria. Pago inmediato." },
   { value: "bancolombia", label: "🏦 Transferencia Bancolombia", description: "Transfiere y sube tu comprobante" },
   { value: "davivienda", label: "🏦 Transferencia Davivienda", description: "Transfiere y sube tu comprobante" },
   { value: "nequi", label: "📱 Nequi", description: "Transfiere por Nequi y sube comprobante" },
-  { value: "breb", label: "⚡ Bre-B", description: "Transferencia inmediata sin pasar por entidad bancaria" },
+  { value: "breb", label: "⚡ Bre-B (transferencia manual)", description: "Transferencia inmediata con llave Bre-B" },
   { value: "telefono", label: "📞 Transferencia directa", description: "Llama o escribe al 321 828 0762" },
 ];
+
+// Map our doc types to Openpay accepted ones (CC | NIT | CE). PA -> CE as fallback.
+function mapDocType(t: string): "CC" | "NIT" | "CE" {
+  if (t === "CC" || t === "NIT" || t === "CE") return t;
+  return "CE";
+}
 
 function CheckoutPage() {
   const { items, subtotal, clear, count } = useCart();
   const navigate = useNavigate();
-  const startMP = useServerFn(startMercadoPagoCheckout);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", customer_id_type: "CC", customer_id_number: "", address: "", city: "", notes: "",
   });
-  const [payment, setPayment] = useState<PaymentMethod>("mercadopago");
+  const [payment, setPayment] = useState<PaymentMethod>("openpay_pse");
   const [receipt, setReceipt] = useState<File | null>(null);
+
+  // ----- Openpay PSE bank list -----
+  const [banks, setBanks] = useState<{ bankCode: string; bankName: string }[]>([]);
+  const [bankCode, setBankCode] = useState<string>("");
+  const [loadingBanks, setLoadingBanks] = useState(false);
+
+  useEffect(() => {
+    if (payment !== "openpay_pse") return;
+    if (banks.length > 0) return;
+    let cancelled = false;
+    setLoadingBanks(true);
+    fetch("/api/openpay/banks")
+      .then(r => r.ok ? r.json() : Promise.reject(new Error("No se pudieron cargar los bancos PSE")))
+      .then((list: { bankCode: string; bankName: string }[]) => {
+        if (!cancelled) setBanks(list);
+      })
+      .catch(e => { if (!cancelled) toast.error(e.message); })
+      .finally(() => { if (!cancelled) setLoadingBanks(false); });
+    return () => { cancelled = true; };
+  }, [payment, banks.length]);
+
+  // ----- Openpay QR Bre-B state -----
+  const [qrOpen, setQrOpen] = useState(false);
+  const [qrBase64, setQrBase64] = useState<string | null>(null);
+  const [qrChargeId, setQrChargeId] = useState<string | null>(null);
+  const [qrSeconds, setQrSeconds] = useState(QR_TOTAL_SECONDS);
+  const [qrStatus, setQrStatus] = useState<"loading" | "active" | "expired" | "paid">("loading");
+  const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopTimers = () => {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (pollRef.current) clearInterval(pollRef.current);
+    countdownRef.current = null;
+    pollRef.current = null;
+  };
+  useEffect(() => () => stopTimers(), []);
+
+  const qrMmss = useMemo(() => {
+    const m = Math.floor(qrSeconds / 60);
+    const s = qrSeconds % 60;
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }, [qrSeconds]);
 
   const requiresReceipt = (REQUIRES_RECEIPT as readonly string[]).includes(payment);
 
@@ -79,32 +131,81 @@ function CheckoutPage() {
   const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("El archivo no debe superar 5MB");
-      return;
-    }
+    if (file.size > 5 * 1024 * 1024) { toast.error("El archivo no debe superar 5MB"); return; }
     const valid = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
-    if (!valid.includes(file.type)) {
-      toast.error("Solo JPG, PNG o PDF");
-      return;
-    }
+    if (!valid.includes(file.type)) { toast.error("Solo JPG, PNG o PDF"); return; }
     setReceipt(file);
   };
+
+  async function startQrPolling(orderId: string, chargeId: string) {
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/openpay/status?id=${encodeURIComponent(chargeId)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.status === "completed") {
+          stopTimers();
+          setQrStatus("paid");
+          await supabase.from("orders").update({ status: "paid" }).eq("id", orderId);
+          setTimeout(() => {
+            setQrOpen(false);
+            clear();
+            navigate({ to: "/resultado-pago", search: { id: orderId, status: "ok" } as any });
+          }, 1500);
+        }
+      } catch { /* ignore polling errors */ }
+    }, POLL_INTERVAL_MS);
+  }
+
+  async function generateQr(orderId: string) {
+    setQrOpen(true);
+    setQrStatus("loading");
+    setQrBase64(null);
+    setQrSeconds(QR_TOTAL_SECONDS);
+    stopTimers();
+    try {
+      const [first, ...rest] = form.name.trim().split(/\s+/);
+      const last = rest.join(" ") || first;
+      const res = await fetch("/api/openpay/breb-qr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: subtotal,
+          description: `Pedido ${orderId.slice(0, 8)}`,
+          customer: {
+            name: first,
+            last_name: last,
+            email: form.email,
+            phone_number: form.phone,
+          },
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.description || "No se pudo generar el QR");
+      setQrBase64(data.qr_base64);
+      setQrChargeId(data.id);
+      setQrStatus("active");
+      countdownRef.current = setInterval(() => {
+        setQrSeconds((s) => {
+          if (s <= 1) { stopTimers(); setQrStatus("expired"); setQrBase64(null); return 0; }
+          return s - 1;
+        });
+      }, 1000);
+      if (data.id) startQrPolling(orderId, data.id);
+    } catch (e: any) {
+      toast.error(e?.message || "Error generando el QR");
+      setQrOpen(false);
+    }
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = schema.safeParse(form);
-    if (!res.success) {
-      toast.error(res.error.issues[0]?.message || "Revisa los campos");
-      return;
-    }
-    if (requiresReceipt && !receipt) {
-      toast.error("Sube el comprobante de pago para continuar");
-      return;
-    }
+    if (!res.success) { toast.error(res.error.issues[0]?.message || "Revisa los campos"); return; }
+    if (payment === "openpay_pse" && !bankCode) { toast.error("Selecciona tu banco PSE"); return; }
+    if (requiresReceipt && !receipt) { toast.error("Sube el comprobante de pago para continuar"); return; }
     setSubmitting(true);
 
-    // Upload receipt first if present
     let receiptUrl: string | null = null;
     if (receipt) {
       const ext = receipt.name.split(".").pop() || "bin";
@@ -112,11 +213,7 @@ function CheckoutPage() {
       const { error: upErr } = await supabase.storage
         .from("payment-receipts")
         .upload(path, receipt, { contentType: receipt.type });
-      if (upErr) {
-        setSubmitting(false);
-        toast.error("No se pudo subir el comprobante. Intenta de nuevo.");
-        return;
-      }
+      if (upErr) { setSubmitting(false); toast.error("No se pudo subir el comprobante. Intenta de nuevo."); return; }
       receiptUrl = path;
     }
 
@@ -137,44 +234,60 @@ function CheckoutPage() {
 
     setSubmitting(false);
 
-    if (error || !data) {
-      toast.error("No se pudo crear el pedido. Intenta de nuevo.");
-      return;
-    }
+    if (error || !data) { toast.error("No se pudo crear el pedido. Intenta de nuevo."); return; }
 
     await supabase.from("customers").upsert({
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
+      name: form.name, email: form.email, phone: form.phone,
     }, { onConflict: "email" });
 
-    const summary = items.map(i => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`).join("\n");
-    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${data.id.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
-
-    // Mercado Pago: crear preferencia y redirigir al checkout
-    if (payment === "mercadopago") {
-      const toastId = toast.loading("Conectando con Mercado Pago...");
+    // ------- Openpay PSE -------
+    if (payment === "openpay_pse") {
+      const toastId = toast.loading("Conectando con PSE...");
       try {
-        const result = await startMP({
-          data: { orderId: data.id, origin: window.location.origin },
+        const [first, ...rest] = form.name.trim().split(/\s+/);
+        const last = rest.join(" ") || first;
+        const r = await fetch("/api/openpay/pse", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName: first,
+            lastName: last,
+            email: form.email,
+            docType: mapDocType(form.customer_id_type),
+            docNumber: form.customer_id_number.replace(/-/g, ""),
+            bankCode,
+            amount: subtotal,
+            description: `Pedido ${data.id.slice(0, 8)}`,
+            redirectUrl: `${window.location.origin}/resultado-pago?id=${data.id}`,
+          }),
         });
+        const json = await r.json().catch(() => ({}));
         toast.dismiss(toastId);
-        if (!result.ok || !result.redirectUrl) {
-          toast.error(result.ok ? "Mercado Pago no devolvió URL de pago" : result.error);
+        if (!r.ok || !json?.redirectUrl) {
+          toast.error(json?.description || "PSE no devolvió URL de pago");
           return;
         }
         clear();
-        window.location.href = result.redirectUrl;
+        window.location.href = json.redirectUrl;
         return;
       } catch (err: any) {
         toast.dismiss(toastId);
-        toast.error("No se pudo iniciar Mercado Pago: " + (err?.message || "error"));
+        toast.error("No se pudo iniciar PSE: " + (err?.message || "error"));
         return;
       }
     }
 
-    window.open(whatsappUrl(msg), "_blank");
+    // ------- Openpay QR Bre-B -------
+    if (payment === "openpay_qr_breb") {
+      setPendingOrderId(data.id);
+      await generateQr(data.id);
+      return;
+    }
 
+    // ------- Métodos manuales (WhatsApp) -------
+    const summary = items.map(i => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`).join("\n");
+    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${data.id.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
+    window.open(whatsappUrl(msg), "_blank");
     clear();
     navigate({ to: "/resultado-pago", search: { id: data.id, status: "ok" } as any });
   };
@@ -246,74 +359,54 @@ function CheckoutPage() {
               ))}
             </RadioGroup>
 
-            {/* Detalles según método seleccionado */}
-            {payment === "mercadopago" && (
-              <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
-                <p className="font-semibold mb-1">Paga con Mercado Pago</p>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Al confirmar el pedido te llevaremos al checkout seguro de Mercado Pago,
-                  donde puedes pagar con tarjeta de crédito/débito, PSE, Efecty o saldo en tu cuenta.
-                </p>
-                <a
-                  href="https://www.mercadopago.com.co/ayuda"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-secondary hover:underline"
+            {/* Openpay PSE: selector de banco */}
+            {payment === "openpay_pse" && (
+              <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4 space-y-3">
+                <p className="font-semibold">Selecciona tu banco</p>
+                <select
+                  value={bankCode}
+                  onChange={(e) => setBankCode(e.target.value)}
+                  required
+                  disabled={loadingBanks || banks.length === 0}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
-                  ¿Cómo funciona Mercado Pago? <ExternalLink className="h-3 w-3" />
-                </a>
+                  <option value="">{loadingBanks ? "Cargando bancos..." : "Selecciona tu banco"}</option>
+                  {banks.map(b => (
+                    <option key={b.bankCode} value={b.bankCode}>{b.bankName}</option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  Te redirigiremos al portal seguro de tu banco para confirmar el pago.
+                </p>
+              </div>
+            )}
+
+            {/* Openpay QR Bre-B info */}
+            {payment === "openpay_qr_breb" && (
+              <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
+                <p className="font-semibold mb-1 flex items-center gap-2"><QrCode className="h-4 w-4" /> Pago QR Bre-B</p>
+                <p className="text-sm text-muted-foreground">
+                  Al confirmar el pedido generaremos un código QR dinámico. Tendrás 10 minutos para escanearlo desde tu app bancaria.
+                </p>
               </div>
             )}
 
             {payment === "bancolombia" && (
-              <BankDetails
-                items={[
-                  ["Banco", "Bancolombia"],
-                  ["Tipo", "Cuenta de Ahorros NUEVO"],
-                  ["Número", "69800001277"],
-                  ["Titular", "ALL FOR ALL SAS"],
-                  ["NIT", "901.009.310-8"],
-                ]}
-              />
+              <BankDetails items={[["Banco","Bancolombia"],["Tipo","Cuenta de Ahorros NUEVO"],["Número","69800001277"],["Titular","ALL FOR ALL SAS"],["NIT","901.009.310-8"]]} />
             )}
-
             {payment === "davivienda" && (
-              <BankDetails
-                items={[
-                  ["Banco", "Davivienda"],
-                  ["Tipo", "Cuenta de Ahorros"],
-                  ["Número", "462970017556"],
-                  ["Titular", "ALL FOR ALL SAS"],
-                  ["NIT", "901.009.310-8"],
-                ]}
-              />
+              <BankDetails items={[["Banco","Davivienda"],["Tipo","Cuenta de Ahorros"],["Número","462970017556"],["Titular","ALL FOR ALL SAS"],["NIT","901.009.310-8"]]} />
             )}
-
             {payment === "nequi" && (
-              <BankDetails
-                items={[
-                  ["Llave Nequi", "@9010093108"],
-                  ["Titular", "ALL FOR ALL SAS"],
-                ]}
-              />
+              <BankDetails items={[["Llave Nequi","@9010093108"],["Titular","ALL FOR ALL SAS"]]} />
             )}
-
             {payment === "breb" && (
-              <BankDetails
-                items={[
-                  ["Llave Bre-B", "@9010093108"],
-                  ["Titular", "ALL FOR ALL SAS"],
-                  ["Tipo", "Empresa"],
-                ]}
-              />
+              <BankDetails items={[["Llave Bre-B","@9010093108"],["Titular","ALL FOR ALL SAS"],["Tipo","Empresa"]]} />
             )}
-
             {payment === "telefono" && (
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
                 <p className="font-semibold mb-1">📞 Teléfono: 321 828 0762</p>
-                <p className="text-sm text-muted-foreground">
-                  Coordina tu pago directamente con nuestro equipo.
-                </p>
+                <p className="text-sm text-muted-foreground">Coordina tu pago directamente con nuestro equipo.</p>
               </div>
             )}
 
@@ -339,15 +432,9 @@ function CheckoutPage() {
                       <FileCheck2 className="h-6 w-6 text-green-600 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{receipt.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {(receipt.size / 1024).toFixed(0)} KB
-                        </p>
+                        <p className="text-xs text-muted-foreground">{(receipt.size / 1024).toFixed(0)} KB</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setReceipt(null)}
-                        className="text-xs text-red-500 hover:text-red-700 inline-flex items-center gap-1"
-                      >
+                      <button type="button" onClick={() => setReceipt(null)} className="text-xs text-red-500 hover:text-red-700 inline-flex items-center gap-1">
                         <X className="h-3 w-3" /> Cambiar
                       </button>
                     </div>
@@ -392,17 +479,81 @@ function CheckoutPage() {
             size="lg"
             className="w-full bg-primary"
           >
-            {submitting
-              ? "Procesando..."
-              : requiresReceipt && !receipt
-              ? "⬆️ Primero sube el comprobante"
-              : "Confirmar pedido →"}
+            {submitting ? "Procesando..." : requiresReceipt && !receipt ? "⬆️ Primero sube el comprobante" : "Confirmar pedido →"}
           </Button>
           <p className="text-xs text-muted-foreground text-center mt-3">
-            Al confirmar serás contactado por WhatsApp para coordinar el pago y la entrega.
+            Pagos PSE y QR procesados de forma segura por Openpay.
           </p>
         </aside>
       </form>
+
+      {/* Diálogo de QR Bre-B */}
+      <Dialog
+        open={qrOpen}
+        onOpenChange={(open) => {
+          if (!open) { stopTimers(); setQrOpen(false); }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pago QR Bre-B</DialogTitle>
+            <DialogDescription>
+              Escanea este código desde tu app bancaria para completar el pago.
+            </DialogDescription>
+          </DialogHeader>
+
+          {qrStatus === "loading" && (
+            <div className="py-10 text-center">
+              <Loader2 className="h-10 w-10 mx-auto animate-spin text-primary mb-3" />
+              <p className="text-sm text-muted-foreground">Generando tu código QR...</p>
+            </div>
+          )}
+
+          {qrStatus === "active" && qrBase64 && (
+            <div className="flex flex-col items-center gap-3 py-2">
+              <div className="bg-white p-3 rounded-xl border shadow-sm">
+                <img
+                  width={300}
+                  height={300}
+                  src={`data:image/png;base64,${qrBase64}`}
+                  alt="Código QR Bre-B"
+                  className="block"
+                />
+              </div>
+              <div className="text-center">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Expira en</p>
+                <p className={`text-3xl font-mono font-bold ${qrSeconds < 60 ? "text-destructive" : "text-foreground"}`}>
+                  {qrMmss}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Verificando el pago automáticamente cada 30 segundos...
+                </p>
+              </div>
+            </div>
+          )}
+
+          {qrStatus === "expired" && (
+            <div className="text-center py-8">
+              <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-3" />
+              <h3 className="font-semibold mb-1">El código QR expiró</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Los códigos QR Bre-B sólo son válidos por 10 minutos.
+              </p>
+              <Button onClick={() => pendingOrderId && generateQr(pendingOrderId)}>
+                <RefreshCw className="h-4 w-4 mr-2" /> Generar nuevo QR
+              </Button>
+            </div>
+          )}
+
+          {qrStatus === "paid" && (
+            <div className="text-center py-8">
+              <CheckCircle2 className="h-16 w-16 text-green-600 mx-auto mb-3" />
+              <h3 className="text-xl font-bold mb-1">¡Pago exitoso!</h3>
+              <p className="text-sm text-muted-foreground">Recibimos tu pago correctamente.</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

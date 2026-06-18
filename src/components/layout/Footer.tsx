@@ -77,7 +77,7 @@ export function Footer() {
             Métodos de pago aceptados
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            {["💳 Mercado Pago", "🏦 Bancolombia", "🏦 Davivienda", "📱 Nequi", "⚡ Bre-B"].map((m) => (
+            {["🏛️ PSE Openpay", "📲 QR Bre-B", "🏦 Bancolombia", "🏦 Davivienda", "📱 Nequi"].map((m) => (
               <span
                 key={m}
                 className="text-xs px-3 py-1.5 rounded-full bg-white/10 text-primary-foreground/90"
