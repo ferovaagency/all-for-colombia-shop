@@ -350,7 +350,6 @@ function QrPanel({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.description || "No se pudo generar el QR. Intenta de nuevo.");
-      const data = await res.json();
       const b64: string | undefined = data?.qr_base64 ?? data?.qrBase64 ?? data?.qr;
       const id: string | undefined = data?.id ?? data?.charge_id;
       if (!b64) throw new Error("Respuesta inválida del servidor (sin QR).");
