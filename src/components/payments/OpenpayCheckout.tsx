@@ -115,9 +115,9 @@ export function OpenpayCheckout({ amount, endpoints }: Props) {
       </RadioGroup>
 
       {method === "pse" ? (
-        <PsePanel banksUrl={api.banks} pseUrl={api.pse} />
+        <PsePanel banksUrl={api.banks} pseUrl={api.pse} amount={amount} />
       ) : (
-        <QrPanel qrUrl={api.qr} statusUrl={api.status} />
+        <QrPanel qrUrl={api.qr} statusUrl={api.status} amount={amount} />
       )}
     </div>
   );
@@ -125,7 +125,7 @@ export function OpenpayCheckout({ amount, endpoints }: Props) {
 
 /* -------------------- PSE -------------------- */
 
-function PsePanel({ banksUrl, pseUrl }: { banksUrl: string; pseUrl: string }) {
+function PsePanel({ banksUrl, pseUrl, amount }: { banksUrl: string; pseUrl: string; amount?: number }) {
   const [banks, setBanks] = useState<Bank[]>([]);
   const [loadingBanks, setLoadingBanks] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -172,16 +172,27 @@ function PsePanel({ banksUrl, pseUrl }: { banksUrl: string; pseUrl: string }) {
       setError(parsed.error.issues[0]?.message || "Revisa los campos");
       return;
     }
+    if (!amount || amount <= 0) {
+      setError("Monto inválido. Recarga la página.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch(pseUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed.data),
+        body: JSON.stringify({
+          ...parsed.data,
+          amount,
+          description: "Pago en línea",
+          redirectUrl: `${window.location.origin}/resultado-pago`,
+        }),
       });
-      if (!res.ok) throw new Error("El cobro PSE falló. Intenta de nuevo.");
-      const data = await res.json();
-      const redirect = data?.payment_method?.url;
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.description || "El cobro PSE falló. Intenta de nuevo.");
+      }
+      const redirect = data?.redirectUrl ?? data?.payment_method?.url;
       if (!redirect) throw new Error("Respuesta inválida del servidor (sin URL de redirección).");
       window.location.href = redirect;
     } catch (e: any) {
@@ -276,9 +287,11 @@ type QrStatus = "idle" | "loading" | "active" | "expired" | "paid" | "error";
 function QrPanel({
   qrUrl,
   statusUrl,
+  amount,
 }: {
   qrUrl: string;
   statusUrl: (id: string) => string;
+  amount?: number;
 }) {
   const [status, setStatus] = useState<QrStatus>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -321,13 +334,22 @@ function QrPanel({
 
   async function handleQrPayment() {
     setError(null);
+    if (!amount || amount <= 0) {
+      setError("Monto inválido para generar QR.");
+      setStatus("error");
+      return;
+    }
     setStatus("loading");
     setQrBase64(null);
     stopTimers();
     try {
-      const res = await fetch(qrUrl, { method: "POST" });
-      if (!res.ok) throw new Error("No se pudo generar el QR. Intenta de nuevo.");
-      const data = await res.json();
+      const res = await fetch(qrUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, description: "Pago QR Bre-B" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.description || "No se pudo generar el QR. Intenta de nuevo.");
       const b64: string | undefined = data?.qr_base64 ?? data?.qrBase64 ?? data?.qr;
       const id: string | undefined = data?.id ?? data?.charge_id;
       if (!b64) throw new Error("Respuesta inválida del servidor (sin QR).");
