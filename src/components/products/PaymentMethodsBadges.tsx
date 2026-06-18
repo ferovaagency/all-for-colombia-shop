@@ -4,7 +4,7 @@ const METHODS = [
   { icon: <CreditCard className="h-5 w-5" />, label: "Tarjetas" },
   { icon: <Building2 className="h-5 w-5" />, label: "PSE" },
   { icon: <Smartphone className="h-5 w-5" />, label: "Bre-B" },
-  { icon: <Wallet className="h-5 w-5" />, label: "Mercado Pago" },
+  { icon: <Wallet className="h-5 w-5" />, label: "PSE / QR Bre-B (Openpay)" },
 ];
 
 export function PaymentMethodsBadges() {
