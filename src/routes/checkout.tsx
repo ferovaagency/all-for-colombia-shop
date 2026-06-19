@@ -282,13 +282,17 @@ function CheckoutPage() {
         const json = await r.json().catch(() => ({}));
         toast.dismiss(toastId);
         if (!r.ok || !json?.redirectUrl) {
-          toast.error(json?.description || "PSE no devolvió URL de pago");
+          console.error("DETALLE DEL ERROR DE OPENPAY (pse):", json);
+          toast.error(
+            `[${json?.error_code ?? r.status}] ${json?.description ?? "PSE no devolvió URL de pago"}`,
+          );
           return;
         }
         clear();
         window.location.href = json.redirectUrl;
         return;
       } catch (err: any) {
+        console.error("DETALLE DEL ERROR DE OPENPAY (pse, catch):", err);
         toast.dismiss(toastId);
         toast.error("No se pudo iniciar PSE: " + (err?.message || "error"));
         return;
