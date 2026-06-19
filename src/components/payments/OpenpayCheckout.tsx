@@ -364,7 +364,12 @@ function QrPanel({
         body: JSON.stringify({ amount, description: "Pago QR Bre-B" }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.description || "No se pudo generar el QR. Intenta de nuevo.");
+      if (!res.ok) {
+        console.error("DETALLE DEL ERROR DE OPENPAY (qr):", data);
+        throw new Error(
+          `[${data?.error_code ?? res.status}] ${data?.description ?? JSON.stringify(data)}`,
+        );
+      }
       const b64: string | undefined = data?.qr_base64 ?? data?.qrBase64 ?? data?.qr;
       const id: string | undefined = data?.id ?? data?.charge_id;
       if (!b64) throw new Error("Respuesta inválida del servidor (sin QR).");
@@ -389,6 +394,7 @@ function QrPanel({
         pollRef.current = setInterval(() => checkPaymentStatus(id), POLL_INTERVAL_MS);
       }
     } catch (e: any) {
+      console.error("DETALLE DEL ERROR DE OPENPAY (qr, catch):", e);
       setError(e?.message || "Error generando el QR");
       setStatus("error");
     }
