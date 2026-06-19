@@ -146,10 +146,21 @@ function PsePanel({ banksUrl, pseUrl, amount }: { banksUrl: string; pseUrl: stri
       setError(null);
       try {
         const res = await fetch(banksUrl, { method: "GET" });
-        if (!res.ok) throw new Error("No se pudo obtener la lista de bancos");
+        if (!res.ok) {
+          const errorRes = await res.json().catch(() => ({ description: res.statusText }));
+          console.error("DETALLE DEL ERROR DE OPENPAY (banks):", errorRes);
+          if (!cancelled) {
+            setError(
+              `[${errorRes.error_code ?? res.status}] ${errorRes.description ?? JSON.stringify(errorRes)}`,
+            );
+            setBanks([]);
+          }
+          return;
+        }
         const data: Bank[] = await res.json();
         if (!cancelled) setBanks(Array.isArray(data) ? data : []);
       } catch (e: any) {
+        console.error("DETALLE DEL ERROR DE OPENPAY (banks, network):", e);
         if (!cancelled) setError(e?.message || "Error cargando bancos");
       } finally {
         if (!cancelled) setLoadingBanks(false);
@@ -190,12 +201,16 @@ function PsePanel({ banksUrl, pseUrl, amount }: { banksUrl: string; pseUrl: stri
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data?.description || "El cobro PSE falló. Intenta de nuevo.");
+        console.error("DETALLE DEL ERROR DE OPENPAY (pse):", data);
+        throw new Error(
+          `[${data?.error_code ?? res.status}] ${data?.description ?? JSON.stringify(data)}`,
+        );
       }
       const redirect = data?.redirectUrl ?? data?.payment_method?.url;
       if (!redirect) throw new Error("Respuesta inválida del servidor (sin URL de redirección).");
       window.location.href = redirect;
     } catch (e: any) {
+      console.error("DETALLE DEL ERROR DE OPENPAY (pse, catch):", e);
       setError(e?.message || "Error procesando el pago");
       setSubmitting(false);
     }
@@ -349,7 +364,12 @@ function QrPanel({
         body: JSON.stringify({ amount, description: "Pago QR Bre-B" }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.description || "No se pudo generar el QR. Intenta de nuevo.");
+      if (!res.ok) {
+        console.error("DETALLE DEL ERROR DE OPENPAY (qr):", data);
+        throw new Error(
+          `[${data?.error_code ?? res.status}] ${data?.description ?? JSON.stringify(data)}`,
+        );
+      }
       const b64: string | undefined = data?.qr_base64 ?? data?.qrBase64 ?? data?.qr;
       const id: string | undefined = data?.id ?? data?.charge_id;
       if (!b64) throw new Error("Respuesta inválida del servidor (sin QR).");
@@ -374,6 +394,7 @@ function QrPanel({
         pollRef.current = setInterval(() => checkPaymentStatus(id), POLL_INTERVAL_MS);
       }
     } catch (e: any) {
+      console.error("DETALLE DEL ERROR DE OPENPAY (qr, catch):", e);
       setError(e?.message || "Error generando el QR");
       setStatus("error");
     }

@@ -82,11 +82,23 @@ function CheckoutPage() {
     let cancelled = false;
     setLoadingBanks(true);
     fetch("/api/openpay/banks")
-      .then(r => r.ok ? r.json() : Promise.reject(new Error("No se pudieron cargar los bancos PSE")))
+      .then(async (r) => {
+        if (!r.ok) {
+          const errorRes = await r.json().catch(() => ({ description: r.statusText }));
+          console.error("DETALLE DEL ERROR DE OPENPAY (banks):", errorRes);
+          throw new Error(
+            `[${errorRes.error_code ?? r.status}] ${errorRes.description ?? JSON.stringify(errorRes)}`,
+          );
+        }
+        return r.json();
+      })
       .then((list: { bankCode: string; bankName: string }[]) => {
         if (!cancelled) setBanks(list);
       })
-      .catch(e => { if (!cancelled) toast.error(e.message); })
+      .catch(e => {
+        console.error("DETALLE DEL ERROR DE OPENPAY (banks, catch):", e);
+        if (!cancelled) toast.error(e.message);
+      })
       .finally(() => { if (!cancelled) setLoadingBanks(false); });
     return () => { cancelled = true; };
   }, [payment, banks.length]);
@@ -181,7 +193,12 @@ function CheckoutPage() {
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.description || "No se pudo generar el QR");
+      if (!res.ok) {
+        console.error("DETALLE DEL ERROR DE OPENPAY (qr):", data);
+        throw new Error(
+          `[${data?.error_code ?? res.status}] ${data?.description ?? JSON.stringify(data)}`,
+        );
+      }
       setQrBase64(data.qr_base64);
       setQrChargeId(data.id);
       setQrStatus("active");
@@ -193,6 +210,7 @@ function CheckoutPage() {
       }, 1000);
       if (data.id) startQrPolling(orderId, data.id);
     } catch (e: any) {
+      console.error("DETALLE DEL ERROR DE OPENPAY (qr, catch):", e);
       toast.error(e?.message || "Error generando el QR");
       setQrOpen(false);
     }
@@ -264,13 +282,17 @@ function CheckoutPage() {
         const json = await r.json().catch(() => ({}));
         toast.dismiss(toastId);
         if (!r.ok || !json?.redirectUrl) {
-          toast.error(json?.description || "PSE no devolvió URL de pago");
+          console.error("DETALLE DEL ERROR DE OPENPAY (pse):", json);
+          toast.error(
+            `[${json?.error_code ?? r.status}] ${json?.description ?? "PSE no devolvió URL de pago"}`,
+          );
           return;
         }
         clear();
         window.location.href = json.redirectUrl;
         return;
       } catch (err: any) {
+        console.error("DETALLE DEL ERROR DE OPENPAY (pse, catch):", err);
         toast.dismiss(toastId);
         toast.error("No se pudo iniciar PSE: " + (err?.message || "error"));
         return;
