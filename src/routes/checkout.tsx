@@ -193,7 +193,12 @@ function CheckoutPage() {
         }),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.description || "No se pudo generar el QR");
+      if (!res.ok) {
+        console.error("DETALLE DEL ERROR DE OPENPAY (qr):", data);
+        throw new Error(
+          `[${data?.error_code ?? res.status}] ${data?.description ?? JSON.stringify(data)}`,
+        );
+      }
       setQrBase64(data.qr_base64);
       setQrChargeId(data.id);
       setQrStatus("active");
@@ -205,6 +210,7 @@ function CheckoutPage() {
       }, 1000);
       if (data.id) startQrPolling(orderId, data.id);
     } catch (e: any) {
+      console.error("DETALLE DEL ERROR DE OPENPAY (qr, catch):", e);
       toast.error(e?.message || "Error generando el QR");
       setQrOpen(false);
     }
