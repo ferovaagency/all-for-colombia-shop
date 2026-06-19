@@ -201,12 +201,16 @@ function PsePanel({ banksUrl, pseUrl, amount }: { banksUrl: string; pseUrl: stri
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data?.description || "El cobro PSE falló. Intenta de nuevo.");
+        console.error("DETALLE DEL ERROR DE OPENPAY (pse):", data);
+        throw new Error(
+          `[${data?.error_code ?? res.status}] ${data?.description ?? JSON.stringify(data)}`,
+        );
       }
       const redirect = data?.redirectUrl ?? data?.payment_method?.url;
       if (!redirect) throw new Error("Respuesta inválida del servidor (sin URL de redirección).");
       window.location.href = redirect;
     } catch (e: any) {
+      console.error("DETALLE DEL ERROR DE OPENPAY (pse, catch):", e);
       setError(e?.message || "Error procesando el pago");
       setSubmitting(false);
     }
