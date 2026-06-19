@@ -82,11 +82,23 @@ function CheckoutPage() {
     let cancelled = false;
     setLoadingBanks(true);
     fetch("/api/openpay/banks")
-      .then(r => r.ok ? r.json() : Promise.reject(new Error("No se pudieron cargar los bancos PSE")))
+      .then(async (r) => {
+        if (!r.ok) {
+          const errorRes = await r.json().catch(() => ({ description: r.statusText }));
+          console.error("DETALLE DEL ERROR DE OPENPAY (banks):", errorRes);
+          throw new Error(
+            `[${errorRes.error_code ?? r.status}] ${errorRes.description ?? JSON.stringify(errorRes)}`,
+          );
+        }
+        return r.json();
+      })
       .then((list: { bankCode: string; bankName: string }[]) => {
         if (!cancelled) setBanks(list);
       })
-      .catch(e => { if (!cancelled) toast.error(e.message); })
+      .catch(e => {
+        console.error("DETALLE DEL ERROR DE OPENPAY (banks, catch):", e);
+        if (!cancelled) toast.error(e.message);
+      })
       .finally(() => { if (!cancelled) setLoadingBanks(false); });
     return () => { cancelled = true; };
   }, [payment, banks.length]);
