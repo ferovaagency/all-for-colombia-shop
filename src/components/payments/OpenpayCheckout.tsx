@@ -146,10 +146,21 @@ function PsePanel({ banksUrl, pseUrl, amount }: { banksUrl: string; pseUrl: stri
       setError(null);
       try {
         const res = await fetch(banksUrl, { method: "GET" });
-        if (!res.ok) throw new Error("No se pudo obtener la lista de bancos");
+        if (!res.ok) {
+          const errorRes = await res.json().catch(() => ({ description: res.statusText }));
+          console.error("DETALLE DEL ERROR DE OPENPAY (banks):", errorRes);
+          if (!cancelled) {
+            setError(
+              `[${errorRes.error_code ?? res.status}] ${errorRes.description ?? JSON.stringify(errorRes)}`,
+            );
+            setBanks([]);
+          }
+          return;
+        }
         const data: Bank[] = await res.json();
         if (!cancelled) setBanks(Array.isArray(data) ? data : []);
       } catch (e: any) {
+        console.error("DETALLE DEL ERROR DE OPENPAY (banks, network):", e);
         if (!cancelled) setError(e?.message || "Error cargando bancos");
       } finally {
         if (!cancelled) setLoadingBanks(false);
