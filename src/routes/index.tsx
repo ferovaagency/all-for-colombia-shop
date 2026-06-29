@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerA50 from "@/assets/banner-logitech-gol.jpg";
+import bannerMsiAsset from "@/assets/banner-msi-juega-sin-limites.png.asset.json";
 import monitorGamer from "@/assets/monitor-gamer.png";
 
 export const Route = createFileRoute("/")({
