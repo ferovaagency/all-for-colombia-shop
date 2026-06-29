@@ -41,6 +41,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
 const PROMO_BANNERS = [
   { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 2, image: bannerA50, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
+  { id: 3, image: bannerMsiAsset.url, link: "/tienda?marca=msi", alt: "MSI — Juega sin límites", ratio: "1920/818" },
 ];
 
 function HomePage() {
