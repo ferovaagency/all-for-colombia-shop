@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerA50 from "@/assets/banner-logitech-gol.jpg";
+import bannerMsiAsset from "@/assets/banner-msi-juega-sin-limites.png.asset.json";
 import monitorGamer from "@/assets/monitor-gamer.png";
 
 export const Route = createFileRoute("/")({
@@ -40,6 +41,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
 const PROMO_BANNERS = [
   { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 2, image: bannerA50, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
+  { id: 3, image: bannerMsiAsset.url, link: "/tienda?marca=msi", alt: "MSI — Juega sin límites", ratio: "1920/818" },
 ];
 
 function HomePage() {
