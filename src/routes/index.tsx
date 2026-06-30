@@ -90,20 +90,20 @@ function HomePage() {
       {/* Hero - slider rotativo con todos los banners */}
       <section className="relative overflow-hidden bg-muted">
         <h1 className="sr-only">All For All — Tienda online de tecnología, hogar y soluciones empresariales en Colombia</h1>
-        <div className="relative w-full">
+        <div className="relative w-full aspect-[1920/585]">
           {PROMO_BANNERS.map((banner, i) => (
             <Link
               key={banner.id}
               to={banner.link}
               className={cn(
-                "block w-full transition-opacity duration-500",
-                i === bannerIndex ? "relative opacity-100 z-10" : "absolute inset-0 opacity-0 z-0 pointer-events-none",
+                "absolute inset-0 block transition-opacity duration-500",
+                i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none",
               )}
             >
               <img
                 src={banner.image}
                 alt={banner.alt}
-                className="block w-full h-auto"
+                className="absolute inset-0 h-full w-full object-cover object-center"
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "auto"}
                 decoding="async"
