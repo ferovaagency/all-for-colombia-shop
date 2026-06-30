@@ -87,20 +87,44 @@ function HomePage() {
 
   return (
     <>
-      {/* Hero - banner se adapta a la proporción real de la imagen */}
+      {/* Hero - slider rotativo con todos los banners */}
       <section className="relative overflow-hidden bg-muted">
         <h1 className="sr-only">All For All — Tienda online de tecnología, hogar y soluciones empresariales en Colombia</h1>
-        <Link to="/tienda" className="block w-full">
-          <img
-            src={bannerPadre}
-            alt="Si es Logitech, es gol — Mundial Colombia"
-            className="block w-full h-auto"
-            width={1920}
-            height={600}
-            fetchPriority="high"
-            decoding="async"
-          />
-        </Link>
+        <div className="relative w-full aspect-[1920/600]">
+          {PROMO_BANNERS.map((banner, i) => (
+            <Link
+              key={banner.id}
+              to={banner.link}
+              className={cn(
+                "absolute inset-0 transition-opacity duration-500",
+                i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0",
+              )}
+            >
+              <img
+                src={banner.image}
+                alt={banner.alt}
+                width={1920}
+                height={600}
+                className="w-full h-full object-contain object-center"
+                loading={i === 0 ? "eager" : "lazy"}
+                fetchPriority={i === 0 ? "high" : "auto"}
+                decoding="async"
+              />
+            </Link>
+          ))}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+            {PROMO_BANNERS.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setBannerIndex(i)}
+                aria-label={`Banner ${i + 1}`}
+                className={cn("h-1.5 rounded-full transition-all", i === bannerIndex ? "w-5 bg-white" : "w-1.5 bg-white/60")}
+              />
+            ))}
+          </div>
+        </div>
+
 
         <div className="container mx-auto px-4 -mt-10 relative z-20">
           <form onSubmit={onSearch} className="max-w-2xl mx-auto">
