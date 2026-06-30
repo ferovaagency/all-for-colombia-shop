@@ -222,22 +222,21 @@ function HomePage() {
                 key={banner.id}
                 to={banner.link}
                 className={cn(
-                  "absolute inset-0 transition-opacity duration-500",
-                  i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0",
+                  "block w-full transition-opacity duration-500",
+                  i === bannerIndex ? "relative opacity-100 z-10" : "absolute inset-0 opacity-0 z-0 pointer-events-none",
                 )}
               >
                 <img
                   src={banner.image}
                   alt={banner.alt}
-                  width={1920}
-                  height={600}
-                  className="w-full h-full object-cover object-center"
+                  className="block w-full h-auto"
                   loading={i === 0 ? "eager" : "lazy"}
                   fetchPriority={i === 0 ? "high" : "auto"}
                   decoding="async"
                 />
               </Link>
             ))}
+
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
               {PROMO_BANNERS.map((_, i) => (
                 <button
