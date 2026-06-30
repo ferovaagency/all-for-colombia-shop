@@ -90,7 +90,7 @@ function HomePage() {
       {/* Hero - slider rotativo con todos los banners */}
       <section className="relative overflow-hidden bg-muted">
         <h1 className="sr-only">All For All — Tienda online de tecnología, hogar y soluciones empresariales en Colombia</h1>
-        <div className="relative w-full aspect-[1920/600]">
+        <div className="relative w-full aspect-[1920/600] bg-muted">
           {PROMO_BANNERS.map((banner, i) => (
             <Link
               key={banner.id}
@@ -105,7 +105,8 @@ function HomePage() {
                 alt={banner.alt}
                 width={1920}
                 height={600}
-                className="w-full h-full object-contain object-center"
+                className="w-full h-full object-cover object-center"
+
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "auto"}
                 decoding="async"
