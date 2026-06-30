@@ -233,7 +233,7 @@ function HomePage() {
                   alt={banner.alt}
                   width={1920}
                   height={600}
-                  className="w-full h-full object-contain object-center"
+                  className="w-full h-full object-cover object-center"
                   loading={i === 0 ? "eager" : "lazy"}
                   fetchPriority={i === 0 ? "high" : "auto"}
                   decoding="async"
