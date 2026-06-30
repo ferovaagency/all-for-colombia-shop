@@ -8,7 +8,7 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerA50 from "@/assets/banner-logitech-gol.jpg";
-import bannerMsiAsset from "@/assets/banner-msi-juega-sin-limites.png.asset.json";
+import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
 import monitorGamer from "@/assets/monitor-gamer.png";
 
 export const Route = createFileRoute("/")({
@@ -41,7 +41,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
 const PROMO_BANNERS = [
   { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 2, image: bannerA50, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
-  { id: 3, image: bannerMsiAsset.url, link: "/tienda?marca=msi", alt: "MSI — Juega sin límites", ratio: "1920/818" },
+  { id: 3, image: bannerMsi, link: "/tienda?marca=msi", alt: "MSI — Juega sin límites" },
 ];
 
 function HomePage() {
@@ -90,20 +90,20 @@ function HomePage() {
       {/* Hero - slider rotativo con todos los banners */}
       <section className="relative overflow-hidden bg-muted">
         <h1 className="sr-only">All For All — Tienda online de tecnología, hogar y soluciones empresariales en Colombia</h1>
-        <div className="relative w-full">
+        <div className="relative w-full aspect-[1920/585]">
           {PROMO_BANNERS.map((banner, i) => (
             <Link
               key={banner.id}
               to={banner.link}
               className={cn(
-                "block w-full transition-opacity duration-500",
-                i === bannerIndex ? "relative opacity-100 z-10" : "absolute inset-0 opacity-0 z-0 pointer-events-none",
+                "absolute inset-0 block transition-opacity duration-500",
+                i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none",
               )}
             >
               <img
                 src={banner.image}
                 alt={banner.alt}
-                className="block w-full h-auto"
+                className="absolute inset-0 h-full w-full object-cover object-center"
                 loading={i === 0 ? "eager" : "lazy"}
                 fetchPriority={i === 0 ? "high" : "auto"}
                 decoding="async"
@@ -216,22 +216,21 @@ function HomePage() {
       {/* Promo banners slider */}
       <section className="py-6 bg-background">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-2xl w-full bg-background">
+          <div className="relative overflow-hidden rounded-2xl w-full bg-background aspect-[1920/585]">
             {PROMO_BANNERS.map((banner, i) => (
               <Link
                 key={banner.id}
                 to={banner.link}
                 className={cn(
-                  "block w-full transition-opacity duration-500",
-                  i === bannerIndex ? "relative opacity-100 z-10" : "absolute inset-0 opacity-0 z-0 pointer-events-none",
+                  "absolute inset-0 block transition-opacity duration-500",
+                  i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none",
                 )}
               >
                 <img
                   src={banner.image}
                   alt={banner.alt}
-                  className="block w-full h-auto"
-                  loading={i === 0 ? "eager" : "lazy"}
-                  fetchPriority={i === 0 ? "high" : "auto"}
+                  className="absolute inset-0 h-full w-full object-cover object-center"
+                  loading="lazy"
                   decoding="async"
                 />
               </Link>
