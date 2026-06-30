@@ -216,22 +216,21 @@ function HomePage() {
       {/* Promo banners slider */}
       <section className="py-6 bg-background">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-2xl w-full bg-background">
+          <div className="relative overflow-hidden rounded-2xl w-full bg-background aspect-[1920/585]">
             {PROMO_BANNERS.map((banner, i) => (
               <Link
                 key={banner.id}
                 to={banner.link}
                 className={cn(
-                  "block w-full transition-opacity duration-500",
-                  i === bannerIndex ? "relative opacity-100 z-10" : "absolute inset-0 opacity-0 z-0 pointer-events-none",
+                  "absolute inset-0 block transition-opacity duration-500",
+                  i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none",
                 )}
               >
                 <img
                   src={banner.image}
                   alt={banner.alt}
-                  className="block w-full h-auto"
-                  loading={i === 0 ? "eager" : "lazy"}
-                  fetchPriority={i === 0 ? "high" : "auto"}
+                  className="absolute inset-0 h-full w-full object-cover object-center"
+                  loading="lazy"
                   decoding="async"
                 />
               </Link>
