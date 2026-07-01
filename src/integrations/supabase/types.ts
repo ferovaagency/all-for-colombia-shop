@@ -910,6 +910,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_order_addi_refs: {
+        Args: {
+          _application_id: string
+          _checkout_url: string
+          _order_id: string
+          _status: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin"
