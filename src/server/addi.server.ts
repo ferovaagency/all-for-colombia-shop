@@ -1,12 +1,12 @@
 // Server-only Addi API client (sandbox/production)
 // Docs: https://developers.addi.com
 
-const PUBLIC_API_PROD = "https://channels.public.api.addi.com";
-const PUBLIC_API_SANDBOX = "https://channels.public.api.staging.addi.com";
+const PUBLIC_API_PROD = "https://channels-public-api.addi.com";
+const PUBLIC_API_SANDBOX = "https://channels-public-api.addi-staging.com";
 const AUTH_PROD = "https://auth.addi.com";
 const AUTH_SANDBOX = "https://auth.addi-staging.com";
 const AUDIENCE_PROD = "https://api.addi.com";
-const AUDIENCE_SANDBOX = "https://api.staging.addi.com";
+const AUDIENCE_SANDBOX = "https://api.addi-staging.com";
 
 function isProduction() {
   return (process.env.ADDI_ENV || "sandbox") === "production";
