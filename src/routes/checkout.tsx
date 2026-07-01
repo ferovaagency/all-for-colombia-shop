@@ -424,6 +424,32 @@ function CheckoutPage() {
               </div>
             )}
 
+            {/* Openpay Tarjeta */}
+            {payment === "openpay_card" && !cardOrderId && (
+              <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
+                <p className="font-semibold mb-1 flex items-center gap-2"><Lock className="h-4 w-4" /> Pago con tarjeta</p>
+                <p className="text-sm text-muted-foreground">
+                  Al confirmar el pedido te pediremos los datos de tu tarjeta de forma segura (tokenización Openpay).
+                </p>
+              </div>
+            )}
+            {payment === "openpay_card" && cardOrderId && (
+              <OpenpayCardForm
+                orderId={cardOrderId}
+                amount={subtotal}
+                customer={{
+                  name: form.name.trim().split(/\s+/)[0] || form.name,
+                  last_name: form.name.trim().split(/\s+/).slice(1).join(" ") || form.name,
+                  phone_number: form.phone,
+                  email: form.email,
+                }}
+                onSuccess={({ charge_id }) => {
+                  clear();
+                  navigate({ to: "/resultado-pago", search: { id: cardOrderId, status: "ok", ref: charge_id } as any });
+                }}
+              />
+            )}
+
             {payment === "bancolombia" && (
               <BankDetails items={[["Banco","Bancolombia"],["Tipo","Cuenta de Ahorros NUEVO"],["Número","69800001277"],["Titular","ALL FOR ALL SAS"],["NIT","901.009.310-8"]]} />
             )}
