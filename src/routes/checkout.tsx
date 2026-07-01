@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode, Lock } from "lucide-react";
 import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
+import { startAddiCheckout } from "@/lib/addi.functions";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -37,6 +38,7 @@ type PaymentMethod =
   | "openpay_card"
   | "openpay_pse"
   | "openpay_qr_breb"
+  | "addi"
   | "bancolombia"
   | "davivienda"
   | "nequi"
@@ -51,6 +53,7 @@ const PAYMENT_OPTIONS: {
   { value: "openpay_card", label: "💳 Tarjeta crédito/débito", description: "Visa, Mastercard, Amex — procesado por Openpay" },
   { value: "openpay_pse", label: "🏛️ PSE — Openpay", description: "Débito desde tu banco con PSE (procesado por Openpay)" },
   { value: "openpay_qr_breb", label: "📲 QR Bre-B — Openpay", description: "Escanea el QR desde tu app bancaria. Pago inmediato." },
+  { value: "addi", label: "🟣 Addi — Paga a cuotas sin tarjeta", description: "Financia tu compra en cuotas con aprobación en minutos" },
   { value: "bancolombia", label: "🏦 Transferencia Bancolombia", description: "Transfiere y sube tu comprobante" },
   { value: "davivienda", label: "🏦 Transferencia Davivienda", description: "Transfiere y sube tu comprobante" },
   { value: "nequi", label: "📱 Nequi", description: "Transfiere por Nequi y sube comprobante" },
@@ -316,6 +319,29 @@ function CheckoutPage() {
       setCardOrderId(data.id);
       toast.success("Pedido creado. Completa los datos de tu tarjeta abajo para pagar.");
       return;
+    }
+
+    // ------- Addi (financiamiento en cuotas) -------
+    if (payment === "addi") {
+      const toastId = toast.loading("Conectando con Addi...");
+      try {
+        const result = await startAddiCheckout({
+          data: { orderId: data.id, origin: window.location.origin },
+        });
+        toast.dismiss(toastId);
+        if (!result?.ok || !result.redirectUrl) {
+          toast.error(result?.error || "Addi no devolvió URL de pago");
+          return;
+        }
+        clear();
+        window.location.href = result.redirectUrl;
+        return;
+      } catch (err: any) {
+        toast.dismiss(toastId);
+        console.error("Addi checkout error:", err);
+        toast.error("No se pudo iniciar Addi: " + (err?.message || "error"));
+        return;
+      }
     }
 
     // ------- Métodos manuales (WhatsApp) -------
