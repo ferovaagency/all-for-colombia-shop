@@ -535,11 +535,19 @@ function CheckoutPage() {
           </div>
           <Button
             type="submit"
-            disabled={submitting || (requiresReceipt && !receipt)}
+            disabled={submitting || (requiresReceipt && !receipt) || (payment === "openpay_card" && !!cardOrderId)}
             size="lg"
             className="w-full bg-primary"
           >
-            {submitting ? "Procesando..." : requiresReceipt && !receipt ? "⬆️ Primero sube el comprobante" : "Confirmar pedido →"}
+            {submitting
+              ? "Procesando..."
+              : payment === "openpay_card" && cardOrderId
+                ? "Ingresa los datos de tu tarjeta ↓"
+                : requiresReceipt && !receipt
+                  ? "⬆️ Primero sube el comprobante"
+                  : payment === "openpay_card"
+                    ? "Continuar al pago con tarjeta →"
+                    : "Confirmar pedido →"}
           </Button>
           <p className="text-xs text-muted-foreground text-center mt-3">
             Pagos PSE y QR procesados de forma segura por Openpay.
