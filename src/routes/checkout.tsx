@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode } from "lucide-react";
+import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode, Lock } from "lucide-react";
 import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
 
 const schema = z.object({
