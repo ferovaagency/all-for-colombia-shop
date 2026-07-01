@@ -39,7 +39,9 @@ export const Route = createFileRoute("/api/public/addi-webhook")({
           payload?.allyReference || payload?.data?.allyReference;
 
         const orderStatus = mapAddiStatusToOrder(status);
-        const update: Record<string, any> = { addi_status: status || null };
+        const update: { addi_status: string | null; status?: string } = {
+          addi_status: status || null,
+        };
         if (orderStatus) update.status = orderStatus;
 
         const query = supabaseAdmin.from("orders").update(update);
