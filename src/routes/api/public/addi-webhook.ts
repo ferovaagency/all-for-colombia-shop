@@ -11,10 +11,19 @@ export const Route = createFileRoute("/api/public/addi-webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const user = process.env.ADDI_WEBHOOK_USER?.trim();
-        const pass = process.env.ADDI_WEBHOOK_PASS?.trim();
-        if (user && pass) {
-          if (!isAuthorizedAddiWebhook(request.headers, user, pass)) {
+        const credentialPairs = [
+          {
+            user: process.env.ADDI_WEBHOOK_USER?.trim(),
+            pass: process.env.ADDI_WEBHOOK_PASS?.trim(),
+          },
+          {
+            user: process.env.ADDI_CLIENT_ID?.trim(),
+            pass: process.env.ADDI_CLIENT_SECRET?.trim(),
+          },
+        ].filter((pair): pair is { user: string; pass: string } => Boolean(pair.user && pair.pass));
+
+        if (credentialPairs.length > 0) {
+          if (!isAuthorizedAddiWebhook(request.headers, credentialPairs)) {
             return new Response("Unauthorized", { status: 401 });
           }
         }
@@ -74,7 +83,7 @@ function mapAddiStatusToOrder(status: string): string | null {
   return null;
 }
 
-function isAuthorizedAddiWebhook(headers: Headers, expectedUser: string, expectedPass: string) {
+function isAuthorizedAddiWebhook(headers: Headers, credentialPairs: Array<{ user: string; pass: string }>) {
   const authorization = headers.get("authorization")?.trim() || "";
   if (authorization.toLowerCase().startsWith("basic ")) {
     const encoded = authorization.slice(6).trim();
@@ -84,7 +93,7 @@ function isAuthorizedAddiWebhook(headers: Headers, expectedUser: string, expecte
       if (separatorIndex >= 0) {
         const headerUser = decoded.slice(0, separatorIndex);
         const headerPass = decoded.slice(separatorIndex + 1);
-        if (safeEqual(headerUser, expectedUser) && safeEqual(headerPass, expectedPass)) return true;
+        if (matchesCredentialPair(headerUser, headerPass, credentialPairs)) return true;
       }
     } catch {
       return false;
@@ -95,11 +104,16 @@ function isAuthorizedAddiWebhook(headers: Headers, expectedUser: string, expecte
     "x-addi-webhook-user",
     "x-addi-user",
     "x-addi-client-id",
+    "x-addi-client_id",
     "x-webhook-user",
     "x-webhook-username",
+    "x-username",
+    "x-user",
+    "x-auth-user",
     "x-client-id",
     "client-id",
     "client_id",
+    "clientid",
     "webhook-user",
     "username",
     "user",
@@ -110,22 +124,34 @@ function isAuthorizedAddiWebhook(headers: Headers, expectedUser: string, expecte
     "x-addi-pass",
     "x-addi-password",
     "x-addi-client-secret",
+    "x-addi-client_secret",
     "x-webhook-pass",
     "x-webhook-password",
+    "x-password",
+    "x-pass",
+    "x-auth-password",
     "x-client-secret",
     "client-secret",
     "client_secret",
+    "clientsecret",
     "webhook-pass",
     "password",
     "pass",
   ]);
 
-  return Boolean(
-    headerUser &&
-      headerPass &&
-      safeEqual(headerUser.trim(), expectedUser) &&
-      safeEqual(headerPass.trim(), expectedPass),
-  );
+  const apiKey = firstHeader(headers, [
+    "x-api-key",
+    "x-addi-api-key",
+    "x-access-token",
+    "api-key",
+    "apikey",
+  ]);
+
+  if (headerUser && headerPass && matchesCredentialPair(headerUser.trim(), headerPass.trim(), credentialPairs)) {
+    return true;
+  }
+
+  return Boolean(apiKey && credentialPairs.some((pair) => safeEqual(apiKey.trim(), pair.pass)));
 }
 
 function firstHeader(headers: Headers, names: string[]) {
@@ -138,4 +164,10 @@ function firstHeader(headers: Headers, names: string[]) {
 
 function safeEqual(a: string, b: string) {
   return a.length === b.length && a === b;
+}
+
+function matchesCredentialPair(user: string, pass: string, credentialPairs: Array<{ user: string; pass: string }>) {
+  return credentialPairs.some(
+    (pair) => safeEqual(user.trim(), pair.user) && safeEqual(pass.trim(), pair.pass),
+  );
 }
