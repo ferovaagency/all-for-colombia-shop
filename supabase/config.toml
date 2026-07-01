@@ -7,3 +7,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.send-distributor-welcome]
 verify_jwt = false
+[functions.openpay-diagnostico]
+verify_jwt = false
