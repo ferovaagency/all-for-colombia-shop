@@ -1,7 +1,8 @@
 // Server-only Addi API client (sandbox/production)
 // Docs: https://developers.addi.com
 
-const PUBLIC_API_BASE = "https://channels.public.api.addi.com";
+const PUBLIC_API_PROD = "https://channels.public.api.addi.com";
+const PUBLIC_API_SANDBOX = "https://channels.public.api.staging.addi.com";
 const AUTH_PROD = "https://auth.addi.com";
 const AUTH_SANDBOX = "https://auth.addi-staging.com";
 const AUDIENCE_PROD = "https://api.addi.com";
@@ -17,6 +18,10 @@ function getAuthBase() {
 
 function getAudience() {
   return isProduction() ? AUDIENCE_PROD : AUDIENCE_SANDBOX;
+
+function getPublicApiBase() {
+  return isProduction() ? PUBLIC_API_PROD : PUBLIC_API_SANDBOX;
+}
 }
 
 function getAllySlug() {
@@ -80,7 +85,7 @@ export type AddiConfig = {
 
 export async function getAddiConfig(requestedAmountCop: number): Promise<AddiConfig> {
   const slug = getAllySlug();
-  const url = `${PUBLIC_API_BASE}/allies/${encodeURIComponent(slug)}/config?requestedamount=${Math.round(requestedAmountCop)}`;
+  const url = `${getPublicApiBase()}/allies/${encodeURIComponent(slug)}/config?requestedamount=${Math.round(requestedAmountCop)}`;
   const res = await fetch(url, {
     headers: { Accept: "application/json", "Content-Type": "application/json" },
   });
@@ -157,7 +162,7 @@ export async function createAddiApplication(input: AddiApplicationInput) {
       : {}),
   };
 
-  const res = await fetch(`${PUBLIC_API_BASE}/allies/${encodeURIComponent(slug)}/applications`, {
+  const res = await fetch(`${getPublicApiBase()}/allies/${encodeURIComponent(slug)}/applications`, {
     method: "POST",
     redirect: "manual", // capture the 301 ourselves
     headers: {
@@ -214,7 +219,7 @@ export async function getAddiApplication(applicationId: string) {
   const token = await getAddiToken();
   const slug = getAllySlug();
   const res = await fetch(
-    `${PUBLIC_API_BASE}/allies/${encodeURIComponent(slug)}/applications/${encodeURIComponent(applicationId)}`,
+    `${getPublicApiBase()}/allies/${encodeURIComponent(slug)}/applications/${encodeURIComponent(applicationId)}`,
     { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } },
   );
   if (!res.ok) throw new Error(`Addi getApplication ${res.status}`);
@@ -233,7 +238,7 @@ export async function cancelAddiApplication(
   const token = await getAddiToken();
   const slug = getAllySlug();
   const res = await fetch(
-    `${PUBLIC_API_BASE}/allies/${encodeURIComponent(slug)}/applications/${encodeURIComponent(applicationId)}/cancellations`,
+    `${getPublicApiBase()}/allies/${encodeURIComponent(slug)}/applications/${encodeURIComponent(applicationId)}/cancellations`,
     {
       method: "POST",
       headers: {
