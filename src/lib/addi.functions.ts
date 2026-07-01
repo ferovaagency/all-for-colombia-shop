@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 import { createAddiApplication } from "@/server/addi.server";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const InputSchema = z.object({
   orderId: z.string().uuid(),
@@ -11,11 +11,14 @@ const InputSchema = z.object({
 export const startAddiCheckout = createServerFn({ method: "POST" })
   .inputValidator((input) => InputSchema.parse(input))
   .handler(async ({ data }) => {
-    const { data: order, error } = await supabaseAdmin
-      .from("orders")
-      .select("*")
-      .eq("id", data.orderId)
-      .maybeSingle();
+    const sb = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+    );
+    const { data: rows, error } = await sb
+      .rpc("get_order_for_payment", { _order_id: data.orderId });
+    const order = Array.isArray(rows) ? rows[0] : rows;
 
     if (error || !order) {
       console.error("Addi order lookup failed:", { orderId: data.orderId, error });
@@ -51,14 +54,12 @@ export const startAddiCheckout = createServerFn({ method: "POST" })
         redirectionUrl: `${data.origin}/resultado-pago?order_id=${order.id}&provider=addi`,
       });
 
-      await supabaseAdmin
-        .from("orders")
-        .update({
-          addi_application_id: result.applicationId,
-          addi_status: result.status || "PENDING",
-          addi_checkout_url: result.redirectUrl || null,
-        })
-        .eq("id", order.id);
+      await sb.rpc("set_order_addi_refs", {
+        _order_id: order.id,
+        _application_id: result.applicationId,
+        _status: result.status || "PENDING",
+        _checkout_url: result.redirectUrl || null,
+      });
 
       return {
         ok: true as const,

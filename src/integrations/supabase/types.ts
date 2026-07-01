@@ -873,12 +873,51 @@ export type Database = {
     }
     Functions: {
       generate_distributor_order_number: { Args: never; Returns: string }
+      get_order_for_payment: {
+        Args: { _order_id: string }
+        Returns: {
+          addi_application_id: string | null
+          addi_checkout_url: string | null
+          addi_status: string | null
+          created_at: string | null
+          customer_email: string | null
+          customer_id_number: string | null
+          customer_id_type: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          distributor_id: string | null
+          id: string
+          items: Json | null
+          order_type: string | null
+          payment_method: string | null
+          receipt_url: string | null
+          shipping_address: Json | null
+          status: string | null
+          subtotal: number | null
+          total: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      set_order_addi_refs: {
+        Args: {
+          _application_id: string
+          _checkout_url: string
+          _order_id: string
+          _status: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
