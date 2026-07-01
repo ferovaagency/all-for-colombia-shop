@@ -18,7 +18,8 @@ export const startAddiCheckout = createServerFn({ method: "POST" })
       .maybeSingle();
 
     if (error || !order) {
-      return { ok: false as const, error: "Pedido no encontrado" };
+      console.error("Addi order lookup failed:", { orderId: data.orderId, error });
+      return { ok: false as const, error: `Pedido no encontrado: ${error?.message || "sin resultado"}` };
     }
 
     const items = (order.items as any[]) || [];
