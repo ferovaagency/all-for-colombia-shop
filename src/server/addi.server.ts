@@ -6,7 +6,7 @@ const PUBLIC_API_SANDBOX = "https://channels-public-api.addi-staging.com";
 const AUTH_PROD = "https://auth.addi.com";
 const AUTH_SANDBOX = "https://auth.addi-staging.com";
 const AUDIENCE_PROD = "https://api.addi.com";
-const AUDIENCE_SANDBOX = "https://api.addi-staging.com";
+const AUDIENCE_SANDBOX = "https://api.staging.addi.com";
 
 function isProduction() {
   return (process.env.ADDI_ENV || "sandbox") === "production";
