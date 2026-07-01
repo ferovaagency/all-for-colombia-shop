@@ -100,58 +100,118 @@ function isAuthorizedAddiWebhook(headers: Headers, credentialPairs: Array<{ user
     }
   }
 
+  if (authorization) {
+    const rawAuthValue = authorization.replace(/^bearer\s+/i, "").trim();
+    if (matchesSingleCredential(rawAuthValue, credentialPairs)) return true;
+
+    try {
+      const decoded = Buffer.from(rawAuthValue, "base64").toString("utf8");
+      const separatorIndex = decoded.indexOf(":");
+      if (separatorIndex >= 0) {
+        const headerUser = decoded.slice(0, separatorIndex);
+        const headerPass = decoded.slice(separatorIndex + 1);
+        if (matchesCredentialPair(headerUser, headerPass, credentialPairs)) return true;
+      }
+    } catch {
+      // Non-base64 Authorization values are handled as raw bearer/API key values above.
+    }
+  }
+
   const headerUser = firstHeader(headers, [
+    "ADDI_WEBHOOK_USER",
+    "ADDI_CLIENT_ID",
     "x-addi-webhook-user",
     "x-addi-user",
+    "addi-user",
     "x-addi-client-id",
     "x-addi-client_id",
+    "addi-client-id",
+    "addi-client_id",
     "x-webhook-user",
     "x-webhook-username",
+    "webhook-username",
+    "auth-user",
+    "auth-username",
+    "authentication-user",
+    "authentication-username",
     "x-username",
     "x-user",
     "x-auth-user",
+    "x-auth-username",
+    "x-authentication-user",
+    "x-authentication-username",
     "x-client-id",
     "client-id",
     "client_id",
     "clientid",
+    "client_id_header",
     "webhook-user",
     "username",
+    "userid",
     "user",
   ]);
   const headerPass = firstHeader(headers, [
+    "ADDI_WEBHOOK_PASS",
+    "ADDI_WEBHOOK_PASSWORD",
+    "ADDI_CLIENT_SECRET",
     "x-addi-webhook-pass",
     "x-addi-webhook-password",
     "x-addi-pass",
     "x-addi-password",
+    "addi-pass",
+    "addi-password",
     "x-addi-client-secret",
     "x-addi-client_secret",
+    "addi-client-secret",
+    "addi-client_secret",
     "x-webhook-pass",
     "x-webhook-password",
+    "webhook-password",
+    "auth-pass",
+    "auth-password",
+    "authentication-pass",
+    "authentication-password",
     "x-password",
     "x-pass",
     "x-auth-password",
+    "x-auth-pass",
+    "x-authentication-password",
+    "x-authentication-pass",
     "x-client-secret",
     "client-secret",
     "client_secret",
     "clientsecret",
+    "client_secret_header",
     "webhook-pass",
     "password",
     "pass",
+    "secret",
   ]);
 
   const apiKey = firstHeader(headers, [
+    "ADDI_WEBHOOK_PASS",
+    "ADDI_CLIENT_SECRET",
     "x-api-key",
+    "x-apikey",
     "x-addi-api-key",
+    "x-addi-apikey",
     "x-access-token",
+    "x-auth-token",
+    "x-webhook-token",
+    "x-addi-token",
     "api-key",
     "apikey",
+    "access-token",
+    "auth-token",
+    "webhook-token",
+    "token",
   ]);
 
   if (headerUser && headerPass && matchesCredentialPair(headerUser.trim(), headerPass.trim(), credentialPairs)) {
     return true;
   }
 
-  return Boolean(apiKey && credentialPairs.some((pair) => safeEqual(apiKey.trim(), pair.pass)));
+  return Boolean(apiKey && matchesSingleCredential(apiKey, credentialPairs));
 }
 
 function firstHeader(headers: Headers, names: string[]) {
@@ -169,5 +229,12 @@ function safeEqual(a: string, b: string) {
 function matchesCredentialPair(user: string, pass: string, credentialPairs: Array<{ user: string; pass: string }>) {
   return credentialPairs.some(
     (pair) => safeEqual(user.trim(), pair.user) && safeEqual(pass.trim(), pair.pass),
+  );
+}
+
+function matchesSingleCredential(value: string, credentialPairs: Array<{ user: string; pass: string }>) {
+  const normalized = value.trim();
+  return credentialPairs.some(
+    (pair) => safeEqual(normalized, pair.pass) || safeEqual(normalized, `${pair.user}:${pair.pass}`),
   );
 }
