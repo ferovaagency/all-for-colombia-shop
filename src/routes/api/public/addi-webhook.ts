@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // Addi webhook (Online Application Callback).
 // Requirements from Addi:
@@ -36,7 +35,7 @@ export const Route = createFileRoute("/api/public/addi-webhook")({
           payload?.status || payload?.state || payload?.data?.status || "",
         ).toLowerCase();
         const allyReference =
-          payload?.allyReference || payload?.data?.allyReference;
+          payload?.orderId || payload?.allyReference || payload?.data?.orderId || payload?.data?.allyReference;
 
         const orderStatus = mapAddiStatusToOrder(status);
         const update: { addi_status: string | null; status?: string } = {
@@ -44,6 +43,7 @@ export const Route = createFileRoute("/api/public/addi-webhook")({
         };
         if (orderStatus) update.status = orderStatus;
 
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const query = supabaseAdmin.from("orders").update(update);
         const { error } = allyReference
           ? await query.eq("id", allyReference)
