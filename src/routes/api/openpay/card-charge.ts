@@ -23,6 +23,7 @@ export const Route = createFileRoute("/api/openpay/card-charge")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        let supabaseAdmin: any = null;
         try {
           const raw = await request.json();
           const parsed = bodySchema.safeParse(raw);
@@ -35,17 +36,37 @@ export const Route = createFileRoute("/api/openpay/card-charge")({
           const d = parsed.data;
 
           // Load service-role client only inside handler (never at module scope in a route file).
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-          const { data: order, error: orderErr } = await supabaseAdmin
-            .from("orders")
-            .select("id, total, status")
-            .eq("id", d.order_id)
-            .maybeSingle();
-
-          if (orderErr) {
-            return Response.json({ error_code: "db_error", description: orderErr.message }, { status: 500 });
+          try {
+            const supabaseModule = await import("@/integrations/supabase/client.server");
+            supabaseAdmin = supabaseModule.supabaseAdmin;
+          } catch (dbError) {
+            console.error("Failed to load Supabase client:", dbError);
+            return Response.json(
+              { error_code: "db_connection_error", description: "No se puede conectar a la base de datos. Intente nuevamente." },
+              { status: 503 }
+            );
           }
+
+          let order: any = null;
+          try {
+            const { data: orderData, error: orderErr } = await supabaseAdmin
+              .from("orders")
+              .select("id, total, status")
+              .eq("id", d.order_id)
+              .maybeSingle();
+
+            if (orderErr) {
+              return Response.json({ error_code: "db_error", description: orderErr.message }, { status: 500 });
+            }
+            order = orderData;
+          } catch (dbError) {
+            console.error("Database query error:", dbError);
+            return Response.json(
+              { error_code: "db_query_error", description: "Error al consultar la base de datos. Intente nuevamente." },
+              { status: 503 }
+            );
+          }
+
           if (!order) {
             return Response.json({ error_code: "not_found", description: "Order not found" }, { status: 404 });
           }
@@ -75,13 +96,18 @@ export const Route = createFileRoute("/api/openpay/card-charge")({
           if (!res.ok) return passthroughOpenpayError(res);
           const charge = await res.json();
 
-          // Record the payment attempt.
-          await supabaseAdmin.from("payments").insert({
-            order_id: order.id,
-            openpay_charge_id: charge?.id ?? null,
-            status: charge?.status ?? null,
-            raw: charge,
-          });
+          // Record the payment attempt (non-critical if this fails).
+          try {
+            await supabaseAdmin.from("payments").insert({
+              order_id: order.id,
+              openpay_charge_id: charge?.id ?? null,
+              status: charge?.status ?? null,
+              raw: charge,
+            });
+          } catch (recordError) {
+            console.error("Failed to record payment (non-critical):", recordError);
+            // Continue anyway - the charge was successful
+          }
 
           // 3DS redirect flow.
           if (charge?.payment_method?.type === "redirect" && charge?.payment_method?.url) {
@@ -93,10 +119,15 @@ export const Route = createFileRoute("/api/openpay/card-charge")({
           }
 
           if (charge?.status === "completed") {
-            await supabaseAdmin
-              .from("orders")
-              .update({ status: "paid" })
-              .eq("id", order.id);
+            try {
+              await supabaseAdmin
+                .from("orders")
+                .update({ status: "paid" })
+                .eq("id", order.id);
+            } catch (updateError) {
+              console.error("Failed to update order status (non-critical):", updateError);
+              // Continue anyway - the charge was successful
+            }
             return Response.json({ status: "completed", charge_id: charge.id });
           }
 
@@ -111,6 +142,7 @@ export const Route = createFileRoute("/api/openpay/card-charge")({
           );
         } catch (e: any) {
           if (e instanceof Response) return e;
+          console.error("Unexpected error in card-charge:", e);
           return Response.json(
             { error_code: "server_error", description: e?.message ?? "Unexpected error" },
             { status: 500 },
