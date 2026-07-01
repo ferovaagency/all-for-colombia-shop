@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode } from "lucide-react";
+import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode, Lock } from "lucide-react";
+import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/checkout")({
 });
 
 type PaymentMethod =
+  | "openpay_card"
   | "openpay_pse"
   | "openpay_qr_breb"
   | "bancolombia"
@@ -46,6 +48,7 @@ const PAYMENT_OPTIONS: {
   label: string;
   description: string;
 }[] = [
+  { value: "openpay_card", label: "💳 Tarjeta crédito/débito", description: "Visa, Mastercard, Amex — procesado por Openpay" },
   { value: "openpay_pse", label: "🏛️ PSE — Openpay", description: "Débito desde tu banco con PSE (procesado por Openpay)" },
   { value: "openpay_qr_breb", label: "📲 QR Bre-B — Openpay", description: "Escanea el QR desde tu app bancaria. Pago inmediato." },
   { value: "bancolombia", label: "🏦 Transferencia Bancolombia", description: "Transfiere y sube tu comprobante" },
@@ -110,6 +113,7 @@ function CheckoutPage() {
   const [qrSeconds, setQrSeconds] = useState(QR_TOTAL_SECONDS);
   const [qrStatus, setQrStatus] = useState<"loading" | "active" | "expired" | "paid">("loading");
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+  const [cardOrderId, setCardOrderId] = useState<string | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -221,6 +225,7 @@ function CheckoutPage() {
     const res = schema.safeParse(form);
     if (!res.success) { toast.error(res.error.issues[0]?.message || "Revisa los campos"); return; }
     if (payment === "openpay_pse" && !bankCode) { toast.error("Selecciona tu banco PSE"); return; }
+    if (payment === "openpay_card" && cardOrderId) { toast.info("Ya creaste el pedido. Completa los datos de tu tarjeta abajo."); return; }
     if (requiresReceipt && !receipt) { toast.error("Sube el comprobante de pago para continuar"); return; }
     setSubmitting(true);
 
@@ -303,6 +308,13 @@ function CheckoutPage() {
     if (payment === "openpay_qr_breb") {
       setPendingOrderId(data.id);
       await generateQr(data.id);
+      return;
+    }
+
+    // ------- Openpay Tarjeta -------
+    if (payment === "openpay_card") {
+      setCardOrderId(data.id);
+      toast.success("Pedido creado. Completa los datos de tu tarjeta abajo para pagar.");
       return;
     }
 
@@ -413,6 +425,32 @@ function CheckoutPage() {
               </div>
             )}
 
+            {/* Openpay Tarjeta */}
+            {payment === "openpay_card" && !cardOrderId && (
+              <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
+                <p className="font-semibold mb-1 flex items-center gap-2"><Lock className="h-4 w-4" /> Pago con tarjeta</p>
+                <p className="text-sm text-muted-foreground">
+                  Al confirmar el pedido te pediremos los datos de tu tarjeta de forma segura (tokenización Openpay).
+                </p>
+              </div>
+            )}
+            {payment === "openpay_card" && cardOrderId && (
+              <OpenpayCardForm
+                orderId={cardOrderId}
+                amount={subtotal}
+                customer={{
+                  name: form.name.trim().split(/\s+/)[0] || form.name,
+                  last_name: form.name.trim().split(/\s+/).slice(1).join(" ") || form.name,
+                  phone_number: form.phone,
+                  email: form.email,
+                }}
+                onSuccess={({ charge_id }) => {
+                  clear();
+                  navigate({ to: "/resultado-pago", search: { id: cardOrderId, status: "ok", ref: charge_id } as any });
+                }}
+              />
+            )}
+
             {payment === "bancolombia" && (
               <BankDetails items={[["Banco","Bancolombia"],["Tipo","Cuenta de Ahorros NUEVO"],["Número","69800001277"],["Titular","ALL FOR ALL SAS"],["NIT","901.009.310-8"]]} />
             )}
@@ -497,11 +535,19 @@ function CheckoutPage() {
           </div>
           <Button
             type="submit"
-            disabled={submitting || (requiresReceipt && !receipt)}
+            disabled={submitting || (requiresReceipt && !receipt) || (payment === "openpay_card" && !!cardOrderId)}
             size="lg"
             className="w-full bg-primary"
           >
-            {submitting ? "Procesando..." : requiresReceipt && !receipt ? "⬆️ Primero sube el comprobante" : "Confirmar pedido →"}
+            {submitting
+              ? "Procesando..."
+              : payment === "openpay_card" && cardOrderId
+                ? "Ingresa los datos de tu tarjeta ↓"
+                : requiresReceipt && !receipt
+                  ? "⬆️ Primero sube el comprobante"
+                  : payment === "openpay_card"
+                    ? "Continuar al pago con tarjeta →"
+                    : "Confirmar pedido →"}
           </Button>
           <p className="text-xs text-muted-foreground text-center mt-3">
             Pagos PSE y QR procesados de forma segura por Openpay.

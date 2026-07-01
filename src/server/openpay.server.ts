@@ -2,7 +2,10 @@
  * Shared helper for Openpay sandbox requests.
  * Uses HTTP Basic Auth with the Private Key as the username and empty password.
  */
-const OPENPAY_BASE = "https://sandbox-api.openpay.co/v1";
+function getOpenpayBase() {
+  const sandbox = (process.env.OPENPAY_SANDBOX ?? "true").toLowerCase() !== "false";
+  return sandbox ? "https://sandbox-api.openpay.co/v1" : "https://api.openpay.co/v1";
+}
 
 export interface OpenpayEnv {
   merchantId: string;
@@ -36,7 +39,7 @@ export async function openpayFetch(
   init: { method: "GET" | "POST"; body?: unknown } = { method: "GET" },
 ): Promise<Response> {
   const { merchantId, privateKey } = getOpenpayEnv();
-  const url = `${OPENPAY_BASE}/${merchantId}${path}`;
+  const url = `${getOpenpayBase()}/${merchantId}${path}`;
   const headers: Record<string, string> = {
     Authorization: basicAuthHeader(privateKey),
     Accept: "application/json",
