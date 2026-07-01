@@ -141,6 +141,7 @@ export async function createAddiApplication(input: AddiApplicationInput) {
     input.logoUrl || `${new URL(input.redirectionUrl).origin}/favicon.ico`;
 
   const body = {
+    description: `Orden ${input.orderId}`,
     orderId: input.orderId,
     totalAmount: Math.round(input.totalCop),
     shippingAmount: 0,
