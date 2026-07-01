@@ -26,13 +26,19 @@ export const Route = createFileRoute("/api/public/openpay-webhook")({
       POST: async ({ request }) => {
         const user = process.env.OPENPAY_WEBHOOK_USER;
         const pass = process.env.OPENPAY_WEBHOOK_PASS;
-        if (!user || !pass) {
-          return new Response("Webhook not configured", { status: 500 });
-        }
-        const expected = "Basic " + btoa(`${user}:${pass}`);
-        const authHeader = request.headers.get("authorization") ?? "";
-        if (!timingSafeEqualStr(authHeader, expected)) {
-          return new Response("Unauthorized", { status: 401 });
+        // Modo simulado: si aún no configuras user/pass, el webhook responde
+        // igual (incluida la verificación) pero deja un aviso en logs. En cuanto
+        // definas ambos secrets, la validación Basic Auth se activa sola.
+        if (user && pass) {
+          const expected = "Basic " + btoa(`${user}:${pass}`);
+          const authHeader = request.headers.get("authorization") ?? "";
+          if (!timingSafeEqualStr(authHeader, expected)) {
+            return new Response("Unauthorized", { status: 401 });
+          }
+        } else {
+          console.warn(
+            "[openpay-webhook] running in SIMULATED mode: OPENPAY_WEBHOOK_USER/PASS not set — accepting requests without auth.",
+          );
         }
 
         let event: any;
@@ -64,6 +70,17 @@ export const Route = createFileRoute("/api/public/openpay-webhook")({
         }
 
         return new Response("ok", { status: 200 });
+      },
+      GET: async () => {
+        const configured = Boolean(process.env.OPENPAY_WEBHOOK_USER && process.env.OPENPAY_WEBHOOK_PASS);
+        return Response.json({
+          ok: true,
+          endpoint: "openpay-webhook",
+          mode: configured ? "authenticated" : "simulated",
+          hint: configured
+            ? "Basic Auth activo. Openpay debe enviar el header Authorization configurado."
+            : "Sin OPENPAY_WEBHOOK_USER/PASS: acepta cualquier POST. Añade los secretos para activar Basic Auth.",
+        });
       },
     },
   },
