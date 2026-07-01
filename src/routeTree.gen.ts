@@ -46,6 +46,7 @@ import { Route as ApiOpenpayDiagnosticoRouteImport } from './routes/api/openpay/
 import { Route as ApiOpenpayCardChargeRouteImport } from './routes/api/openpay/card-charge'
 import { Route as ApiOpenpayBrebQrRouteImport } from './routes/api/openpay/breb-qr'
 import { Route as ApiOpenpayBanksRouteImport } from './routes/api/openpay/banks'
+import { Route as ApiAddiConfigRouteImport } from './routes/api/addi/config'
 
 const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
   id: '/ventas-corporativas',
@@ -236,6 +237,11 @@ const ApiOpenpayBanksRoute = ApiOpenpayBanksRouteImport.update({
   path: '/api/openpay/banks',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAddiConfigRoute = ApiAddiConfigRouteImport.update({
+  id: '/api/addi/config',
+  path: '/api/addi/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/api/addi/config': typeof ApiAddiConfigRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByTo {
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin': typeof AdminIndexRoute
   '/distribuidores': typeof DistribuidoresIndexRoute
+  '/api/addi/config': typeof ApiAddiConfigRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
@@ -339,6 +347,7 @@ export interface FileRoutesById {
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/api/addi/config': typeof ApiAddiConfigRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
@@ -380,6 +389,7 @@ export interface FileRouteTypes {
     | '/producto/$slug'
     | '/admin/'
     | '/distribuidores/'
+    | '/api/addi/config'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/producto/$slug'
     | '/admin'
     | '/distribuidores'
+    | '/api/addi/config'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/producto/$slug'
     | '/admin/'
     | '/distribuidores/'
+    | '/api/addi/config'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
@@ -491,6 +503,7 @@ export interface RootRouteChildren {
   DistribuidoresRegistroRoute: typeof DistribuidoresRegistroRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
   DistribuidoresIndexRoute: typeof DistribuidoresIndexRoute
+  ApiAddiConfigRoute: typeof ApiAddiConfigRoute
   ApiOpenpayBanksRoute: typeof ApiOpenpayBanksRoute
   ApiOpenpayBrebQrRoute: typeof ApiOpenpayBrebQrRoute
   ApiOpenpayCardChargeRoute: typeof ApiOpenpayCardChargeRoute
@@ -764,6 +777,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOpenpayBanksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/addi/config': {
+      id: '/api/addi/config'
+      path: '/api/addi/config'
+      fullPath: '/api/addi/config'
+      preLoaderRoute: typeof ApiAddiConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -828,6 +848,7 @@ const rootRouteChildren: RootRouteChildren = {
   DistribuidoresRegistroRoute: DistribuidoresRegistroRoute,
   ProductoSlugRoute: ProductoSlugRoute,
   DistribuidoresIndexRoute: DistribuidoresIndexRoute,
+  ApiAddiConfigRoute: ApiAddiConfigRoute,
   ApiOpenpayBanksRoute: ApiOpenpayBanksRoute,
   ApiOpenpayBrebQrRoute: ApiOpenpayBrebQrRoute,
   ApiOpenpayCardChargeRoute: ApiOpenpayCardChargeRoute,
