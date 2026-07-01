@@ -310,6 +310,13 @@ function CheckoutPage() {
       return;
     }
 
+    // ------- Openpay Tarjeta -------
+    if (payment === "openpay_card") {
+      setCardOrderId(data.id);
+      toast.success("Pedido creado. Completa los datos de tu tarjeta abajo para pagar.");
+      return;
+    }
+
     // ------- Métodos manuales (WhatsApp) -------
     const summary = items.map(i => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`).join("\n");
     const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${data.id.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
