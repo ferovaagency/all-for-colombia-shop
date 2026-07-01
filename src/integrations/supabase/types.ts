@@ -603,6 +603,41 @@ export type Database = {
           },
         ]
       }
+      payments: {
+        Row: {
+          created_at: string
+          id: string
+          openpay_charge_id: string | null
+          order_id: string | null
+          raw: Json | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          openpay_charge_id?: string | null
+          order_id?: string | null
+          raw?: Json | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          openpay_charge_id?: string | null
+          order_id?: string | null
+          raw?: Json | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_reviews: {
         Row: {
           cargo: string
