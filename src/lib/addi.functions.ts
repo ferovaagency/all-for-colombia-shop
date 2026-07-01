@@ -47,6 +47,7 @@ export const startAddiCheckout = createServerFn({ method: "POST" })
           ? { address: shipping.address, city: shipping.city || "" }
           : undefined,
         callbackUrl: `${data.origin}/api/public/addi-webhook`,
+        redirectionUrl: `${data.origin}/resultado-pago?order_id=${order.id}&provider=addi`,
       });
 
       await supabaseAdmin
