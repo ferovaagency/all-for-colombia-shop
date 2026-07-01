@@ -3,6 +3,8 @@
 
 const PUBLIC_API_PROD = "https://channels-public-api.addi.com";
 const PUBLIC_API_SANDBOX = "https://channels-public-api.addi-staging.com";
+const APPLICATION_API_PROD = "https://api.addi.com";
+const APPLICATION_API_SANDBOX = "https://api.addi-staging.com";
 const AUTH_PROD = "https://auth.addi.com";
 const AUTH_SANDBOX = "https://auth.addi-staging.com";
 const AUDIENCE_PROD = "https://api.addi.com";
@@ -22,6 +24,10 @@ function getAudience() {
 
 function getPublicApiBase() {
   return isProduction() ? PUBLIC_API_PROD : PUBLIC_API_SANDBOX;
+}
+
+function getApplicationApiBase() {
+  return isProduction() ? APPLICATION_API_PROD : APPLICATION_API_SANDBOX;
 }
 
 function getAllySlug() {
@@ -111,58 +117,64 @@ export type AddiApplicationInput = {
   shippingAddress?: { address: string; city: string };
   callbackUrl: string;
   redirectionUrl: string;
+  logoUrl?: string;
 };
 
 /**
- * POST /allies/:slug/applications
+ * POST /v1/online-applications
  * Addi returns HTTP 301 with Location header pointing at the checkout URL.
  * We disable auto-follow so we can capture the redirect target reliably.
  */
 export async function createAddiApplication(input: AddiApplicationInput) {
   const token = await getAddiToken();
-  const slug = getAllySlug();
   const [firstName, ...rest] = (input.customer.name || "").trim().split(/\s+/);
   const lastName = rest.join(" ") || firstName || "";
+  const documentNumber = String(
+    input.customer.document_number || input.customer.document || "",
+  ).replace(/[^\d]/g, "");
+  const shipping = {
+    lineOne: input.shippingAddress?.address || "Dirección no especificada",
+    city: input.shippingAddress?.city || "Bogotá D.C",
+    country: "CO",
+  };
+  const logoUrl =
+    input.logoUrl || `${new URL(input.redirectionUrl).origin}/favicon.ico`;
 
   const body = {
-    allyReference: input.orderId,
-    totalAmount: { value: Math.round(input.totalCop), currency: "COP" },
-    callbackUrl: input.callbackUrl,
-    redirectionUrl: input.redirectionUrl,
+    orderId: input.orderId,
+    totalAmount: Math.round(input.totalCop),
+    shippingAmount: 0,
+    totalTaxesAmount: 0,
+    currency: "COP",
     items: input.items.map((it) => ({
       sku: it.sku || it.name.slice(0, 32),
       name: it.name,
       quantity: it.quantity,
-      unitPrice: { value: Math.round(it.price), currency: "COP" },
+      unitPrice: Math.round(it.price),
+      tax: 0,
+      pictureUrl: "https://allforall.com.co/favicon.ico",
+      category: "technology",
     })),
-    shopper: {
+    client: {
+      idType: input.customer.document_type || "CC",
+      idNumber: documentNumber,
       firstName,
       lastName,
       email: input.customer.email,
-      phoneNumber: input.customer.phone,
-      ...(input.customer.document_number
-        ? {
-            document: {
-              type: input.customer.document_type || "CC",
-              number: String(input.customer.document_number).replace(/[^\d]/g, ""),
-            },
-          }
-        : input.customer.document
-        ? { document: { type: "CC", number: input.customer.document } }
-        : {}),
+      cellphone: String(input.customer.phone || "").replace(/[^\d]/g, ""),
+      cellphoneCountryCode: "+57",
+      address: shipping,
     },
-    ...(input.shippingAddress
-      ? {
-          shipping: {
-            address: input.shippingAddress.address,
-            city: input.shippingAddress.city,
-            country: "CO",
-          },
-        }
-      : {}),
+    shippingAddress: shipping,
+    billingAddress: shipping,
+    allyUrlRedirection: {
+      logoUrl,
+      callbackUrl: input.callbackUrl,
+      redirectionUrl: input.redirectionUrl,
+    },
   };
 
-  const res = await fetch(`${getPublicApiBase()}/allies/${encodeURIComponent(slug)}/applications`, {
+  const res = await fetch(`${getApplicationApiBase()}/v1/online-applications`, {
     method: "POST",
     redirect: "manual", // capture the 301 ourselves
     headers: {
@@ -217,9 +229,8 @@ export async function createAddiApplication(input: AddiApplicationInput) {
 
 export async function getAddiApplication(applicationId: string) {
   const token = await getAddiToken();
-  const slug = getAllySlug();
   const res = await fetch(
-    `${getPublicApiBase()}/allies/${encodeURIComponent(slug)}/applications/${encodeURIComponent(applicationId)}`,
+    `${getApplicationApiBase()}/v1/online-applications/${encodeURIComponent(applicationId)}`,
     { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } },
   );
   if (!res.ok) throw new Error(`Addi getApplication ${res.status}`);
@@ -236,9 +247,8 @@ export async function cancelAddiApplication(
   reason?: string,
 ) {
   const token = await getAddiToken();
-  const slug = getAllySlug();
   const res = await fetch(
-    `${getPublicApiBase()}/allies/${encodeURIComponent(slug)}/applications/${encodeURIComponent(applicationId)}/cancellations`,
+    `${getApplicationApiBase()}/v1/online-applications/${encodeURIComponent(applicationId)}/cancellations`,
     {
       method: "POST",
       headers: {
