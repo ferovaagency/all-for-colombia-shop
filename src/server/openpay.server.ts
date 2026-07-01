@@ -12,18 +12,35 @@ export interface OpenpayEnv {
   privateKey: string;
 }
 
+function cleanSecret(value: string | undefined) {
+  return value?.trim();
+}
+
+function openpayConfigError(description: string, status = 500) {
+  throw new Response(
+    JSON.stringify({
+      error_code: "openpay_config_error",
+      description,
+    }),
+    { status, headers: { "Content-Type": "application/json" } },
+  );
+}
+
 export function getOpenpayEnv(): OpenpayEnv {
-  const merchantId = process.env.OPENPAY_MERCHANT_ID;
-  const privateKey = process.env.OPENPAY_PRIVATE_KEY;
+  const merchantId = cleanSecret(process.env.OPENPAY_MERCHANT_ID);
+  const privateKey = cleanSecret(process.env.OPENPAY_PRIVATE_KEY);
+  const publicKey = cleanSecret(process.env.OPENPAY_PUBLIC_KEY);
   if (!merchantId || !privateKey) {
-    throw new Response(
-      JSON.stringify({
-        error_code: "missing_credentials",
-        description:
-          "OPENPAY_MERCHANT_ID y OPENPAY_PRIVATE_KEY deben estar configurados en el backend.",
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    openpayConfigError("OPENPAY_MERCHANT_ID y OPENPAY_PRIVATE_KEY deben estar configurados en el backend.");
+  }
+  if (privateKey.startsWith("pk_")) {
+    openpayConfigError("Las llaves de Openpay parecen estar invertidas: OPENPAY_PRIVATE_KEY contiene una llave pública (pk_). Debe contener la llave secreta (sk_).");
+  }
+  if (publicKey?.startsWith("sk_")) {
+    openpayConfigError("Las llaves de Openpay parecen estar invertidas: OPENPAY_PUBLIC_KEY contiene una llave secreta (sk_). Debe contener la llave pública (pk_).");
+  }
+  if (!privateKey.startsWith("sk_")) {
+    openpayConfigError("OPENPAY_PRIVATE_KEY no tiene formato de llave secreta de Openpay. Debe iniciar por sk_.");
   }
   return { merchantId, privateKey };
 }
