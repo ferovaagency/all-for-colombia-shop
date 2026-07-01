@@ -11,11 +11,9 @@ const InputSchema = z.object({
 export const startAddiCheckout = createServerFn({ method: "POST" })
   .inputValidator((input) => InputSchema.parse(input))
   .handler(async ({ data }) => {
-    const { data: order, error } = await supabaseAdmin
-      .from("orders")
-      .select("*")
-      .eq("id", data.orderId)
-      .maybeSingle();
+    const { data: rows, error } = await supabaseAdmin
+      .rpc("get_order_for_payment", { _order_id: data.orderId });
+    const order = Array.isArray(rows) ? rows[0] : rows;
 
     if (error || !order) {
       console.error("Addi order lookup failed:", { orderId: data.orderId, error });
