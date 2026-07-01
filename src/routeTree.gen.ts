@@ -40,6 +40,7 @@ import { Route as ApiPublicOpenpayWebhookRouteImport } from './routes/api/public
 import { Route as ApiPublicMercadopagoWebhookRouteImport } from './routes/api/public/mercadopago-webhook'
 import { Route as ApiPublicAddiWebhookRouteImport } from './routes/api/public/addi-webhook'
 import { Route as ApiOpenpayStatusRouteImport } from './routes/api/openpay/status'
+import { Route as ApiOpenpayPublicConfigRouteImport } from './routes/api/openpay/public-config'
 import { Route as ApiOpenpayPseRouteImport } from './routes/api/openpay/pse'
 import { Route as ApiOpenpayCardChargeRouteImport } from './routes/api/openpay/card-charge'
 import { Route as ApiOpenpayBrebQrRouteImport } from './routes/api/openpay/breb-qr'
@@ -204,6 +205,11 @@ const ApiOpenpayStatusRoute = ApiOpenpayStatusRouteImport.update({
   path: '/api/openpay/status',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOpenpayPublicConfigRoute = ApiOpenpayPublicConfigRouteImport.update({
+  id: '/api/openpay/public-config',
+  path: '/api/openpay/public-config',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiOpenpayPseRoute = ApiOpenpayPseRouteImport.update({
   id: '/api/openpay/pse',
   path: '/api/openpay/pse',
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
   '/api/openpay/pse': typeof ApiOpenpayPseRoute
+  '/api/openpay/public-config': typeof ApiOpenpayPublicConfigRoute
   '/api/openpay/status': typeof ApiOpenpayStatusRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
@@ -289,6 +296,7 @@ export interface FileRoutesByTo {
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
   '/api/openpay/pse': typeof ApiOpenpayPseRoute
+  '/api/openpay/public-config': typeof ApiOpenpayPublicConfigRoute
   '/api/openpay/status': typeof ApiOpenpayStatusRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
@@ -327,6 +335,7 @@ export interface FileRoutesById {
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
   '/api/openpay/pse': typeof ApiOpenpayPseRoute
+  '/api/openpay/public-config': typeof ApiOpenpayPublicConfigRoute
   '/api/openpay/status': typeof ApiOpenpayStatusRoute
   '/api/public/addi-webhook': typeof ApiPublicAddiWebhookRoute
   '/api/public/mercadopago-webhook': typeof ApiPublicMercadopagoWebhookRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
     | '/api/openpay/pse'
+    | '/api/openpay/public-config'
     | '/api/openpay/status'
     | '/api/public/addi-webhook'
     | '/api/public/mercadopago-webhook'
@@ -401,6 +411,7 @@ export interface FileRouteTypes {
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
     | '/api/openpay/pse'
+    | '/api/openpay/public-config'
     | '/api/openpay/status'
     | '/api/public/addi-webhook'
     | '/api/public/mercadopago-webhook'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
     | '/api/openpay/pse'
+    | '/api/openpay/public-config'
     | '/api/openpay/status'
     | '/api/public/addi-webhook'
     | '/api/public/mercadopago-webhook'
@@ -471,6 +483,7 @@ export interface RootRouteChildren {
   ApiOpenpayBrebQrRoute: typeof ApiOpenpayBrebQrRoute
   ApiOpenpayCardChargeRoute: typeof ApiOpenpayCardChargeRoute
   ApiOpenpayPseRoute: typeof ApiOpenpayPseRoute
+  ApiOpenpayPublicConfigRoute: typeof ApiOpenpayPublicConfigRoute
   ApiOpenpayStatusRoute: typeof ApiOpenpayStatusRoute
   ApiPublicAddiWebhookRoute: typeof ApiPublicAddiWebhookRoute
   ApiPublicMercadopagoWebhookRoute: typeof ApiPublicMercadopagoWebhookRoute
@@ -696,6 +709,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOpenpayStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/openpay/public-config': {
+      id: '/api/openpay/public-config'
+      path: '/api/openpay/public-config'
+      fullPath: '/api/openpay/public-config'
+      preLoaderRoute: typeof ApiOpenpayPublicConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/openpay/pse': {
       id: '/api/openpay/pse'
       path: '/api/openpay/pse'
@@ -792,6 +812,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiOpenpayBrebQrRoute: ApiOpenpayBrebQrRoute,
   ApiOpenpayCardChargeRoute: ApiOpenpayCardChargeRoute,
   ApiOpenpayPseRoute: ApiOpenpayPseRoute,
+  ApiOpenpayPublicConfigRoute: ApiOpenpayPublicConfigRoute,
   ApiOpenpayStatusRoute: ApiOpenpayStatusRoute,
   ApiPublicAddiWebhookRoute: ApiPublicAddiWebhookRoute,
   ApiPublicMercadopagoWebhookRoute: ApiPublicMercadopagoWebhookRoute,

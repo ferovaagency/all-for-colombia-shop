@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode } from "lucide-react";
+import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/checkout")({
 });
 
 type PaymentMethod =
+  | "openpay_card"
   | "openpay_pse"
   | "openpay_qr_breb"
   | "bancolombia"
@@ -46,6 +48,7 @@ const PAYMENT_OPTIONS: {
   label: string;
   description: string;
 }[] = [
+  { value: "openpay_card", label: "💳 Tarjeta crédito/débito", description: "Visa, Mastercard, Amex — procesado por Openpay" },
   { value: "openpay_pse", label: "🏛️ PSE — Openpay", description: "Débito desde tu banco con PSE (procesado por Openpay)" },
   { value: "openpay_qr_breb", label: "📲 QR Bre-B — Openpay", description: "Escanea el QR desde tu app bancaria. Pago inmediato." },
   { value: "bancolombia", label: "🏦 Transferencia Bancolombia", description: "Transfiere y sube tu comprobante" },
