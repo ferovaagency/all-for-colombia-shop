@@ -54,14 +54,12 @@ export const startAddiCheckout = createServerFn({ method: "POST" })
         redirectionUrl: `${data.origin}/resultado-pago?order_id=${order.id}&provider=addi`,
       });
 
-      await supabaseAdmin
-        .from("orders")
-        .update({
-          addi_application_id: result.applicationId,
-          addi_status: result.status || "PENDING",
-          addi_checkout_url: result.redirectUrl || null,
-        })
-        .eq("id", order.id);
+      await sb.rpc("set_order_addi_refs", {
+        _order_id: order.id,
+        _application_id: result.applicationId,
+        _status: result.status || "PENDING",
+        _checkout_url: result.redirectUrl || null,
+      });
 
       return {
         ok: true as const,
