@@ -11,8 +11,8 @@ declare global {
   }
 }
 
-const OPENPAY_JS = "https://js.openpay.mx/openpay.v1.min.js";
-const OPENPAY_DATA_JS = "https://js.openpay.mx/openpay-data.v1.min.js";
+const OPENPAY_JS = "https://resources.openpay.co/openpay.v1.min.js";
+const OPENPAY_DATA_JS = "https://resources.openpay.co/openpay-data.v1.min.js";
 
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
