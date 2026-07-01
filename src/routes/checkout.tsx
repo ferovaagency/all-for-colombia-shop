@@ -113,6 +113,7 @@ function CheckoutPage() {
   const [qrSeconds, setQrSeconds] = useState(QR_TOTAL_SECONDS);
   const [qrStatus, setQrStatus] = useState<"loading" | "active" | "expired" | "paid">("loading");
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+  const [cardOrderId, setCardOrderId] = useState<string | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
