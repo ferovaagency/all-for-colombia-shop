@@ -1,7 +1,8 @@
 // Server-only Addi API client (sandbox/production)
 // Docs: https://developers.addi.com
 
-const PUBLIC_API_BASE = "https://channels.public.api.addi.com";
+const PUBLIC_API_PROD = "https://channels.public.api.addi.com";
+const PUBLIC_API_SANDBOX = "https://channels.public.api.staging.addi.com";
 const AUTH_PROD = "https://auth.addi.com";
 const AUTH_SANDBOX = "https://auth.addi-staging.com";
 const AUDIENCE_PROD = "https://api.addi.com";
