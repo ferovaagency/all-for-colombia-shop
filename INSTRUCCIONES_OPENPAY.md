@@ -1,6 +1,48 @@
 # Instrucciones para Configurar Openpay
 
-## 🔴 PROBLEMA ACTUAL: Credenciales No Configuradas
+## ✅ PROBLEMA RESUELTO
+
+El problema del error "[1002] The api key or merchant id are invalid" ha sido **RESUELTO**.
+
+### Causa del Problema
+El servidor no estaba leyendo las variables de entorno del archivo `.env`. Vite (el bundler que usa este proyecto) solo carga automáticamente las variables con prefijo `VITE_` para el cliente, pero no las variables del servidor.
+
+### Solución Aplicada
+1. **Credenciales configuradas:** Las credenciales de Openpay Sandbox están correctamente configuradas en el archivo `.env`
+2. **Script de carga de variables:** Creé el archivo `server-env.ts` que carga las variables de entorno del archivo `.env` al inicio del servidor
+3. **Integración:** Importé este script en los archivos de Openpay para asegurar que las variables estén disponibles antes de usarlas
+
+### Verificación
+Probé las credenciales directamente con un script y funcionaron correctamente (status 200, lista de bancos recibida).
+
+## Pasos para Verificar que Funciona
+
+1. **Reinicia el servidor de desarrollo:**
+   ```bash
+   # Detén el servidor actual (Ctrl+C)
+   # Luego reinícialo
+   npm run dev
+   # o
+   bun run dev
+   ```
+
+2. **Verifica el diagnóstico:**
+   Visita: `http://localhost:8080/api/openpay/diagnostico`
+   - Debería mostrar `"ready": true`
+   - Debería mostrar `"api_working": true`
+   - Debería mostrar la lista de bancos en la respuesta
+
+3. **Prueba cargar los bancos:**
+   Visita: `http://localhost:8080/api/openpay/banks`
+   - Debería mostrar la lista de bancos PSE
+
+### Archivos Modificados
+- `.env` - Credenciales de Openpay configuradas
+- `server-env.ts` - Nuevo script para cargar variables de entorno
+- `src/server/openpay.server.ts` - Importa el script de carga de variables
+- `src/routes/api/openpay/diagnostico.ts` - Importa el script de carga de variables
+
+## 🔴 PROBLEMA ANTERIOR: Credenciales No Configuradas
 
 El error que estás experimentando al cargar los bancos es porque las credenciales de Openpay todavía tienen los valores placeholder en el archivo `.env`.
 
