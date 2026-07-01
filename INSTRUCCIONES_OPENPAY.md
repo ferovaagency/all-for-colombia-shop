@@ -1,5 +1,17 @@
 # Instrucciones para Configurar Openpay
 
+## 🔴 PROBLEMA ACTUAL: Credenciales No Configuradas
+
+El error que estás experimentando al cargar los bancos es porque las credenciales de Openpay todavía tienen los valores placeholder en el archivo `.env`.
+
+**Solución inmediata:**
+1. Edita el archivo `.env` en la raíz del proyecto
+2. Reemplaza los valores placeholder con tus credenciales reales de Openpay
+3. Reinicia el servidor de desarrollo
+
+**Verifica la configuración:**
+Visita: `http://localhost:8080/api/openpay/diagnostico` para ver el estado de tu configuración.
+
 ## Problemas Identificados y Soluciones
 
 ### 1. Error de Timeout de Supabase (Error 522 Cloudflare)
@@ -18,6 +30,42 @@
 **Solución Aplicada:**
 - Se han agregado las variables de entorno necesarias en el archivo `.env`
 - Debes actualizar los valores con tus credenciales reales de Openpay
+
+## Diagnóstico de Configuración
+
+Antes de configurar las credenciales, puedes verificar el estado actual:
+
+**Endpoint de diagnóstico:**
+```
+GET http://localhost:8080/api/openpay/diagnostico
+```
+
+Este endpoint te mostrará:
+- Si las variables de entorno están configuradas
+- Si hay valores placeholder
+- Si el formato de las llaves es correcto
+- Si la configuración general es válida
+
+**Respuesta esperada cuando todo está correcto:**
+```json
+{
+  "overall_status": {
+    "ready": true,
+    "message": "Configuración de Openpay parece correcta."
+  }
+}
+```
+
+**Respuesta cuando hay placeholders:**
+```json
+{
+  "overall_status": {
+    "ready": false,
+    "has_placeholders": true,
+    "message": "Las credenciales de Openpay tienen valores placeholder. Por favor actualiza el archivo .env con tus credenciales reales."
+  }
+}
+```
 
 ## Configuración de Openpay
 
@@ -142,4 +190,21 @@ Si encuentras problemas:
 
 - `src/lib/public.functions.ts` - Manejo de errores mejorado
 - `src/routes/api/openpay/card-charge.ts` - Resistencia a fallos de Supabase
+- `src/routes/api/openpay/banks.ts` - Mejor manejo de errores con logging
+- `src/routes/api/openpay/diagnostico.ts` - Nuevo endpoint de diagnóstico
 - `.env` - Variables de entorno agregadas
+
+## Pasos Inmediatos para Solucionar el Error
+
+1. **Abre el archivo `.env`** en la raíz del proyecto
+2. **Reemplaza los valores placeholder:**
+   ```env
+   OPENPAY_MERCHANT_ID="tu_merchant_id_real"
+   OPENPAY_PRIVATE_KEY="sk_tu_llave_privada_real"
+   OPENPAY_PUBLIC_KEY="pk_tu_llave_publica_real"
+   ```
+3. **Reinicia el servidor de desarrollo**
+4. **Verifica la configuración** en: `http://localhost:8080/api/openpay/diagnostico`
+5. **Intenta cargar los bancos** nuevamente
+
+Si después de configurar las credenciales sigues teniendo problemas, el endpoint de diagnóstico te dará información específica sobre qué está mal.

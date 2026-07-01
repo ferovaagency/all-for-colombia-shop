@@ -24,9 +24,14 @@ export const Route = createFileRoute("/api/openpay/banks")({
             .filter((b) => b.bankCode && b.bankName);
           return Response.json(banks);
         } catch (e: any) {
+          console.error("Error fetching banks:", e);
           if (e instanceof Response) return e;
           return new Response(
-            JSON.stringify({ error_code: "server_error", description: e?.message ?? "Unexpected error" }),
+            JSON.stringify({
+              error_code: "server_error",
+              description: e?.message ?? "Unexpected error",
+              details: process.env.NODE_ENV === "development" ? String(e) : undefined
+            }),
             { status: 500, headers: { "Content-Type": "application/json" } },
           );
         }
