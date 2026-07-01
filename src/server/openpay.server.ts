@@ -5,7 +5,7 @@ import '../../server-env';
  * Shared helper for Openpay sandbox requests.
  * Uses HTTP Basic Auth with the Private Key as the username and empty password.
  */
-function getOpenpayBase() {
+export function getOpenpayBase() {
   const sandbox = process.env.OPENPAY_SANDBOX?.trim() === "true";
   return sandbox ? "https://sandbox-api.openpay.co" : "https://api.openpay.co";
 }
