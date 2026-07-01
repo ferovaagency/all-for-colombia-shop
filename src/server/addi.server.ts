@@ -48,25 +48,43 @@ export async function getAddiToken(): Promise<string> {
     throw new Error("Addi credentials not configured (ADDI_CLIENT_ID/ADDI_CLIENT_SECRET)");
   }
 
-  const res = await fetch(`${getAuthBase()}/oauth/token`, {
+  const tokenUrl = `${getAuthBase()}/oauth/token`;
+  const tokenPayload = {
+    audience: getAudience(),
+    grant_type: "client_credentials",
+  };
+
+  const res = await fetch(tokenUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-    },
-    body: JSON.stringify({
-      audience: getAudience(),
-      grant_type: "client_credentials",
       client_id: clientId,
       client_secret: clientSecret,
-    }),
+    },
+    body: JSON.stringify(tokenPayload),
   });
 
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Addi auth failed: ${res.status} ${txt}`);
+  const finalRes = res.status === 401 || res.status === 400
+    ? await fetch(tokenUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          ...tokenPayload,
+          client_id: clientId,
+          client_secret: clientSecret,
+        }),
+      })
+    : res;
+
+  if (!finalRes.ok) {
+    const txt = await finalRes.text();
+    throw new Error(`Addi auth failed: ${finalRes.status} ${txt}`);
   }
-  const data = (await res.json()) as { access_token: string; expires_in?: number };
+  const data = (await finalRes.json()) as { access_token: string; expires_in?: number };
   return data.access_token;
 }
 
