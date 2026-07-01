@@ -2,21 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 
 // Addi webhook (Online Application Callback).
 // Requirements from Addi:
-//  - Basic Auth (credentials configured in Addi's portal, stored here as
-//    ADDI_WEBHOOK_USER / ADDI_WEBHOOK_PASS).
+//  - Credentials configured in Addi's portal, stored here as
+//    ADDI_WEBHOOK_USER / ADDI_WEBHOOK_PASS. Addi may send them either as
+//    Basic Auth or as explicit headers, so we accept both formats.
 //  - Respond HTTP 200 echoing the exact same JSON body received.
 //  - Retries every 30 min for up to 24 h if the response is not 200.
 export const Route = createFileRoute("/api/public/addi-webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        // Basic Auth validation
-        const user = process.env.ADDI_WEBHOOK_USER;
-        const pass = process.env.ADDI_WEBHOOK_PASS;
+        const user = process.env.ADDI_WEBHOOK_USER?.trim();
+        const pass = process.env.ADDI_WEBHOOK_PASS?.trim();
         if (user && pass) {
-          const header = request.headers.get("authorization") || "";
-          const expected = "Basic " + Buffer.from(`${user}:${pass}`).toString("base64");
-          if (header !== expected) {
+          if (!isAuthorizedAddiWebhook(request.headers, user, pass)) {
             return new Response("Unauthorized", { status: 401 });
           }
         }
@@ -74,4 +72,70 @@ function mapAddiStatusToOrder(status: string): string | null {
     return "cancelled";
   if (["pending", "in_review", "processing"].includes(status)) return "pending";
   return null;
+}
+
+function isAuthorizedAddiWebhook(headers: Headers, expectedUser: string, expectedPass: string) {
+  const authorization = headers.get("authorization")?.trim() || "";
+  if (authorization.toLowerCase().startsWith("basic ")) {
+    const encoded = authorization.slice(6).trim();
+    try {
+      const decoded = Buffer.from(encoded, "base64").toString("utf8");
+      const separatorIndex = decoded.indexOf(":");
+      if (separatorIndex >= 0) {
+        const headerUser = decoded.slice(0, separatorIndex);
+        const headerPass = decoded.slice(separatorIndex + 1);
+        if (safeEqual(headerUser, expectedUser) && safeEqual(headerPass, expectedPass)) return true;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  const headerUser = firstHeader(headers, [
+    "x-addi-webhook-user",
+    "x-addi-user",
+    "x-addi-client-id",
+    "x-webhook-user",
+    "x-webhook-username",
+    "x-client-id",
+    "client-id",
+    "client_id",
+    "webhook-user",
+    "username",
+    "user",
+  ]);
+  const headerPass = firstHeader(headers, [
+    "x-addi-webhook-pass",
+    "x-addi-webhook-password",
+    "x-addi-pass",
+    "x-addi-password",
+    "x-addi-client-secret",
+    "x-webhook-pass",
+    "x-webhook-password",
+    "x-client-secret",
+    "client-secret",
+    "client_secret",
+    "webhook-pass",
+    "password",
+    "pass",
+  ]);
+
+  return Boolean(
+    headerUser &&
+      headerPass &&
+      safeEqual(headerUser.trim(), expectedUser) &&
+      safeEqual(headerPass.trim(), expectedPass),
+  );
+}
+
+function firstHeader(headers: Headers, names: string[]) {
+  for (const name of names) {
+    const value = headers.get(name);
+    if (value) return value;
+  }
+  return null;
+}
+
+function safeEqual(a: string, b: string) {
+  return a.length === b.length && a === b;
 }
