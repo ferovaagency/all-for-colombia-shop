@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
 import { createAddiApplication } from "@/server/addi.server";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const InputSchema = z.object({
   orderId: z.string().uuid(),
@@ -11,7 +11,12 @@ const InputSchema = z.object({
 export const startAddiCheckout = createServerFn({ method: "POST" })
   .inputValidator((input) => InputSchema.parse(input))
   .handler(async ({ data }) => {
-    const { data: rows, error } = await supabaseAdmin
+    const sb = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
+    );
+    const { data: rows, error } = await sb
       .rpc("get_order_for_payment", { _order_id: data.orderId });
     const order = Array.isArray(rows) ? rows[0] : rows;
 
