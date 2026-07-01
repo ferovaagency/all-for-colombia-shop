@@ -2,15 +2,21 @@
 // Docs: https://developers.addi.com
 
 const PUBLIC_API_BASE = "https://channels.public.api.addi.com";
-const IDAAS_PROD = "https://identity.addi.com";
-const IDAAS_SANDBOX = "https://identity.uat.addi.com";
+const AUTH_PROD = "https://auth.addi.com";
+const AUTH_SANDBOX = "https://auth.addi-staging.com";
+const AUDIENCE_PROD = "https://api.addi.com";
+const AUDIENCE_SANDBOX = "https://api.staging.addi.com";
 
 function isProduction() {
   return (process.env.ADDI_ENV || "sandbox") === "production";
 }
 
-function getIdaasBase() {
-  return isProduction() ? IDAAS_PROD : IDAAS_SANDBOX;
+function getAuthBase() {
+  return isProduction() ? AUTH_PROD : AUTH_SANDBOX;
+}
+
+function getAudience() {
+  return isProduction() ? AUDIENCE_PROD : AUDIENCE_SANDBOX;
 }
 
 function getAllySlug() {
@@ -20,26 +26,29 @@ function getAllySlug() {
 }
 
 /**
- * OAuth (IdaaS) client_credentials. Per Addi best practice, we do NOT cache
- * the token — generate a fresh one per transaction attempt.
+ * OAuth client_credentials against auth.addi(-staging).com/oauth/token.
+ * Per Addi best practice, we do NOT cache the token — generate a fresh
+ * one per transaction attempt.
  */
 export async function getAddiToken(): Promise<string> {
-  const clientId = process.env.ADDI_CLIENT_ID;
-  const clientSecret = process.env.ADDI_CLIENT_SECRET;
+  const clientId = process.env.ADDI_CLIENT_ID?.trim();
+  const clientSecret = process.env.ADDI_CLIENT_SECRET?.trim();
   if (!clientId || !clientSecret) {
     throw new Error("Addi credentials not configured (ADDI_CLIENT_ID/ADDI_CLIENT_SECRET)");
   }
-  const basic = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
-  const body = new URLSearchParams({ grant_type: "client_credentials" });
 
-  const res = await fetch(`${getIdaasBase()}/oauth2/token`, {
+  const res = await fetch(`${getAuthBase()}/oauth/token`, {
     method: "POST",
     headers: {
-      Authorization: `Basic ${basic}`,
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: body.toString(),
+    body: JSON.stringify({
+      audience: getAudience(),
+      grant_type: "client_credentials",
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
   });
 
   if (!res.ok) {
