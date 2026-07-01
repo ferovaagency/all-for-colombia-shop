@@ -71,6 +71,17 @@ export const Route = createFileRoute("/api/public/openpay-webhook")({
 
         return new Response("ok", { status: 200 });
       },
+      GET: async () => {
+        const configured = Boolean(process.env.OPENPAY_WEBHOOK_USER && process.env.OPENPAY_WEBHOOK_PASS);
+        return Response.json({
+          ok: true,
+          endpoint: "openpay-webhook",
+          mode: configured ? "authenticated" : "simulated",
+          hint: configured
+            ? "Basic Auth activo. Openpay debe enviar el header Authorization configurado."
+            : "Sin OPENPAY_WEBHOOK_USER/PASS: acepta cualquier POST. Añade los secretos para activar Basic Auth.",
+        });
+      },
     },
   },
 });
