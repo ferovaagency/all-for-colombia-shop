@@ -16,7 +16,7 @@ function cleanSecret(value: string | undefined) {
   return value?.trim();
 }
 
-function openpayConfigError(description: string, status = 500) {
+function openpayConfigError(description: string, status = 500): never {
   throw new Response(
     JSON.stringify({
       error_code: "openpay_config_error",
