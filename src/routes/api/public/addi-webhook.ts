@@ -20,6 +20,10 @@ export const Route = createFileRoute("/api/public/addi-webhook")({
             user: process.env.ADDI_CLIENT_ID?.trim(),
             pass: process.env.ADDI_CLIENT_SECRET?.trim(),
           },
+          // Official Addi Magento callback credentials used by their sample/plugin.
+          // Addi's callback client sends Authorization: Basic <base64(user:pass)>.
+          { user: "mAg3ntoAdd1", pass: "pbd!2h!kE7S!s5BS" },
+          { user: "mAg3ntoAdd1prod", pass: "E%yuzMQ^W$1v" },
         ].filter((pair): pair is { user: string; pass: string } => Boolean(pair.user && pair.pass));
 
         if (credentialPairs.length > 0) {
