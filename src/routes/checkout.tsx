@@ -38,6 +38,7 @@ type PaymentMethod =
   | "openpay_card"
   | "openpay_pse"
   | "openpay_qr_breb"
+  | "addi"
   | "bancolombia"
   | "davivienda"
   | "nequi"
@@ -52,6 +53,7 @@ const PAYMENT_OPTIONS: {
   { value: "openpay_card", label: "💳 Tarjeta crédito/débito", description: "Visa, Mastercard, Amex — procesado por Openpay" },
   { value: "openpay_pse", label: "🏛️ PSE — Openpay", description: "Débito desde tu banco con PSE (procesado por Openpay)" },
   { value: "openpay_qr_breb", label: "📲 QR Bre-B — Openpay", description: "Escanea el QR desde tu app bancaria. Pago inmediato." },
+  { value: "addi", label: "🟣 Addi — Paga a cuotas sin tarjeta", description: "Financia tu compra en cuotas con aprobación en minutos" },
   { value: "bancolombia", label: "🏦 Transferencia Bancolombia", description: "Transfiere y sube tu comprobante" },
   { value: "davivienda", label: "🏦 Transferencia Davivienda", description: "Transfiere y sube tu comprobante" },
   { value: "nequi", label: "📱 Nequi", description: "Transfiere por Nequi y sube comprobante" },
