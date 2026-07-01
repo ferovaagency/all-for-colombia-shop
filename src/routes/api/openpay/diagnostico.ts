@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getOpenpayEnv, getOpenpayBase, basicAuthHeader } from "@/server/openpay.server";
 // Load environment variables from .env file
-import '../../../server-env';
+import '../../../../server-env';
 
 /**
  * GET /api/openpay/diagnostico
