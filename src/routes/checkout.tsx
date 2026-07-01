@@ -243,7 +243,9 @@ function CheckoutPage() {
       receiptUrl = path;
     }
 
-    const { data, error } = await supabase.from("orders").insert({
+    const orderId = crypto.randomUUID();
+    const { error } = await supabase.from("orders").insert({
+      id: orderId,
       customer_name: form.name,
       customer_email: form.email,
       customer_phone: form.phone,
@@ -256,11 +258,11 @@ function CheckoutPage() {
       payment_method: payment,
       receipt_url: receiptUrl,
       shipping_address: { address: form.address, city: form.city, notes: form.notes },
-    }).select().maybeSingle();
+    });
 
     setSubmitting(false);
 
-    if (error || !data) { toast.error("No se pudo crear el pedido. Intenta de nuevo."); return; }
+    if (error) { toast.error("No se pudo crear el pedido. Intenta de nuevo."); return; }
 
     await supabase.from("customers").upsert({
       name: form.name, email: form.email, phone: form.phone,
@@ -283,8 +285,8 @@ function CheckoutPage() {
             docNumber: form.customer_id_number.replace(/-/g, ""),
             bankCode,
             amount: subtotal,
-            description: `Pedido ${data.id.slice(0, 8)}`,
-            redirectUrl: `${window.location.origin}/resultado-pago?id=${data.id}`,
+            description: `Pedido ${orderId.slice(0, 8)}`,
+            redirectUrl: `${window.location.origin}/resultado-pago?id=${orderId}`,
           }),
         });
         const json = await r.json().catch(() => ({}));
@@ -309,14 +311,14 @@ function CheckoutPage() {
 
     // ------- Openpay QR Bre-B -------
     if (payment === "openpay_qr_breb") {
-      setPendingOrderId(data.id);
-      await generateQr(data.id);
+      setPendingOrderId(orderId);
+      await generateQr(orderId);
       return;
     }
 
     // ------- Openpay Tarjeta -------
     if (payment === "openpay_card") {
-      setCardOrderId(data.id);
+      setCardOrderId(orderId);
       toast.success("Pedido creado. Completa los datos de tu tarjeta abajo para pagar.");
       return;
     }
@@ -326,7 +328,7 @@ function CheckoutPage() {
       const toastId = toast.loading("Conectando con Addi...");
       try {
         const result = await startAddiCheckout({
-          data: { orderId: data.id, origin: window.location.origin },
+          data: { orderId, origin: window.location.origin },
         });
         toast.dismiss(toastId);
         if (!result?.ok || !result.redirectUrl) {
@@ -346,10 +348,10 @@ function CheckoutPage() {
 
     // ------- Métodos manuales (WhatsApp) -------
     const summary = items.map(i => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`).join("\n");
-    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${data.id.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
+    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
     window.open(whatsappUrl(msg), "_blank");
     clear();
-    navigate({ to: "/resultado-pago", search: { id: data.id, status: "ok" } as any });
+    navigate({ to: "/resultado-pago", search: { id: orderId, status: "ok" } as any });
   };
 
   return (
