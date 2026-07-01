@@ -225,6 +225,7 @@ function CheckoutPage() {
     const res = schema.safeParse(form);
     if (!res.success) { toast.error(res.error.issues[0]?.message || "Revisa los campos"); return; }
     if (payment === "openpay_pse" && !bankCode) { toast.error("Selecciona tu banco PSE"); return; }
+    if (payment === "openpay_card" && cardOrderId) { toast.info("Ya creaste el pedido. Completa los datos de tu tarjeta abajo."); return; }
     if (requiresReceipt && !receipt) { toast.error("Sube el comprobante de pago para continuar"); return; }
     setSubmitting(true);
 
