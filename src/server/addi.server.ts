@@ -18,10 +18,10 @@ function getAuthBase() {
 
 function getAudience() {
   return isProduction() ? AUDIENCE_PROD : AUDIENCE_SANDBOX;
+}
 
 function getPublicApiBase() {
   return isProduction() ? PUBLIC_API_PROD : PUBLIC_API_SANDBOX;
-}
 }
 
 function getAllySlug() {
