@@ -3,8 +3,8 @@
  * Uses HTTP Basic Auth with the Private Key as the username and empty password.
  */
 function getOpenpayBase() {
-  const sandbox = (process.env.OPENPAY_SANDBOX ?? "true").toLowerCase() !== "false";
-  return sandbox ? "https://sandbox-api.openpay.co/v1" : "https://api.openpay.co/v1";
+  const sandbox = process.env.OPENPAY_SANDBOX?.trim() === "true";
+  return sandbox ? "https://sandbox-api.openpay.co" : "https://api.openpay.co";
 }
 
 export interface OpenpayEnv {
@@ -40,7 +40,7 @@ export function getOpenpayEnv(): OpenpayEnv {
     openpayConfigError("Las llaves de Openpay parecen estar invertidas: OPENPAY_PUBLIC_KEY contiene una llave secreta (sk_). Debe contener la llave pública (pk_).");
   }
   if (!privateKey.startsWith("sk_")) {
-    openpayConfigError("OPENPAY_PRIVATE_KEY no tiene formato de llave secreta de Openpay. Debe iniciar por sk_.");
+    openpayConfigError("La llave privada no tiene formato sk_");
   }
   return { merchantId, privateKey };
 }
@@ -56,7 +56,7 @@ export async function openpayFetch(
   init: { method: "GET" | "POST"; body?: unknown } = { method: "GET" },
 ): Promise<Response> {
   const { merchantId, privateKey } = getOpenpayEnv();
-  const url = `${getOpenpayBase()}/${merchantId}${path}`;
+  const url = `${getOpenpayBase()}/v1/${merchantId}${path}`;
   const headers: Record<string, string> = {
     Authorization: basicAuthHeader(privateKey),
     Accept: "application/json",
