@@ -39,7 +39,7 @@ export async function openpayFetch(
   init: { method: "GET" | "POST"; body?: unknown } = { method: "GET" },
 ): Promise<Response> {
   const { merchantId, privateKey } = getOpenpayEnv();
-  const url = `${OPENPAY_BASE}/${merchantId}${path}`;
+  const url = `${getOpenpayBase()}/${merchantId}${path}`;
   const headers: Record<string, string> = {
     Authorization: basicAuthHeader(privateKey),
     Accept: "application/json",
