@@ -1,13 +1,23 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-// NOTE (Step 1 of security migration): these admin-facing fns are temporarily
-// unprotected to match the current /admin posture. Step 2 will gate them with
-// has_role(auth.uid(), 'admin') once Supabase Auth + user_roles ship.
+async function assertAdmin(context: { supabase: any; userId: string }) {
+  const { data: isAdmin, error } = await context.supabase.rpc("has_role", {
+    _user_id: context.userId,
+    _role: "admin",
+  });
 
-export const adminListDistributors = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+  if (error) throw new Error(error.message);
+  if (!isAdmin) throw new Error("No autorizado");
+}
+
+export const adminListDistributors = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+  await assertAdmin(context);
+
+  const { data, error } = await context.supabase
     .from("distributors")
     .select("*")
     .order("created_at", { ascending: false });
@@ -16,10 +26,12 @@ export const adminListDistributors = createServerFn({ method: "GET" }).handler(a
 });
 
 export const adminRejectDistributor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+
+    const { error } = await context.supabase
       .from("distributors")
       .update({ status: "rejected" })
       .eq("id", data.id);
@@ -28,6 +40,7 @@ export const adminRejectDistributor = createServerFn({ method: "POST" })
   });
 
 export const adminApproveDistributor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) =>
     z
       .object({
@@ -36,11 +49,13 @@ export const adminApproveDistributor = createServerFn({ method: "POST" })
       })
       .parse(input),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Fetch the distributor record
-    const { data: dist, error: fetchErr } = await supabaseAdmin
+    const { data: dist, error: fetchErr } = await context.supabase
       .from("distributors")
       .select("id, email, contact_name, company_name, auth_user_id, status")
       .eq("id", data.id)
@@ -88,7 +103,7 @@ export const adminApproveDistributor = createServerFn({ method: "POST" })
     }
 
     // Mark approved and link
-    const { error: updateErr } = await supabaseAdmin
+    const { error: updateErr } = await context.supabase
       .from("distributors")
       .update({
         status: "approved",

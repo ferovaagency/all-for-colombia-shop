@@ -42,9 +42,11 @@ import { Route as ApiPublicAddiWebhookRouteImport } from './routes/api/public/ad
 import { Route as ApiOpenpayStatusRouteImport } from './routes/api/openpay/status'
 import { Route as ApiOpenpayPublicConfigRouteImport } from './routes/api/openpay/public-config'
 import { Route as ApiOpenpayPseRouteImport } from './routes/api/openpay/pse'
+import { Route as ApiOpenpayDiagnosticoRouteImport } from './routes/api/openpay/diagnostico'
 import { Route as ApiOpenpayCardChargeRouteImport } from './routes/api/openpay/card-charge'
 import { Route as ApiOpenpayBrebQrRouteImport } from './routes/api/openpay/breb-qr'
 import { Route as ApiOpenpayBanksRouteImport } from './routes/api/openpay/banks'
+import { Route as ApiAddiConfigRouteImport } from './routes/api/addi/config'
 
 const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
   id: '/ventas-corporativas',
@@ -215,6 +217,11 @@ const ApiOpenpayPseRoute = ApiOpenpayPseRouteImport.update({
   path: '/api/openpay/pse',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOpenpayDiagnosticoRoute = ApiOpenpayDiagnosticoRouteImport.update({
+  id: '/api/openpay/diagnostico',
+  path: '/api/openpay/diagnostico',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiOpenpayCardChargeRoute = ApiOpenpayCardChargeRouteImport.update({
   id: '/api/openpay/card-charge',
   path: '/api/openpay/card-charge',
@@ -228,6 +235,11 @@ const ApiOpenpayBrebQrRoute = ApiOpenpayBrebQrRouteImport.update({
 const ApiOpenpayBanksRoute = ApiOpenpayBanksRouteImport.update({
   id: '/api/openpay/banks',
   path: '/api/openpay/banks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAddiConfigRoute = ApiAddiConfigRouteImport.update({
+  id: '/api/addi/config',
+  path: '/api/addi/config',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -256,9 +268,11 @@ export interface FileRoutesByFullPath {
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/api/addi/config': typeof ApiAddiConfigRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
+  '/api/openpay/diagnostico': typeof ApiOpenpayDiagnosticoRoute
   '/api/openpay/pse': typeof ApiOpenpayPseRoute
   '/api/openpay/public-config': typeof ApiOpenpayPublicConfigRoute
   '/api/openpay/status': typeof ApiOpenpayStatusRoute
@@ -292,9 +306,11 @@ export interface FileRoutesByTo {
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin': typeof AdminIndexRoute
   '/distribuidores': typeof DistribuidoresIndexRoute
+  '/api/addi/config': typeof ApiAddiConfigRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
+  '/api/openpay/diagnostico': typeof ApiOpenpayDiagnosticoRoute
   '/api/openpay/pse': typeof ApiOpenpayPseRoute
   '/api/openpay/public-config': typeof ApiOpenpayPublicConfigRoute
   '/api/openpay/status': typeof ApiOpenpayStatusRoute
@@ -331,9 +347,11 @@ export interface FileRoutesById {
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/api/addi/config': typeof ApiAddiConfigRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
+  '/api/openpay/diagnostico': typeof ApiOpenpayDiagnosticoRoute
   '/api/openpay/pse': typeof ApiOpenpayPseRoute
   '/api/openpay/public-config': typeof ApiOpenpayPublicConfigRoute
   '/api/openpay/status': typeof ApiOpenpayStatusRoute
@@ -371,9 +389,11 @@ export interface FileRouteTypes {
     | '/producto/$slug'
     | '/admin/'
     | '/distribuidores/'
+    | '/api/addi/config'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
+    | '/api/openpay/diagnostico'
     | '/api/openpay/pse'
     | '/api/openpay/public-config'
     | '/api/openpay/status'
@@ -407,9 +427,11 @@ export interface FileRouteTypes {
     | '/producto/$slug'
     | '/admin'
     | '/distribuidores'
+    | '/api/addi/config'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
+    | '/api/openpay/diagnostico'
     | '/api/openpay/pse'
     | '/api/openpay/public-config'
     | '/api/openpay/status'
@@ -445,9 +467,11 @@ export interface FileRouteTypes {
     | '/producto/$slug'
     | '/admin/'
     | '/distribuidores/'
+    | '/api/addi/config'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
+    | '/api/openpay/diagnostico'
     | '/api/openpay/pse'
     | '/api/openpay/public-config'
     | '/api/openpay/status'
@@ -479,9 +503,11 @@ export interface RootRouteChildren {
   DistribuidoresRegistroRoute: typeof DistribuidoresRegistroRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
   DistribuidoresIndexRoute: typeof DistribuidoresIndexRoute
+  ApiAddiConfigRoute: typeof ApiAddiConfigRoute
   ApiOpenpayBanksRoute: typeof ApiOpenpayBanksRoute
   ApiOpenpayBrebQrRoute: typeof ApiOpenpayBrebQrRoute
   ApiOpenpayCardChargeRoute: typeof ApiOpenpayCardChargeRoute
+  ApiOpenpayDiagnosticoRoute: typeof ApiOpenpayDiagnosticoRoute
   ApiOpenpayPseRoute: typeof ApiOpenpayPseRoute
   ApiOpenpayPublicConfigRoute: typeof ApiOpenpayPublicConfigRoute
   ApiOpenpayStatusRoute: typeof ApiOpenpayStatusRoute
@@ -723,6 +749,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOpenpayPseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/openpay/diagnostico': {
+      id: '/api/openpay/diagnostico'
+      path: '/api/openpay/diagnostico'
+      fullPath: '/api/openpay/diagnostico'
+      preLoaderRoute: typeof ApiOpenpayDiagnosticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/openpay/card-charge': {
       id: '/api/openpay/card-charge'
       path: '/api/openpay/card-charge'
@@ -742,6 +775,13 @@ declare module '@tanstack/react-router' {
       path: '/api/openpay/banks'
       fullPath: '/api/openpay/banks'
       preLoaderRoute: typeof ApiOpenpayBanksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/addi/config': {
+      id: '/api/addi/config'
+      path: '/api/addi/config'
+      fullPath: '/api/addi/config'
+      preLoaderRoute: typeof ApiAddiConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -808,9 +848,11 @@ const rootRouteChildren: RootRouteChildren = {
   DistribuidoresRegistroRoute: DistribuidoresRegistroRoute,
   ProductoSlugRoute: ProductoSlugRoute,
   DistribuidoresIndexRoute: DistribuidoresIndexRoute,
+  ApiAddiConfigRoute: ApiAddiConfigRoute,
   ApiOpenpayBanksRoute: ApiOpenpayBanksRoute,
   ApiOpenpayBrebQrRoute: ApiOpenpayBrebQrRoute,
   ApiOpenpayCardChargeRoute: ApiOpenpayCardChargeRoute,
+  ApiOpenpayDiagnosticoRoute: ApiOpenpayDiagnosticoRoute,
   ApiOpenpayPseRoute: ApiOpenpayPseRoute,
   ApiOpenpayPublicConfigRoute: ApiOpenpayPublicConfigRoute,
   ApiOpenpayStatusRoute: ApiOpenpayStatusRoute,
@@ -821,3 +863,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
