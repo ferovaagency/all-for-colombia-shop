@@ -129,10 +129,5 @@ function firstHeader(headers: Headers, names: string[]) {
 }
 
 function safeEqual(a: string, b: string) {
-  const aBuffer = Buffer.from(a);
-  const bBuffer = Buffer.from(b);
-  if (aBuffer.length !== bBuffer.length) return false;
-  return crypto.subtle
-    ? a === b
-    : a === b;
+  return a.length === b.length && a === b;
 }
