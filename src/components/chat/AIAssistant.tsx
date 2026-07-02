@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { X, Send, ExternalLink, Loader2, Bot, Sparkles } from 'lucide-react';
+import { X, Send, ExternalLink, Loader2, Bot, Sparkles, Mail, Check } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { syncToBrevo } from '@/lib/brevo';
 
 interface SuggestedProduct {
   id: string;
@@ -51,8 +52,27 @@ export function AIAssistant() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
+  const [emailSubscribed, setEmailSubscribed] = useState(false);
   const sessionId = useRef<string>('');
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const submitEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = emailInput.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    syncToBrevo(email, 'newsletter', { SOURCE: 'asesor-ia' }).catch(() => {});
+    try {
+      localStorage.setItem('afa_ai_email', email);
+    } catch {}
+    setEmailSubscribed(true);
+  };
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('afa_ai_email')) setEmailSubscribed(true);
+    } catch {}
+  }, []);
 
   useEffect(() => {
     sessionId.current = getOrCreateSessionId();
@@ -184,7 +204,28 @@ export function AIAssistant() {
             </button>
           </div>
 
+          {!emailSubscribed ? (
+            <form onSubmit={submitEmail} className="flex items-center gap-2 px-3 py-2 border-b bg-muted/20">
+              <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+              <Input
+                type="email"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                placeholder="Tu email para novedades (opcional)"
+                className="h-8 text-xs flex-1"
+              />
+              <Button type="submit" size="sm" variant="secondary" className="h-8 text-xs px-3">
+                OK
+              </Button>
+            </form>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-1.5 border-b bg-green-50 text-green-700 text-xs">
+              <Check className="w-3.5 h-3.5" /> Te avisaremos de novedades y ofertas.
+            </div>
+          )}
+
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
+
             {messages.map((m, i) => (
               <div key={i} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start flex-col items-start gap-2'}>
                 <div

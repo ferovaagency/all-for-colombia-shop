@@ -3,6 +3,7 @@ import { X, Gift, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { syncToBrevo } from "@/lib/brevo";
 
 const SEGMENTS = [
   { id: "discount_5", label: "5% OFF", code: "BIENVENIDA5", winnable: true },
@@ -64,6 +65,10 @@ export function DiscountWheel() {
   const onSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
+    syncToBrevo(email.trim().toLowerCase(), "newsletter", {
+      NOMBRE: name.trim(),
+      SOURCE: "ruleta",
+    }).catch(() => {});
     setStep("wheel");
   };
 

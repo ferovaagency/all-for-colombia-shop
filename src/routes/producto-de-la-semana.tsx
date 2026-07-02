@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Countdown, useCountdown } from "@/components/WeeklyDealCountdown";
 import { formatCOP, useCart } from "@/lib/cart";
+import { syncToBrevo } from "@/lib/brevo";
 import { Sparkles, ShoppingBag, Zap, ShieldCheck, Truck, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/producto-de-la-semana")({
@@ -375,14 +376,17 @@ function NewsletterSignup() {
       return;
     }
     setLoading(true);
+    const emailLc = email.trim().toLowerCase();
     const { error: err } = await supabase
       .from("newsletter_subscribers")
-      .insert({ email: email.trim().toLowerCase(), source: "producto-semana" });
-    setLoading(false);
+      .insert({ email: emailLc, source: "producto-semana" });
     if (err && !String(err.message).toLowerCase().includes("duplicate")) {
+      setLoading(false);
       setError("No pudimos registrar tu correo. Intenta de nuevo.");
       return;
     }
+    await syncToBrevo(emailLc, "weekly_deal", { SOURCE: "producto-semana" }).catch(() => {});
+    setLoading(false);
     setDone(true);
   };
 

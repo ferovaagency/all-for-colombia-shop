@@ -7,7 +7,7 @@ const corsHeaders = {
 
 interface SyncRequest {
   email: string;
-  list: 'distributors' | 'newsletter' | 'buyers';
+  list: 'distributors' | 'newsletter' | 'buyers' | 'weekly_deal';
   attributes?: Record<string, unknown>;
 }
 
@@ -32,6 +32,7 @@ serve(async (req) => {
       distributors: Deno.env.get('BREVO_LIST_DISTRIBUTORS'),
       newsletter: Deno.env.get('BREVO_LIST_NEWSLETTER'),
       buyers: Deno.env.get('BREVO_LIST_BUYERS'),
+      weekly_deal: Deno.env.get('BREVO_LIST_WEEKLY_DEAL'),
     };
 
     const listId = listMap[list];

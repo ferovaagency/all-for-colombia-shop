@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { WHATSAPP_NUMBER } from "@/lib/cart";
 import { toast } from "sonner";
+import { syncToBrevo } from "@/lib/brevo";
 import { z } from "zod";
 import { CheckCircle2 } from "lucide-react";
 
@@ -89,6 +90,14 @@ function DistributorRegisterPage() {
       }
       return;
     }
+
+    syncToBrevo(form.email.trim().toLowerCase(), "distributors", {
+      NOMBRE: form.contact_name,
+      EMPRESA: form.company_name,
+      NIT: form.nit,
+      TELEFONO: form.phone,
+      CIUDAD: form.city,
+    }).catch(() => {});
 
     const msg =
       `Hola, acabo de enviar solicitud para ser distribuidor.\n` +

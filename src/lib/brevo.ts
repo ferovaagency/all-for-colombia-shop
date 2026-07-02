@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export type BrevoList = 'distributors' | 'newsletter' | 'buyers';
+export type BrevoList = 'distributors' | 'newsletter' | 'buyers' | 'weekly_deal';
 
 export async function syncToBrevo(
   email: string,

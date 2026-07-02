@@ -13,6 +13,7 @@ import { z } from "zod";
 import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode, Lock } from "lucide-react";
 import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
 import { startAddiCheckout } from "@/lib/addi.functions";
+import { syncToBrevo } from "@/lib/brevo";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -265,6 +266,12 @@ function CheckoutPage() {
     await supabase.from("customers").upsert({
       name: form.name, email: form.email, phone: form.phone,
     }, { onConflict: "email" });
+
+    syncToBrevo(form.email.trim().toLowerCase(), "buyers", {
+      NOMBRE: form.name,
+      TELEFONO: form.phone,
+      CIUDAD: form.city,
+    }).catch(() => {});
 
     // ------- Openpay PSE -------
     if (payment === "openpay_pse") {
