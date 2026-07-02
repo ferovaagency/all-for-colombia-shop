@@ -13,6 +13,7 @@ import { Route as VentasCorporativasRouteImport } from './routes/ventas-corporat
 import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResultadoPagoRouteImport } from './routes/resultado-pago'
+import { Route as ProductoDeLaSemanaRouteImport } from './routes/producto-de-la-semana'
 import { Route as NosotrosRouteImport } from './routes/nosotros'
 import { Route as MiCuentaRouteImport } from './routes/mi-cuenta'
 import { Route as LegalRouteImport } from './routes/legal'
@@ -69,6 +70,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const ResultadoPagoRoute = ResultadoPagoRouteImport.update({
   id: '/resultado-pago',
   path: '/resultado-pago',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductoDeLaSemanaRoute = ProductoDeLaSemanaRouteImport.update({
+  id: '/producto-de-la-semana',
+  path: '/producto-de-la-semana',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NosotrosRoute = NosotrosRouteImport.update({
@@ -274,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
+  '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
   '/resultado-pago': typeof ResultadoPagoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tienda': typeof TiendaRoute
@@ -316,6 +323,7 @@ export interface FileRoutesByTo {
   '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
+  '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
   '/resultado-pago': typeof ResultadoPagoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tienda': typeof TiendaRoute
@@ -359,6 +367,7 @@ export interface FileRoutesById {
   '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
+  '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
   '/resultado-pago': typeof ResultadoPagoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tienda': typeof TiendaRoute
@@ -404,6 +413,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
+    | '/producto-de-la-semana'
     | '/resultado-pago'
     | '/sitemap.xml'
     | '/tienda'
@@ -446,6 +456,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
+    | '/producto-de-la-semana'
     | '/resultado-pago'
     | '/sitemap.xml'
     | '/tienda'
@@ -488,6 +499,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
+    | '/producto-de-la-semana'
     | '/resultado-pago'
     | '/sitemap.xml'
     | '/tienda'
@@ -532,6 +544,7 @@ export interface RootRouteChildren {
   LegalRoute: typeof LegalRoute
   MiCuentaRoute: typeof MiCuentaRoute
   NosotrosRoute: typeof NosotrosRoute
+  ProductoDeLaSemanaRoute: typeof ProductoDeLaSemanaRoute
   ResultadoPagoRoute: typeof ResultadoPagoRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TiendaRoute: typeof TiendaRoute
@@ -583,6 +596,13 @@ declare module '@tanstack/react-router' {
       path: '/resultado-pago'
       fullPath: '/resultado-pago'
       preLoaderRoute: typeof ResultadoPagoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/producto-de-la-semana': {
+      id: '/producto-de-la-semana'
+      path: '/producto-de-la-semana'
+      fullPath: '/producto-de-la-semana'
+      preLoaderRoute: typeof ProductoDeLaSemanaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nosotros': {
@@ -901,6 +921,7 @@ const rootRouteChildren: RootRouteChildren = {
   LegalRoute: LegalRoute,
   MiCuentaRoute: MiCuentaRoute,
   NosotrosRoute: NosotrosRoute,
+  ProductoDeLaSemanaRoute: ProductoDeLaSemanaRoute,
   ResultadoPagoRoute: ResultadoPagoRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TiendaRoute: TiendaRoute,
