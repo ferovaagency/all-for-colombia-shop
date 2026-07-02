@@ -38,7 +38,7 @@ export function Countdown({ target, urgent, compact }: Props) {
   return (
     <div
       className={`inline-flex items-stretch gap-2 md:gap-3 ${
-        isUrgent ? "text-white" : "text-foreground"
+        isUrgent ? "text-white" : "text-white"
       }`}
     >
       {[

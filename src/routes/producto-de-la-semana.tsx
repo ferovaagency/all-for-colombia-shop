@@ -335,7 +335,7 @@ function RevealedState({ deal }: { deal: Deal }) {
         </div>
       </section>
 
-      {/* ============ CTA FINAL ============ */}
+      {/* ============ CTA FINAL + NEWSLETTER ============ */}
       <section className="py-20 bg-gradient-to-b from-neutral-900 to-black text-white text-center">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl md:text-5xl font-semibold mb-4">No lo pienses más.</h2>
@@ -350,9 +350,96 @@ function RevealedState({ deal }: { deal: Deal }) {
               Comprar ahora por {formatCOP(final)}
             </Button>
           </div>
+
+          <div className="mt-16 max-w-xl mx-auto">
+            <NewsletterSignup />
+          </div>
         </div>
       </section>
     </div>
+  );
+}
+
+function NewsletterSignup() {
+  const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!email.trim() || !consent) {
+      setError("Ingresa un correo y acepta el tratamiento de datos.");
+      return;
+    }
+    setLoading(true);
+    const { error: err } = await supabase
+      .from("newsletter_subscribers")
+      .insert({ email: email.trim().toLowerCase(), source: "producto-semana" });
+    setLoading(false);
+    if (err && !String(err.message).toLowerCase().includes("duplicate")) {
+      setError("No pudimos registrar tu correo. Intenta de nuevo.");
+      return;
+    }
+    setDone(true);
+  };
+
+  if (done) {
+    return (
+      <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
+        <p className="text-lg font-semibold">¡Listo! Te avisaremos.</p>
+        <p className="text-white/70 text-sm mt-1">
+          Recibirás un correo cuando revelemos el próximo Producto de la Semana.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="text-left">
+      <p className="text-xs uppercase tracking-[0.3em] text-white/60 mb-2 text-center">
+        No te pierdas el próximo
+      </p>
+      <h3 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+        Recibe las próximas revelaciones
+      </h3>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="tu@correo.com"
+          className="flex-1 rounded-lg bg-white/10 border border-white/20 px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-secondary"
+        />
+        <Button
+          type="submit"
+          size="lg"
+          disabled={loading}
+          className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Suscribirme"}
+        </Button>
+      </div>
+      <label className="mt-4 flex items-start gap-2 text-xs text-white/70 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={consent}
+          onChange={(e) => setConsent(e.target.checked)}
+          className="mt-0.5 h-4 w-4 rounded border-white/30 bg-white/10"
+        />
+        <span>
+          Acepto el tratamiento de mis datos personales conforme a la{" "}
+          <Link to="/politica-privacidad" className="underline hover:text-white">
+            Política de Privacidad
+          </Link>{" "}
+          de All For All para recibir comunicaciones comerciales.
+        </span>
+      </label>
+      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+    </form>
   );
 }
 
