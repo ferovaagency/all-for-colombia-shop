@@ -13,6 +13,7 @@ const NAV = [
   { label: "Inicio", path: "/" as const, hasMegaMenu: false },
   { label: "Tienda", path: "/tienda" as const, hasMegaMenu: true },
   { label: "Nosotros", path: "/nosotros" as const, hasMegaMenu: false },
+  { label: "Producto Semana", path: "/producto-de-la-semana" as const, hasMegaMenu: false },
   { label: "Distribuidores", path: "/distribuidores" as const, hasMegaMenu: false },
   { label: "Blog", path: "/blog" as const, hasMegaMenu: false },
 ];
