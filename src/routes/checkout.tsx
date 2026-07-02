@@ -50,15 +50,13 @@ const PAYMENT_OPTIONS: {
   label: string;
   description: string;
 }[] = [
-  { value: "openpay_card", label: "💳 Tarjeta crédito/débito", description: "Visa, Mastercard, Amex — procesado por Openpay" },
-  { value: "openpay_pse", label: "🏛️ PSE — Openpay", description: "Débito desde tu banco con PSE (procesado por Openpay)" },
-  { value: "openpay_qr_breb", label: "📲 QR Bre-B — Openpay", description: "Escanea el QR desde tu app bancaria. Pago inmediato." },
+  // Openpay temporalmente oculto mientras se termina de configurar.
   { value: "addi", label: "🟣 Addi — Paga a cuotas sin tarjeta", description: "Financia tu compra en cuotas con aprobación en minutos" },
   { value: "bancolombia", label: "🏦 Transferencia Bancolombia", description: "Transfiere y sube tu comprobante" },
   { value: "davivienda", label: "🏦 Transferencia Davivienda", description: "Transfiere y sube tu comprobante" },
   { value: "nequi", label: "📱 Nequi", description: "Transfiere por Nequi y sube comprobante" },
   { value: "breb", label: "⚡ Bre-B (transferencia manual)", description: "Transferencia inmediata con llave Bre-B" },
-  { value: "telefono", label: "📞 Transferencia directa", description: "Llama o escribe al 321 828 0762" },
+  { value: "telefono", label: "📞 Transferencia directa", description: "Llama o escribe al 313 497 7955" },
 ];
 
 // Map our doc types to Openpay accepted ones (CC | NIT | CE). PA -> CE as fallback.
@@ -74,7 +72,7 @@ function CheckoutPage() {
   const [form, setForm] = useState({
     name: "", email: "", phone: "", customer_id_type: "CC", customer_id_number: "", address: "", city: "", notes: "",
   });
-  const [payment, setPayment] = useState<PaymentMethod>("openpay_pse");
+  const [payment, setPayment] = useState<PaymentMethod>("addi");
   const [receipt, setReceipt] = useState<File | null>(null);
 
   // ----- Openpay PSE bank list -----

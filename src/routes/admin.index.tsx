@@ -49,7 +49,7 @@ function AdminPage() {
   const reload = async () => {
     const { adminListDistributors } = await import("@/lib/distributors.functions");
     const [oRes, p, c, b, cu, po, conv, dist] = await Promise.all([
-      supabase.from("orders").select("*, distributors(company_name)").order("created_at", { ascending: false }).limit(100),
+      supabase.from("orders").select("*, distributors(company_name)").neq("status", "cancelled").order("created_at", { ascending: false }).limit(500),
       supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("brands").select("*"),
@@ -90,10 +90,50 @@ function AdminPage() {
     reload();
   };
   const updateOrderStatus = async (id: string, status: string) => {
+    if (status === "cancelled") {
+      if (!confirm("Marcar como cancelado eliminará el pedido. ¿Continuar?")) return;
+      const { error } = await supabase.from("orders").delete().eq("id", id);
+      if (error) toast.error(error.message);
+      else toast.success("Pedido cancelado y eliminado");
+      reload();
+      return;
+    }
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) toast.error(error.message);
     else toast.success("Estado actualizado");
     reload();
+  };
+
+  const exportOrdersCSV = (rows: any[], filename: string) => {
+    if (!rows.length) { toast.info("No hay pedidos para exportar"); return; }
+    const headers = [
+      "id","fecha","estado","tipo","cliente","email","telefono","doc_tipo","doc_numero",
+      "direccion","ciudad","departamento","subtotal","total","metodo_pago","items",
+    ];
+    const esc = (v: any) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [headers.join(",")];
+    for (const o of rows) {
+      const addr = o.shipping_address || {};
+      const items = Array.isArray(o.items)
+        ? o.items.map((it: any) => `${it.quantity || it.qty || 1}x ${it.name || it.title || it.product_name || "Producto"} (${it.sku || ""})`).join(" | ")
+        : "";
+      lines.push([
+        o.id, new Date(o.created_at).toISOString(), o.status,
+        o.order_type === "distributor" || o.distributor_id ? "distribuidor" : "cliente",
+        o.customer_name, o.customer_email, o.customer_phone,
+        o.customer_id_type, o.customer_id_number,
+        addr.address || addr.address_line || "", addr.city || "", addr.department || "",
+        o.subtotal, o.total, o.payment_method, items,
+      ].map(esc).join(","));
+    }
+    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
   };
 
   const downloadReceipt = async (path: string) => {
@@ -122,11 +162,21 @@ function AdminPage() {
     // Approval is handled via the credentials dialog
   };
 
-  const filteredOrders = orders.filter((o) => {
+  const baseFiltered = orders.filter((o) => {
     if (orderFilter === "all") return true;
     const isDist = o.order_type === "distributor" || !!o.distributor_id;
     return orderFilter === "distributor" ? isDist : !isDist;
   });
+  const activeOrders = baseFiltered.filter((o) => o.status !== "completed");
+  const completedOrders = baseFiltered.filter((o) => o.status === "completed");
+  const completedByMonth: Record<string, any[]> = {};
+  for (const o of completedOrders) {
+    const d = new Date(o.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    (completedByMonth[key] ||= []).push(o);
+  }
+  const completedMonthKeys = Object.keys(completedByMonth).sort().reverse();
+  const filteredOrders = activeOrders;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -171,7 +221,7 @@ function AdminPage() {
               <AlertCircle className="h-4 w-4" /> Error cargando pedidos: {ordersError}
             </div>
           )}
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-3 flex items-center gap-2 flex-wrap">
             <Label className="text-xs">Filtrar:</Label>
             <select
               value={orderFilter}
@@ -182,6 +232,9 @@ function AdminPage() {
               <option value="retail">Solo clientes</option>
               <option value="distributor">Solo distribuidores</option>
             </select>
+            <Button size="sm" variant="outline" onClick={() => exportOrdersCSV(baseFiltered, `pedidos-${new Date().toISOString().slice(0,10)}.csv`)}>
+              <Download className="h-3.5 w-3.5 mr-1" /> Exportar CSV (todos)
+            </Button>
           </div>
           <div className="bg-card border rounded-xl overflow-x-auto">
             <Table>
@@ -363,7 +416,69 @@ function AdminPage() {
               </TableBody>
             </Table>
           </div>
+
+          {/* ---------- Pedidos completados por mes ---------- */}
+          <div className="mt-10">
+            <h2 className="text-xl font-bold mb-1">Pedidos completados por mes</h2>
+            <p className="text-xs text-muted-foreground mb-4">
+              Historial de pedidos marcados como "Completado", agrupados por mes. Descarga el CSV con toda la información.
+            </p>
+            {completedMonthKeys.length === 0 && (
+              <div className="bg-card border rounded-xl p-6 text-center text-sm text-muted-foreground">
+                Aún no hay pedidos completados.
+              </div>
+            )}
+            {completedMonthKeys.map((mk) => {
+              const rows = completedByMonth[mk];
+              const [y, m] = mk.split("-");
+              const label = new Date(Number(y), Number(m) - 1, 1).toLocaleDateString("es-CO", { month: "long", year: "numeric" });
+              const monthTotal = rows.reduce((sum, r) => sum + Number(r.total || 0), 0);
+              return (
+                <div key={mk} className="bg-card border rounded-xl mb-4 overflow-hidden">
+                  <div className="flex items-center justify-between p-3 border-b bg-muted/30 flex-wrap gap-2">
+                    <div>
+                      <div className="font-semibold capitalize">{label}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {rows.length} pedido{rows.length !== 1 ? "s" : ""} · Total {formatCOP(monthTotal)}
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => exportOrdersCSV(rows, `pedidos-completados-${mk}.csv`)}>
+                      <Download className="h-3.5 w-3.5 mr-1" /> Descargar CSV
+                    </Button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Cliente</TableHead>
+                          <TableHead>Total</TableHead>
+                          <TableHead>Método</TableHead>
+                          <TableHead>Fecha</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {rows.map((o) => (
+                          <TableRow key={o.id}>
+                            <TableCell className="font-mono text-xs">{o.id.slice(0, 8)}</TableCell>
+                            <TableCell>
+                              <div className="text-sm">{o.customer_name}</div>
+                              <div className="text-xs text-muted-foreground">{o.customer_email}</div>
+                            </TableCell>
+                            <TableCell className="font-bold">{formatCOP(Number(o.total))}</TableCell>
+                            <TableCell className="text-xs">{o.payment_method || "—"}</TableCell>
+                            <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </TabsContent>
+
 
         <TabsContent value="products" className="mt-6">
           <div className="bg-card border rounded-xl overflow-x-auto">
