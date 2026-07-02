@@ -545,6 +545,12 @@ function AdminPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="bulk-inventory" className="mt-6">
+          <BulkInventoryUpload />
+        </TabsContent>
+
+
+
         <TabsContent value="categories" className="mt-6">
           <SimpleList items={categories} cols={["name", "slug", "sort_order"]} />
         </TabsContent>
