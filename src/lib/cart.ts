@@ -80,7 +80,7 @@ export function formatCOP(value: number): string {
   }).format(value || 0);
 }
 
-export const WHATSAPP_NUMBER = "573218280762"; // Updated to the one used in product page
+export const WHATSAPP_NUMBER = "573134977955"; // Número de asesoría comercial
 export const CONTACT_EMAIL = "ventas.marketplace@allforall.com.co";
 export const SITE_DOMAIN = "https://allforall.co";
 

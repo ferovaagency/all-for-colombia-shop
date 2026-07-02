@@ -14,7 +14,7 @@ export const Route = createFileRoute("/producto/$slug")({
   component: ProductDetailPage,
 });
 
-const WHATSAPP_NUMBER = "573218280762";
+const WHATSAPP_NUMBER = "573134977955";
 
 type DBProduct = {
   id: string;
