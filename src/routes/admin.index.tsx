@@ -90,10 +90,50 @@ function AdminPage() {
     reload();
   };
   const updateOrderStatus = async (id: string, status: string) => {
+    if (status === "cancelled") {
+      if (!confirm("Marcar como cancelado eliminará el pedido. ¿Continuar?")) return;
+      const { error } = await supabase.from("orders").delete().eq("id", id);
+      if (error) toast.error(error.message);
+      else toast.success("Pedido cancelado y eliminado");
+      reload();
+      return;
+    }
     const { error } = await supabase.from("orders").update({ status }).eq("id", id);
     if (error) toast.error(error.message);
     else toast.success("Estado actualizado");
     reload();
+  };
+
+  const exportOrdersCSV = (rows: any[], filename: string) => {
+    if (!rows.length) { toast.info("No hay pedidos para exportar"); return; }
+    const headers = [
+      "id","fecha","estado","tipo","cliente","email","telefono","doc_tipo","doc_numero",
+      "direccion","ciudad","departamento","subtotal","total","metodo_pago","items",
+    ];
+    const esc = (v: any) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [headers.join(",")];
+    for (const o of rows) {
+      const addr = o.shipping_address || {};
+      const items = Array.isArray(o.items)
+        ? o.items.map((it: any) => `${it.quantity || it.qty || 1}x ${it.name || it.title || it.product_name || "Producto"} (${it.sku || ""})`).join(" | ")
+        : "";
+      lines.push([
+        o.id, new Date(o.created_at).toISOString(), o.status,
+        o.order_type === "distributor" || o.distributor_id ? "distribuidor" : "cliente",
+        o.customer_name, o.customer_email, o.customer_phone,
+        o.customer_id_type, o.customer_id_number,
+        addr.address || addr.address_line || "", addr.city || "", addr.department || "",
+        o.subtotal, o.total, o.payment_method, items,
+      ].map(esc).join(","));
+    }
+    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
   };
 
   const downloadReceipt = async (path: string) => {
