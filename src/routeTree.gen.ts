@@ -13,12 +13,14 @@ import { Route as VentasCorporativasRouteImport } from './routes/ventas-corporat
 import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResultadoPagoRouteImport } from './routes/resultado-pago'
+import { Route as ProductoDeLaSemanaRouteImport } from './routes/producto-de-la-semana'
 import { Route as NosotrosRouteImport } from './routes/nosotros'
 import { Route as MiCuentaRouteImport } from './routes/mi-cuenta'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as CatalogoAllforallDotpdfRouteImport } from './routes/catalogo-allforall[.]pdf'
 import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -70,6 +72,11 @@ const ResultadoPagoRoute = ResultadoPagoRouteImport.update({
   path: '/resultado-pago',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductoDeLaSemanaRoute = ProductoDeLaSemanaRouteImport.update({
+  id: '/producto-de-la-semana',
+  path: '/producto-de-la-semana',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NosotrosRoute = NosotrosRouteImport.update({
   id: '/nosotros',
   path: '/nosotros',
@@ -98,6 +105,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const CategoriasRoute = CategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogoAllforallDotpdfRoute = CatalogoAllforallDotpdfRouteImport.update({
+  id: '/catalogo-allforall.pdf',
+  path: '/catalogo-allforall.pdf',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarritoRoute = CarritoRouteImport.update({
@@ -261,12 +273,14 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
+  '/catalogo-allforall.pdf': typeof CatalogoAllforallDotpdfRoute
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
   '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
+  '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
   '/resultado-pago': typeof ResultadoPagoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tienda': typeof TiendaRoute
@@ -302,12 +316,14 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
+  '/catalogo-allforall.pdf': typeof CatalogoAllforallDotpdfRoute
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
   '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
+  '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
   '/resultado-pago': typeof ResultadoPagoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tienda': typeof TiendaRoute
@@ -344,12 +360,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
+  '/catalogo-allforall.pdf': typeof CatalogoAllforallDotpdfRoute
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
   '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
+  '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
   '/resultado-pago': typeof ResultadoPagoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/tienda': typeof TiendaRoute
@@ -388,12 +406,14 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/carrito'
+    | '/catalogo-allforall.pdf'
     | '/categorias'
     | '/checkout'
     | '/contacto'
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
+    | '/producto-de-la-semana'
     | '/resultado-pago'
     | '/sitemap.xml'
     | '/tienda'
@@ -429,12 +449,14 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/carrito'
+    | '/catalogo-allforall.pdf'
     | '/categorias'
     | '/checkout'
     | '/contacto'
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
+    | '/producto-de-la-semana'
     | '/resultado-pago'
     | '/sitemap.xml'
     | '/tienda'
@@ -470,12 +492,14 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/carrito'
+    | '/catalogo-allforall.pdf'
     | '/categorias'
     | '/checkout'
     | '/contacto'
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
+    | '/producto-de-la-semana'
     | '/resultado-pago'
     | '/sitemap.xml'
     | '/tienda'
@@ -513,12 +537,14 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRouteWithChildren
   CarritoRoute: typeof CarritoRoute
+  CatalogoAllforallDotpdfRoute: typeof CatalogoAllforallDotpdfRoute
   CategoriasRoute: typeof CategoriasRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactoRoute: typeof ContactoRoute
   LegalRoute: typeof LegalRoute
   MiCuentaRoute: typeof MiCuentaRoute
   NosotrosRoute: typeof NosotrosRoute
+  ProductoDeLaSemanaRoute: typeof ProductoDeLaSemanaRoute
   ResultadoPagoRoute: typeof ResultadoPagoRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TiendaRoute: typeof TiendaRoute
@@ -572,6 +598,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultadoPagoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/producto-de-la-semana': {
+      id: '/producto-de-la-semana'
+      path: '/producto-de-la-semana'
+      fullPath: '/producto-de-la-semana'
+      preLoaderRoute: typeof ProductoDeLaSemanaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/nosotros': {
       id: '/nosotros'
       path: '/nosotros'
@@ -612,6 +645,13 @@ declare module '@tanstack/react-router' {
       path: '/categorias'
       fullPath: '/categorias'
       preLoaderRoute: typeof CategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalogo-allforall.pdf': {
+      id: '/catalogo-allforall.pdf'
+      path: '/catalogo-allforall.pdf'
+      fullPath: '/catalogo-allforall.pdf'
+      preLoaderRoute: typeof CatalogoAllforallDotpdfRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carrito': {
@@ -874,12 +914,14 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BlogRoute: BlogRouteWithChildren,
   CarritoRoute: CarritoRoute,
+  CatalogoAllforallDotpdfRoute: CatalogoAllforallDotpdfRoute,
   CategoriasRoute: CategoriasRoute,
   CheckoutRoute: CheckoutRoute,
   ContactoRoute: ContactoRoute,
   LegalRoute: LegalRoute,
   MiCuentaRoute: MiCuentaRoute,
   NosotrosRoute: NosotrosRoute,
+  ProductoDeLaSemanaRoute: ProductoDeLaSemanaRoute,
   ResultadoPagoRoute: ResultadoPagoRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TiendaRoute: TiendaRoute,

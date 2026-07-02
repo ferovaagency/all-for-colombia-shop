@@ -14,6 +14,7 @@ import { WHATSAPP_NUMBER } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { formatCOP, whatsappUrl } from "@/lib/cart";
 import { toast } from "sonner";
+import { WeeklyDealsAdmin } from "@/components/admin/WeeklyDealsAdmin";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin — All For All" }, { name: "robots", content: "noindex" }] }),
@@ -210,6 +211,9 @@ function AdminPage() {
             <Handshake className="h-3.5 w-3.5 mr-1" /> Distribuidores ({distributors.length})
           </TabsTrigger>
           <TabsTrigger value="blog">Blog ({posts.length})</TabsTrigger>
+          <TabsTrigger value="weekly-deal">
+            <Sparkles className="h-3.5 w-3.5 mr-1" /> Producto Semana
+          </TabsTrigger>
           <TabsTrigger value="conversations">
             <MessageSquare className="h-3.5 w-3.5 mr-1" /> Conversaciones IA ({conversations.length})
           </TabsTrigger>
@@ -720,6 +724,10 @@ function AdminPage() {
               </TableBody>
             </Table>
           </div>
+        </TabsContent>
+
+        <TabsContent value="weekly-deal" className="mt-6">
+          <WeeklyDealsAdmin products={products} />
         </TabsContent>
       </Tabs>
 
