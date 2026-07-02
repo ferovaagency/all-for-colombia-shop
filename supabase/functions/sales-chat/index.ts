@@ -200,7 +200,7 @@ ${blogsContext || 'Sin blogs disponibles.'}`;
 
     let whatsappUrl: string | null = null;
     if (shouldEscalate) {
-      const PHONE = '573218280762';
+      const PHONE = '573134977955';
 
       const chatSummary = newHistory.slice(-8).map((m: any) => {
         const role = m.role === 'user' ? 'Cliente' : 'Ali (IA)';
