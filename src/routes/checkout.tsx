@@ -13,6 +13,7 @@ import { z } from "zod";
 import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode, Lock } from "lucide-react";
 import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
 import { startAddiCheckout } from "@/lib/addi.functions";
+import { syncToBrevo } from "@/lib/brevo";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
