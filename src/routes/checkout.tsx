@@ -266,6 +266,12 @@ function CheckoutPage() {
       name: form.name, email: form.email, phone: form.phone,
     }, { onConflict: "email" });
 
+    syncToBrevo(form.email.trim().toLowerCase(), "buyers", {
+      NOMBRE: form.name,
+      TELEFONO: form.phone,
+      CIUDAD: form.city,
+    }).catch(() => {});
+
     // ------- Openpay PSE -------
     if (payment === "openpay_pse") {
       const toastId = toast.loading("Conectando con PSE...");
