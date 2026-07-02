@@ -49,7 +49,7 @@ function AdminPage() {
   const reload = async () => {
     const { adminListDistributors } = await import("@/lib/distributors.functions");
     const [oRes, p, c, b, cu, po, conv, dist] = await Promise.all([
-      supabase.from("orders").select("*, distributors(company_name)").order("created_at", { ascending: false }).limit(100),
+      supabase.from("orders").select("*, distributors(company_name)").neq("status", "cancelled").order("created_at", { ascending: false }).limit(500),
       supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("brands").select("*"),
