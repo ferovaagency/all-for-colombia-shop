@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { X, Send, ExternalLink, Loader2, Bot, Sparkles } from 'lucide-react';
+import { X, Send, ExternalLink, Loader2, Bot, Sparkles, Mail, Check } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { syncToBrevo } from '@/lib/brevo';
 
 interface SuggestedProduct {
   id: string;
@@ -51,8 +52,27 @@ export function AIAssistant() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailInput, setEmailInput] = useState('');
+  const [emailSubscribed, setEmailSubscribed] = useState(false);
   const sessionId = useRef<string>('');
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const submitEmail = (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = emailInput.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    syncToBrevo(email, 'newsletter', { SOURCE: 'asesor-ia' }).catch(() => {});
+    try {
+      localStorage.setItem('afa_ai_email', email);
+    } catch {}
+    setEmailSubscribed(true);
+  };
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('afa_ai_email')) setEmailSubscribed(true);
+    } catch {}
+  }, []);
 
   useEffect(() => {
     sessionId.current = getOrCreateSessionId();
