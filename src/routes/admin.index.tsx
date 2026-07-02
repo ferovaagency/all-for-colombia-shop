@@ -416,7 +416,69 @@ function AdminPage() {
               </TableBody>
             </Table>
           </div>
+
+          {/* ---------- Pedidos completados por mes ---------- */}
+          <div className="mt-10">
+            <h2 className="text-xl font-bold mb-1">Pedidos completados por mes</h2>
+            <p className="text-xs text-muted-foreground mb-4">
+              Historial de pedidos marcados como "Completado", agrupados por mes. Descarga el CSV con toda la información.
+            </p>
+            {completedMonthKeys.length === 0 && (
+              <div className="bg-card border rounded-xl p-6 text-center text-sm text-muted-foreground">
+                Aún no hay pedidos completados.
+              </div>
+            )}
+            {completedMonthKeys.map((mk) => {
+              const rows = completedByMonth[mk];
+              const [y, m] = mk.split("-");
+              const label = new Date(Number(y), Number(m) - 1, 1).toLocaleDateString("es-CO", { month: "long", year: "numeric" });
+              const monthTotal = rows.reduce((sum, r) => sum + Number(r.total || 0), 0);
+              return (
+                <div key={mk} className="bg-card border rounded-xl mb-4 overflow-hidden">
+                  <div className="flex items-center justify-between p-3 border-b bg-muted/30 flex-wrap gap-2">
+                    <div>
+                      <div className="font-semibold capitalize">{label}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {rows.length} pedido{rows.length !== 1 ? "s" : ""} · Total {formatCOP(monthTotal)}
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => exportOrdersCSV(rows, `pedidos-completados-${mk}.csv`)}>
+                      <Download className="h-3.5 w-3.5 mr-1" /> Descargar CSV
+                    </Button>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Cliente</TableHead>
+                          <TableHead>Total</TableHead>
+                          <TableHead>Método</TableHead>
+                          <TableHead>Fecha</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {rows.map((o) => (
+                          <TableRow key={o.id}>
+                            <TableCell className="font-mono text-xs">{o.id.slice(0, 8)}</TableCell>
+                            <TableCell>
+                              <div className="text-sm">{o.customer_name}</div>
+                              <div className="text-xs text-muted-foreground">{o.customer_email}</div>
+                            </TableCell>
+                            <TableCell className="font-bold">{formatCOP(Number(o.total))}</TableCell>
+                            <TableCell className="text-xs">{o.payment_method || "—"}</TableCell>
+                            <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </TabsContent>
+
 
         <TabsContent value="products" className="mt-6">
           <div className="bg-card border rounded-xl overflow-x-auto">
