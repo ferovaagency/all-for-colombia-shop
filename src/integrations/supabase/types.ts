@@ -839,6 +839,50 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_deals: {
+        Row: {
+          created_at: string
+          discount_percent: number
+          ends_at: string
+          id: string
+          is_active: boolean
+          product_id: string
+          reveal_at: string
+          stock_limit: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          discount_percent: number
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          product_id: string
+          reveal_at: string
+          stock_limit?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          discount_percent?: number
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          product_id?: string
+          reveal_at?: string
+          stock_limit?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_deals_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       categories_with_products: {
