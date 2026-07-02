@@ -266,7 +266,7 @@ export function BulkInventoryUpload() {
 
     // Updates in batches
     for (const u of plan.updates) {
-      const payload: Record<string, number | null> = { stock: u.newStock };
+      const payload: { stock: number; price?: number } = { stock: u.newStock };
       if (u.newPrice !== null) payload.price = u.newPrice;
       const { error } = await supabase.from("products").update(payload).eq("id", u.id);
       if (error) errors.push(`Actualizar "${u.name}": ${error.message}`);
