@@ -72,7 +72,7 @@ function CheckoutPage() {
   const [form, setForm] = useState({
     name: "", email: "", phone: "", customer_id_type: "CC", customer_id_number: "", address: "", city: "", notes: "",
   });
-  const [payment, setPayment] = useState<PaymentMethod>("openpay_pse");
+  const [payment, setPayment] = useState<PaymentMethod>("addi");
   const [receipt, setReceipt] = useState<File | null>(null);
 
   // ----- Openpay PSE bank list -----
