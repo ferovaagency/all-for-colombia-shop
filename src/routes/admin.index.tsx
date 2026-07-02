@@ -724,6 +724,8 @@ function AdminPage() {
               </TableBody>
             </Table>
           </div>
+        </TabsContent>
+
         <TabsContent value="weekly-deal" className="mt-6">
           <WeeklyDealsAdmin products={products} />
         </TabsContent>
