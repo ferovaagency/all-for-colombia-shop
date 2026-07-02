@@ -9,12 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, MessageSquare, Handshake, Check, X as XIcon, Send, Download } from "lucide-react";
+import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, MessageSquare, Handshake, Check, X as XIcon, Send, Download, UploadCloud } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { formatCOP, whatsappUrl } from "@/lib/cart";
 import { toast } from "sonner";
 import { WeeklyDealsAdmin } from "@/components/admin/WeeklyDealsAdmin";
+import { BulkInventoryUpload } from "@/components/admin/BulkInventoryUpload";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin — All For All" }, { name: "robots", content: "noindex" }] }),
@@ -204,6 +205,9 @@ function AdminPage() {
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="orders">Pedidos ({orders.length})</TabsTrigger>
           <TabsTrigger value="products">Productos ({products.length})</TabsTrigger>
+          <TabsTrigger value="bulk-inventory">
+            <UploadCloud className="h-3.5 w-3.5 mr-1" /> Inventario masivo
+          </TabsTrigger>
           <TabsTrigger value="categories">Categorías ({categories.length})</TabsTrigger>
           <TabsTrigger value="brands">Marcas ({brands.length})</TabsTrigger>
           <TabsTrigger value="customers">Clientes ({customers.length})</TabsTrigger>
@@ -540,6 +544,12 @@ function AdminPage() {
             </Table>
           </div>
         </TabsContent>
+
+        <TabsContent value="bulk-inventory" className="mt-6">
+          <BulkInventoryUpload />
+        </TabsContent>
+
+
 
         <TabsContent value="categories" className="mt-6">
           <SimpleList items={categories} cols={["name", "slug", "sort_order"]} />
