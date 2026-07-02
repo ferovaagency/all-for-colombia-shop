@@ -162,11 +162,21 @@ function AdminPage() {
     // Approval is handled via the credentials dialog
   };
 
-  const filteredOrders = orders.filter((o) => {
+  const baseFiltered = orders.filter((o) => {
     if (orderFilter === "all") return true;
     const isDist = o.order_type === "distributor" || !!o.distributor_id;
     return orderFilter === "distributor" ? isDist : !isDist;
   });
+  const activeOrders = baseFiltered.filter((o) => o.status !== "completed");
+  const completedOrders = baseFiltered.filter((o) => o.status === "completed");
+  const completedByMonth: Record<string, any[]> = {};
+  for (const o of completedOrders) {
+    const d = new Date(o.created_at);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    (completedByMonth[key] ||= []).push(o);
+  }
+  const completedMonthKeys = Object.keys(completedByMonth).sort().reverse();
+  const filteredOrders = activeOrders;
 
   return (
     <div className="container mx-auto px-4 py-8">
