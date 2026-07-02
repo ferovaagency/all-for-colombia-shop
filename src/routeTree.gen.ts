@@ -19,6 +19,7 @@ import { Route as LegalRouteImport } from './routes/legal'
 import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as CatalogoAllforallDotpdfRouteImport } from './routes/catalogo-allforall[.]pdf'
 import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -98,6 +99,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const CategoriasRoute = CategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogoAllforallDotpdfRoute = CatalogoAllforallDotpdfRouteImport.update({
+  id: '/catalogo-allforall.pdf',
+  path: '/catalogo-allforall.pdf',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarritoRoute = CarritoRouteImport.update({
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
+  '/catalogo-allforall.pdf': typeof CatalogoAllforallDotpdfRoute
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
@@ -302,6 +309,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
+  '/catalogo-allforall.pdf': typeof CatalogoAllforallDotpdfRoute
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
@@ -344,6 +352,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/carrito': typeof CarritoRoute
+  '/catalogo-allforall.pdf': typeof CatalogoAllforallDotpdfRoute
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
@@ -388,6 +397,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/carrito'
+    | '/catalogo-allforall.pdf'
     | '/categorias'
     | '/checkout'
     | '/contacto'
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/carrito'
+    | '/catalogo-allforall.pdf'
     | '/categorias'
     | '/checkout'
     | '/contacto'
@@ -470,6 +481,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/blog'
     | '/carrito'
+    | '/catalogo-allforall.pdf'
     | '/categorias'
     | '/checkout'
     | '/contacto'
@@ -513,6 +525,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRouteWithChildren
   CarritoRoute: typeof CarritoRoute
+  CatalogoAllforallDotpdfRoute: typeof CatalogoAllforallDotpdfRoute
   CategoriasRoute: typeof CategoriasRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactoRoute: typeof ContactoRoute
@@ -612,6 +625,13 @@ declare module '@tanstack/react-router' {
       path: '/categorias'
       fullPath: '/categorias'
       preLoaderRoute: typeof CategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalogo-allforall.pdf': {
+      id: '/catalogo-allforall.pdf'
+      path: '/catalogo-allforall.pdf'
+      fullPath: '/catalogo-allforall.pdf'
+      preLoaderRoute: typeof CatalogoAllforallDotpdfRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carrito': {
@@ -874,6 +894,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BlogRoute: BlogRouteWithChildren,
   CarritoRoute: CarritoRoute,
+  CatalogoAllforallDotpdfRoute: CatalogoAllforallDotpdfRoute,
   CategoriasRoute: CategoriasRoute,
   CheckoutRoute: CheckoutRoute,
   ContactoRoute: ContactoRoute,
