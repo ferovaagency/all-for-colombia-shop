@@ -221,7 +221,7 @@ function AdminPage() {
               <AlertCircle className="h-4 w-4" /> Error cargando pedidos: {ordersError}
             </div>
           )}
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-3 flex items-center gap-2 flex-wrap">
             <Label className="text-xs">Filtrar:</Label>
             <select
               value={orderFilter}
@@ -232,6 +232,9 @@ function AdminPage() {
               <option value="retail">Solo clientes</option>
               <option value="distributor">Solo distribuidores</option>
             </select>
+            <Button size="sm" variant="outline" onClick={() => exportOrdersCSV(baseFiltered, `pedidos-${new Date().toISOString().slice(0,10)}.csv`)}>
+              <Download className="h-3.5 w-3.5 mr-1" /> Exportar CSV (todos)
+            </Button>
           </div>
           <div className="bg-card border rounded-xl overflow-x-auto">
             <Table>
