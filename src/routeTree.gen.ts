@@ -17,6 +17,7 @@ import { Route as ProductoDeLaSemanaRouteImport } from './routes/producto-de-la-
 import { Route as NosotrosRouteImport } from './routes/nosotros'
 import { Route as MiCuentaRouteImport } from './routes/mi-cuenta'
 import { Route as LegalRouteImport } from './routes/legal'
+import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as CategoriasRouteImport } from './routes/categorias'
@@ -90,6 +91,11 @@ const MiCuentaRoute = MiCuentaRouteImport.update({
 const LegalRoute = LegalRouteImport.update({
   id: '/legal',
   path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
+  id: '/feed.xml',
+  path: '/feed.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactoRoute = ContactoRouteImport.update({
@@ -277,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
@@ -320,6 +327,7 @@ export interface FileRoutesByTo {
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
@@ -364,6 +372,7 @@ export interface FileRoutesById {
   '/categorias': typeof CategoriasRoute
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
+  '/feed.xml': typeof FeedDotxmlRoute
   '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
@@ -410,6 +419,7 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/checkout'
     | '/contacto'
+    | '/feed.xml'
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
@@ -453,6 +463,7 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/checkout'
     | '/contacto'
+    | '/feed.xml'
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
@@ -496,6 +507,7 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/checkout'
     | '/contacto'
+    | '/feed.xml'
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
@@ -541,6 +553,7 @@ export interface RootRouteChildren {
   CategoriasRoute: typeof CategoriasRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactoRoute: typeof ContactoRoute
+  FeedDotxmlRoute: typeof FeedDotxmlRoute
   LegalRoute: typeof LegalRoute
   MiCuentaRoute: typeof MiCuentaRoute
   NosotrosRoute: typeof NosotrosRoute
@@ -624,6 +637,13 @@ declare module '@tanstack/react-router' {
       path: '/legal'
       fullPath: '/legal'
       preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed.xml': {
+      id: '/feed.xml'
+      path: '/feed.xml'
+      fullPath: '/feed.xml'
+      preLoaderRoute: typeof FeedDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contacto': {
@@ -918,6 +938,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriasRoute: CategoriasRoute,
   CheckoutRoute: CheckoutRoute,
   ContactoRoute: ContactoRoute,
+  FeedDotxmlRoute: FeedDotxmlRoute,
   LegalRoute: LegalRoute,
   MiCuentaRoute: MiCuentaRoute,
   NosotrosRoute: NosotrosRoute,
@@ -947,13 +968,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
