@@ -32,6 +32,8 @@ export const Route = createFileRoute('/feed.xml')({
               'id, slug, name, description, short_description, price, sale_price, stock, images, brand, category, sku, condition'
             )
             .eq('active', true)
+            .not('price', 'is', null)
+            .gt('price', 0)
             .order('updated_at', { ascending: false })
             .limit(5000);
 
