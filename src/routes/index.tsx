@@ -26,8 +26,8 @@ export const Route = createFileRoute("/")({
 const CATEGORY_IMAGES: Record<string, string> = {
   audio: "/categorias/audio.jpg",
   gaming: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80&auto=format",
-  computadores: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80&auto=format",
-  "computadores-accesorios": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80&auto=format",
+  computadores: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80&auto=format",
+  "computadores-accesorios": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80&auto=format",
   "celulares-tablets": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80&auto=format",
   hogar: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format",
   "hogar-tech": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format",
@@ -184,7 +184,7 @@ function HomePage() {
                 className="group relative shrink-0 w-[200px] h-[200px] rounded-xl overflow-hidden snap-start shadow-card hover:shadow-elevated transition-smooth"
               >
                 <img src={img} alt={cat.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
-                <div className="absolute inset-0 bg-black/45 group-hover:bg-black/55 transition-colors" />
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors" />
                 <div className="absolute inset-x-0 bottom-0 p-4 text-white">
                   <h3 className="font-semibold text-base leading-tight">{cat.name}</h3>
                 </div>
