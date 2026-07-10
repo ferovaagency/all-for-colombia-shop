@@ -26,8 +26,8 @@ export const Route = createFileRoute("/")({
 const CATEGORY_IMAGES: Record<string, string> = {
   audio: "/categorias/audio.jpg",
   gaming: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80&auto=format",
-  computadores: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80&auto=format",
-  "computadores-accesorios": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80&auto=format",
+  computadores: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80&auto=format",
+  "computadores-accesorios": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80&auto=format",
   "celulares-tablets": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80&auto=format",
   hogar: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format",
   "hogar-tech": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format",
