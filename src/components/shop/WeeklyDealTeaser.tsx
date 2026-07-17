@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Countdown, useCountdown } from "@/components/WeeklyDealCountdown";
@@ -53,10 +54,16 @@ function DealCard({ deal }: { deal: Deal }) {
     : null;
 
   return (
-    <section className="container mx-auto px-4 py-12">
+    <motion.section
+      className="container mx-auto px-4 py-12"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
       <Link
         to="/producto-de-la-semana"
-        className="group block relative overflow-hidden rounded-2xl bg-gradient-to-br from-neutral-950 via-primary to-neutral-900 text-white shadow-elevated"
+        className="group block relative overflow-hidden rounded-2xl bg-gradient-to-br from-neutral-950 via-primary to-neutral-900 text-white shadow-elevated transition-transform duration-300 hover:-translate-y-1 hover:shadow-glow"
       >
         <div className="relative grid md:grid-cols-[1fr_auto] gap-6 items-center p-6 md:p-10">
           <div>
@@ -94,6 +101,6 @@ function DealCard({ deal }: { deal: Deal }) {
           </Button>
         </div>
       </Link>
-    </section>
+    </motion.section>
   );
 }

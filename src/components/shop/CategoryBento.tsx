@@ -1,5 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatCOP } from "@/lib/cart";
 
@@ -11,31 +14,58 @@ type Product = {
   price?: number | null;
   sale_price?: number | null;
   images?: string[] | null;
-  category_id?: string | null;
 };
 
 export function CategoryBento({
   categories,
-  products,
   getImage,
 }: {
   categories: Category[];
-  products: Product[];
   getImage: (cat: Category) => string;
 }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const cats = categories.slice(0, 8);
   const active = cats[activeIdx];
 
-  const activeProducts = useMemo(() => {
-    if (!active) return [];
-    return products.filter((p) => p.category_id === active.id).slice(0, 4);
-  }, [products, active]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!active) return;
+    let cancelled = false;
+    setLoading(true);
+    supabase
+      .from("products")
+      .select("id, slug, name, price, sale_price, images")
+      .eq("category_id", active.id)
+      .eq("active", true)
+      .order("updated_at", { ascending: false })
+      .limit(4)
+      .then(({ data }) => {
+        if (cancelled) return;
+        setProducts(data || []);
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [active?.id]);
+
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const scrollTabs = (dir: "left" | "right") => {
+    tabsRef.current?.scrollBy({ left: dir === "left" ? -200 : 200, behavior: "smooth" });
+  };
 
   if (!active) return null;
 
   return (
-    <section className="container mx-auto px-4 py-16">
+    <motion.section
+      className="container mx-auto px-4 py-16"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
       <div className="flex items-end justify-between mb-6 flex-wrap gap-4">
         <div>
           <h2 className="text-3xl font-bold">Categorías</h2>
@@ -46,45 +76,68 @@ export function CategoryBento({
         </Link>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1 mb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {cats.map((cat, i) => (
-          <button
-            key={cat.id}
-            type="button"
-            onClick={() => setActiveIdx(i)}
-            className={cn(
-              "shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition-colors",
-              i === activeIdx
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-background text-foreground border-border hover:bg-muted",
-            )}
-          >
-            {cat.name}
-          </button>
-        ))}
+      <div className="relative mb-4">
+        <div
+          ref={tabsRef}
+          className="flex gap-2 overflow-x-auto pb-1 pr-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {cats.map((cat, i) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setActiveIdx(i)}
+              className={cn(
+                "shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition-colors",
+                i === activeIdx
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-foreground border-border hover:bg-muted",
+              )}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent" />
+        <button
+          type="button"
+          onClick={() => scrollTabs("left")}
+          aria-label="Anterior"
+          className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full border bg-background shadow-card items-center justify-center hover:bg-muted"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => scrollTabs("right")}
+          aria-label="Siguiente"
+          className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full border bg-background shadow-card items-center justify-center hover:bg-muted"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 rounded-2xl overflow-hidden bg-primary p-3">
-        <CategoryHeroTile cat={active} image={getImage(active)} />
-        {activeProducts.length > 0 ? (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={active.id}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-3 rounded-2xl overflow-hidden bg-primary p-3"
+        >
+          <CategoryHeroTile cat={active} image={getImage(active)} />
           <div className="grid grid-cols-2 gap-3">
-            {activeProducts.map((p) => (
-              <ProductTile key={p.id} product={p} />
-            ))}
-            {activeProducts.length < 4 &&
-              Array.from({ length: 4 - activeProducts.length }).map((_, i) => (
-                <SeeAllTile key={`filler-${i}`} cat={active} />
-              ))}
+            {loading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="aspect-square rounded-xl bg-white/10 animate-pulse" />
+                ))
+              : products.length > 0
+                ? products.map((p) => <ProductTile key={p.id} product={p} />)
+                : Array.from({ length: 4 }).map((_, i) => <SeeAllTile key={i} cat={active} />)}
           </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <SeeAllTile key={i} cat={active} />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+        </motion.div>
+      </AnimatePresence>
+    </motion.section>
   );
 }
 
@@ -99,7 +152,7 @@ function CategoryHeroTile({ cat, image }: { cat: Category; image: string }) {
         src={image}
         alt={cat.name}
         loading="lazy"
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
         onError={(e) => {
           const t = e.target as HTMLImageElement;
           if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";

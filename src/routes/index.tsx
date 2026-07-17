@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { ArrowRight, Search, Sparkles, Truck, ShieldCheck, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { PromoBannerSlider, type PromoBannerItem } from "@/components/shop/PromoBanner";
 import { WeeklyDealTeaser } from "@/components/shop/WeeklyDealTeaser";
 import { CategoryBento } from "@/components/shop/CategoryBento";
+import { Reveal } from "@/components/shop/Reveal";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerA50 from "@/assets/banner-logitech-gol.jpg";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
@@ -52,7 +54,6 @@ function HomePage() {
   const [q, setQ] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
-  const [bentoProducts, setBentoProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
 
@@ -64,16 +65,14 @@ function HomePage() {
 
   useEffect(() => {
     (async () => {
-      const [cats, prods, bentoProds, brs, blog] = await Promise.all([
+      const [cats, prods, brs, blog] = await Promise.all([
         supabase.from("categories").select("*").is("parent_id", null).order("sort_order"),
         supabase.from("products").select("*").eq("active", true).order("updated_at", { ascending: false }).limit(8),
-        supabase.from("products").select("id, slug, name, price, sale_price, images, category_id").eq("active", true).order("updated_at", { ascending: false }).limit(60),
         supabase.from("brands").select("*").eq("show_in_home", true).order("display_order", { ascending: true }).limit(20),
         supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false }).limit(3),
       ]);
       setCategories(cats.data || []);
       setProducts(prods.data || []);
-      setBentoProducts(bentoProds.data || []);
       setBrands(brs.data || []);
       setPosts(blog.data || []);
     })();
@@ -100,7 +99,12 @@ function HomePage() {
           className="relative w-full aspect-[1920/585]"
         />
 
-        <div className="container mx-auto px-4 -mt-10 relative z-20">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+          className="container mx-auto px-4 -mt-10 relative z-20"
+        >
           <form onSubmit={onSearch} className="max-w-2xl mx-auto">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -115,121 +119,131 @@ function HomePage() {
               </Button>
             </div>
           </form>
-        </div>
+        </motion.div>
       </section>
 
       {/* Trust strip */}
-      <section className="bg-muted/40 border-y mt-12">
-        <div className="container mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <Trust icon={<Truck className="h-5 w-5" />} title="Envíos a todo Colombia" />
-          <Trust icon={<ShieldCheck className="h-5 w-5" />} title="Compra protegida" />
-          <Trust icon={<Building2 className="h-5 w-5" />} title="Facturación a empresas" />
-          <Trust icon={<Sparkles className="h-5 w-5" />} title="Asesor virtual 24/7" />
-        </div>
-      </section>
+      <Reveal>
+        <section className="bg-muted/40 border-y mt-12">
+          <div className="container mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <Trust icon={<Truck className="h-5 w-5" />} title="Envíos a todo Colombia" />
+            <Trust icon={<ShieldCheck className="h-5 w-5" />} title="Compra protegida" />
+            <Trust icon={<Building2 className="h-5 w-5" />} title="Facturación a empresas" />
+            <Trust icon={<Sparkles className="h-5 w-5" />} title="Asesor virtual 24/7" />
+          </div>
+        </section>
+      </Reveal>
 
       {/* Producto de la semana */}
       <WeeklyDealTeaser />
 
       {/* Categorías — tabs + bento grid */}
-      <CategoryBento categories={categories} products={bentoProducts} getImage={getCategoryImage} />
+      <CategoryBento categories={categories} getImage={getCategoryImage} />
 
       {/* Featured products */}
       {products.length > 0 && (
-        <section className="container mx-auto px-4 py-16">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold">Productos destacados</h2>
-              <p className="text-muted-foreground">Lo más nuevo en nuestra tienda</p>
+        <Reveal>
+          <section className="container mx-auto px-4 py-16">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold">Productos destacados</h2>
+                <p className="text-muted-foreground">Lo más nuevo en nuestra tienda</p>
+              </div>
+              <Link to="/tienda" className="text-secondary text-sm font-medium hover:underline">Ver todos →</Link>
             </div>
-            <Link to="/tienda" className="text-secondary text-sm font-medium hover:underline">Ver todos →</Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
-            {products.map((p) => <ProductCard key={p.id} product={p} />)}
-          </div>
-        </section>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+              {products.map((p) => <ProductCard key={p.id} product={p} />)}
+            </div>
+          </section>
+        </Reveal>
       )}
 
       {/* Promo banners slider (soporta video) */}
-      <section className="py-6 bg-background">
-        <div className="container mx-auto px-4">
-          <PromoBannerSlider
-            banners={PROMO_BANNERS}
-            index={bannerIndex}
-            onSelect={setBannerIndex}
-            className="relative overflow-hidden rounded-2xl w-full bg-background aspect-[1920/585]"
-          />
-        </div>
-      </section>
+      <Reveal>
+        <section className="py-6 bg-background">
+          <div className="container mx-auto px-4">
+            <PromoBannerSlider
+              banners={PROMO_BANNERS}
+              index={bannerIndex}
+              onSelect={setBannerIndex}
+              className="relative overflow-hidden rounded-2xl w-full bg-background aspect-[1920/585]"
+            />
+          </div>
+        </section>
+      </Reveal>
 
       {/* Brands */}
       {brands.length > 0 && (
-        <section className="container mx-auto px-4 py-12">
-          <h2 className="text-2xl font-bold text-center mb-2">Marcas que confían en nosotros</h2>
-          <p className="text-center text-muted-foreground text-sm mb-8">Trabajamos con los líderes de la industria</p>
-          <div className="flex flex-wrap justify-center items-center gap-3 md:gap-4">
-            {brands.map((b) => (
-              <Link
-                key={b.id}
-                to={b.slug === "logitech" ? "/marcas/logitech" : "/tienda"}
-                search={b.slug === "logitech" ? undefined : ({ marca: b.slug } as any)}
-                aria-label={`Ver productos de ${b.name}`}
-                className="group bg-white rounded-lg border border-border h-16 w-28 md:h-20 md:w-32 flex items-center justify-center p-2 hover:shadow-md hover:border-secondary/40 transition-all"
-              >
-                {b.logo_url || b.logo ? (
-                  <img
-                    src={b.logo_url || b.logo}
-                    alt={b.name}
-                    loading="lazy"
-                    className="h-10 md:h-12 w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity"
-                  />
-                ) : (
-                  <span className="text-xs font-semibold text-foreground">{b.name}</span>
-                )}
-              </Link>
-            ))}
-          </div>
-        </section>
+        <Reveal>
+          <section className="container mx-auto px-4 py-12">
+            <h2 className="text-2xl font-bold text-center mb-2">Marcas que confían en nosotros</h2>
+            <p className="text-center text-muted-foreground text-sm mb-8">Trabajamos con los líderes de la industria</p>
+            <div className="flex flex-wrap justify-center items-center gap-3 md:gap-4">
+              {brands.map((b) => (
+                <Link
+                  key={b.id}
+                  to={b.slug === "logitech" ? "/marcas/logitech" : "/tienda"}
+                  search={b.slug === "logitech" ? undefined : ({ marca: b.slug } as any)}
+                  aria-label={`Ver productos de ${b.name}`}
+                  className="group bg-white rounded-lg border border-border h-16 w-28 md:h-20 md:w-32 flex items-center justify-center p-2 hover:shadow-md hover:border-secondary/40 hover:-translate-y-0.5 transition-all"
+                >
+                  {b.logo_url || b.logo ? (
+                    <img
+                      src={b.logo_url || b.logo}
+                      alt={b.name}
+                      loading="lazy"
+                      className="h-10 md:h-12 w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity"
+                    />
+                  ) : (
+                    <span className="text-xs font-semibold text-foreground">{b.name}</span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </section>
+        </Reveal>
       )}
 
       {/* Blog */}
       {posts.length > 0 && (
-        <section className="py-16 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold">Blog y consejos tech</h2>
-                <p className="text-muted-foreground text-sm mt-1">Guías, comparativas y novedades del mundo tech</p>
+        <Reveal>
+          <section className="py-16 bg-muted/30">
+            <div className="container mx-auto px-4">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-2xl font-bold">Blog y consejos tech</h2>
+                  <p className="text-muted-foreground text-sm mt-1">Guías, comparativas y novedades del mundo tech</p>
+                </div>
+                <Link to="/blog" className="text-sm text-secondary hover:underline font-semibold">Ver todos →</Link>
               </div>
-              <Link to="/blog" className="text-sm text-secondary hover:underline font-semibold">Ver todos →</Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {posts.map((post) => (
-                <Link
-                  key={post.id}
-                  to="/blog/$slug"
-                  params={{ slug: post.slug }}
-                  className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-elevated transition-all"
-                >
-                  {post.cover_image && (
-                    <div className="overflow-hidden h-44">
-                      <img src={post.cover_image} alt={post.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    </div>
-                  )}
-                  <div className="p-4">
-                    {post.category && (
-                      <span className="text-[10px] font-bold text-secondary uppercase tracking-wider bg-secondary/10 px-2 py-0.5 rounded-full">
-                        {post.category}
-                      </span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {posts.map((post) => (
+                  <Link
+                    key={post.id}
+                    to="/blog/$slug"
+                    params={{ slug: post.slug }}
+                    className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-elevated transition-all"
+                  >
+                    {post.cover_image && (
+                      <div className="overflow-hidden h-44">
+                        <img src={post.cover_image} alt={post.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      </div>
                     )}
-                    <h3 className="font-bold text-foreground mt-2 line-clamp-2 text-sm group-hover:text-secondary transition-colors">{post.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{post.excerpt}</p>
-                  </div>
-                </Link>
-              ))}
+                    <div className="p-4">
+                      {post.category && (
+                        <span className="text-[10px] font-bold text-secondary uppercase tracking-wider bg-secondary/10 px-2 py-0.5 rounded-full">
+                          {post.category}
+                        </span>
+                      )}
+                      <h3 className="font-bold text-foreground mt-2 line-clamp-2 text-sm group-hover:text-secondary transition-colors">{post.title}</h3>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{post.excerpt}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </Reveal>
       )}
 
       {/* Corporate strip — achicado y al final, ya no domina la home */}

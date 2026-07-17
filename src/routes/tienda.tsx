@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { forwardRef, useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search, ChevronDown, Tag, X } from "lucide-react";
+import { Search, ChevronDown, ChevronLeft, ChevronRight, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -130,6 +130,11 @@ function ShopPage() {
   const activeFilterCount = (search.marca ? 1 : 0) + (search.oferta === "1" ? 1 : 0) +
     (priceRange[0] > 0 || priceRange[1] < maxPrice ? 1 : 0);
 
+  const filterBarRef = useRef<HTMLDivElement>(null);
+  const scrollFilterBar = (dir: "left" | "right") => {
+    filterBarRef.current?.scrollBy({ left: dir === "left" ? -220 : 220, behavior: "smooth" });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -156,7 +161,8 @@ function ShopPage() {
         </div>
 
         {/* Barra de filtros horizontal */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="relative">
+        <div ref={filterBarRef} className="flex items-center gap-2 overflow-x-auto pb-1 pr-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Chip active={!search.categoria} onClick={() => updateSearch({ categoria: undefined })}>
             Todos
           </Chip>
@@ -240,6 +246,24 @@ function ShopPage() {
               <X className="h-3.5 w-3.5" /> Limpiar
             </button>
           )}
+        </div>
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent" />
+        <button
+          type="button"
+          onClick={() => scrollFilterBar("left")}
+          aria-label="Desplazar filtros a la izquierda"
+          className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full border bg-background shadow-card items-center justify-center hover:bg-muted z-10"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => scrollFilterBar("right")}
+          aria-label="Desplazar filtros a la derecha"
+          className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full border bg-background shadow-card items-center justify-center hover:bg-muted z-10"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
         </div>
       </div>
 
