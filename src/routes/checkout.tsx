@@ -135,19 +135,28 @@ function CheckoutPage() {
 
   // Fire begin_checkout once when the user reaches checkout with a non-empty cart.
   const beginCheckoutFiredRef = useRef(false);
+  const purchaseItemsRef = useRef<Array<{ item_id: string; item_name: string; price: number; quantity: number }>>([]);
   useEffect(() => {
     if (beginCheckoutFiredRef.current || count === 0) return;
     beginCheckoutFiredRef.current = true;
-    trackBeginCheckout(
-      items.map((it) => ({
-        item_id: it.sku || it.id,
-        item_name: it.name,
-        price: it.price,
-        quantity: it.quantity,
-      })),
-      subtotal,
-    );
+    const snapshot = items.map((it) => ({
+      item_id: it.sku || it.id,
+      item_name: it.name,
+      price: it.price,
+      quantity: it.quantity,
+    }));
+    purchaseItemsRef.current = snapshot;
+    trackBeginCheckout(snapshot, subtotal);
   }, [count, subtotal, items]);
+
+  const firePurchase = (orderId: string, method: string, valueOverride?: number) => {
+    trackPurchase({
+      transaction_id: orderId,
+      value: valueOverride ?? subtotal,
+      items: purchaseItemsRef.current,
+      payment_method: method,
+    });
+  };
 
   const qrMmss = useMemo(() => {
     const m = Math.floor(qrSeconds / 60);
