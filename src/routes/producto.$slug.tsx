@@ -80,15 +80,15 @@ type Review = {
 
 function ProductDetailPage() {
   const { slug } = Route.useParams();
+  const initial = Route.useLoaderData();
   const { add } = useCart();
-  
-  const [product, setProduct] = useState<DBProduct | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  const [product, setProduct] = useState<DBProduct | null>((initial as any)?.product ?? null);
+  const [loading, setLoading] = useState(!(initial as any)?.product);
   const [imageIdx, setImageIdx] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
-    setLoading(true);
     setImageIdx(0);
     (async () => {
       const { data } = await supabase
