@@ -8,6 +8,8 @@ export type PromoBannerItem = {
   video?: string;
   link: string;
   alt: string;
+  /** Intrinsic aspect ratio "W/H" — drives container height so nothing is cropped. */
+  aspectRatio?: string;
 };
 
 function usePrefersReducedMotion() {
