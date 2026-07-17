@@ -103,7 +103,7 @@ function HomePage() {
           index={bannerIndex}
           onSelect={setBannerIndex}
           eagerFirst
-          className="relative w-full aspect-video"
+          className="w-full"
         />
       </section>
 
@@ -237,7 +237,7 @@ function HomePage() {
             banners={PROMO_BANNERS}
             index={bannerIndex}
             onSelect={setBannerIndex}
-            className="relative w-full aspect-video"
+            className="w-full"
           />
         </section>
       </Reveal>
