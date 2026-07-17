@@ -300,6 +300,13 @@ function ProductDetailPage() {
             </a>
           </div>
 
+          {/* Trust micro-signals to reduce bounce */}
+          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-muted-foreground mb-4">
+            <li className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-green-600" /> Compra 100% segura</li>
+            <li className="flex items-center gap-1.5"><Package className="h-3.5 w-3.5 text-blue-600" /> Envíos a toda Colombia</li>
+            <li className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-orange-600" /> Despacho en 24–48h</li>
+          </ul>
+
           <PaymentMethodsBadges />
 
           {specsEntries.length > 0 && (
@@ -319,6 +326,33 @@ function ProductDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Sticky mobile CTA bar — always visible for higher conversion */}
+      <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 backdrop-blur border-t shadow-[0_-4px_20px_rgba(0,0,0,0.08)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="flex items-center gap-2">
+          <div className="flex-shrink-0">
+            <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Precio</p>
+            <p className="text-base font-bold text-primary leading-none">{formatCOP(finalPrice)}</p>
+          </div>
+          <a
+            href={whatsappLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Consultar por WhatsApp"
+            className="h-11 w-11 flex-shrink-0 inline-flex items-center justify-center rounded-md text-white shadow"
+            style={{ backgroundColor: "#25D366" }}
+          >
+            <MessageCircle className="h-5 w-5" />
+          </a>
+          <Button onClick={handleAdd} className="flex-1 h-11" disabled={!inStock}>
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            {inStock ? "Agregar" : "Agotado"}
+          </Button>
+        </div>
+      </div>
+
+      {/* Bottom spacer so sticky bar doesn't cover content on mobile */}
+      <div className="h-20 md:hidden" aria-hidden />
 
       {/* Complementarios bajo la grid principal */}
       <ProductCarousel
