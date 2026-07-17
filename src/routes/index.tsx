@@ -45,10 +45,10 @@ const CATEGORY_IMAGES: Record<string, string> = {
 };
 
 const PROMO_BANNERS: PromoBannerItem[] = [
-  { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
-  { id: 2, image: bannerA50, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
-  { id: 3, image: bannerMsi, link: "/tienda?marca=msi", alt: "MSI — Juega sin límites" },
-  { id: 4, image: bannerMsi, video: videoJbl.url, link: "/tienda?marca=jbl", alt: "JBL — Sonido premium" },
+  { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia", aspectRatio: "1920/585" },
+  { id: 2, image: bannerA50, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia", aspectRatio: "1920/585" },
+  { id: 3, image: bannerMsi, link: "/tienda?marca=msi", alt: "MSI — Juega sin límites", aspectRatio: "1920/585" },
+  { id: 4, image: bannerMsi, video: videoJbl.url, link: "/tienda?marca=jbl", alt: "JBL — Sonido premium", aspectRatio: "16/9" },
 ];
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };

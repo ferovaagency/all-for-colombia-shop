@@ -8,6 +8,8 @@ export type PromoBannerItem = {
   video?: string;
   link: string;
   alt: string;
+  /** Intrinsic aspect ratio "W/H" — drives container height so nothing is cropped. */
+  aspectRatio?: string;
 };
 
 function usePrefersReducedMotion() {
@@ -85,16 +87,42 @@ export function PromoBannerSlider({
   className?: string;
 }) {
   const active = banners[index] ?? banners[0];
+  const [measured, setMeasured] = useState<Record<string | number, string>>({});
+  const activeAspect =
+    active?.aspectRatio ?? (active ? measured[active.id] : undefined) ?? "1920/585";
   return (
-    <div className={cn("relative w-full", className)}>
-      {/* Sizer: sets the container height to the active banner's natural aspect ratio */}
-      <img
-        key={active?.id}
-        src={active?.image}
-        alt=""
-        aria-hidden="true"
-        className="block w-full h-auto invisible select-none pointer-events-none"
-      />
+    <div className={cn("relative w-full transition-[aspect-ratio] duration-500", className)} style={{ aspectRatio: activeAspect }}>
+      {/* Preload media metadata to learn intrinsic aspect ratio when not declared */}
+      {banners.map((b) =>
+        b.aspectRatio || measured[b.id] ? null : b.video ? (
+          <video
+            key={`m-${b.id}`}
+            src={b.video}
+            preload="metadata"
+            muted
+            playsInline
+            className="hidden"
+            onLoadedMetadata={(e) => {
+              const v = e.currentTarget;
+              if (v.videoWidth && v.videoHeight)
+                setMeasured((m) => ({ ...m, [b.id]: `${v.videoWidth}/${v.videoHeight}` }));
+            }}
+          />
+        ) : (
+          <img
+            key={`m-${b.id}`}
+            src={b.image}
+            alt=""
+            aria-hidden="true"
+            className="hidden"
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              if (img.naturalWidth && img.naturalHeight)
+                setMeasured((m) => ({ ...m, [b.id]: `${img.naturalWidth}/${img.naturalHeight}` }));
+            }}
+          />
+        ),
+      )}
       {banners.map((banner, i) => (
         <PromoBannerSlide key={banner.id} banner={banner} active={i === index} eager={eagerFirst && i === 0} />
       ))}
