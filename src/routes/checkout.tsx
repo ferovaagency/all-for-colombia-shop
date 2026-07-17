@@ -513,6 +513,7 @@ function CheckoutPage() {
                   email: form.email,
                 }}
                 onSuccess={({ charge_id }) => {
+                  if (cardOrderId) firePurchase(cardOrderId, "openpay_card");
                   clear();
                   navigate({ to: "/resultado-pago", search: { id: cardOrderId, status: "ok", ref: charge_id } as any });
                 }}
