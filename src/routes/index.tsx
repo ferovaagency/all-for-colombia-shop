@@ -384,7 +384,7 @@ function CategoryCard({ cat, img }: { cat: any; img: string }) {
     <Link
       to="/tienda"
       search={{ categoria: cat.slug } as any}
-      className="group relative block overflow-hidden rounded-2xl border border-black/10 bg-white aspect-[4/5] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#4f46e5]/40"
+      className="group relative block overflow-hidden rounded-xl border border-black/10 bg-white aspect-square transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-[#4f46e5]/40"
     >
       <div className="absolute inset-0">
         <img
@@ -392,27 +392,23 @@ function CategoryCard({ cat, img }: { cat: any; img: string }) {
           alt={cat.name}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           onError={(e) => {
             const t = e.target as HTMLImageElement;
             if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
       </div>
-      <div className="relative z-10 h-full flex flex-col justify-end p-4 md:p-5">
-        <span className="text-[9px] font-bold tracking-[0.25em] uppercase text-white/80 drop-shadow">Colección</span>
+      <div className="relative z-10 h-full flex flex-col justify-end p-2">
         <h3
           style={SPACE}
-          className="font-bold tracking-[-0.02em] leading-tight text-white text-lg md:text-xl drop-shadow-lg mt-1"
+          className="font-bold tracking-[-0.02em] leading-tight text-white text-xs md:text-sm drop-shadow-lg line-clamp-2"
         >
           {cat.name}
         </h3>
-        <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-white/90 group-hover:text-white transition-colors">
-          Ver
-          <ArrowUpRight className="h-3.5 w-3.5 group-hover:rotate-45 transition-transform" />
-        </div>
       </div>
     </Link>
   );
 }
+
