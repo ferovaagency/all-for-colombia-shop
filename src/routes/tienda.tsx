@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getShopData } from "@/lib/ssr-data.functions";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/tienda")({
     oferta: s.oferta === "1" ? "1" : undefined,
     orden: typeof s.orden === "string" ? s.orden : undefined,
   }),
+  loader: () => getShopData(),
   head: () => ({
     meta: [
       { title: "Tienda — All For All" },
@@ -41,12 +43,13 @@ export const Route = createFileRoute("/tienda")({
 });
 
 function ShopPage() {
+  const initial = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = useNavigate();
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [brands, setBrands] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<any[]>(initial.products ?? []);
+  const [categories, setCategories] = useState<any[]>(initial.categories ?? []);
+  const [brands, setBrands] = useState<any[]>(initial.brands ?? []);
+  const [loading, setLoading] = useState((initial.products?.length ?? 0) === 0);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [maxPrice, setMaxPrice] = useState(10000000);
 
