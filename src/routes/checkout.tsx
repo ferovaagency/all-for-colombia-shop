@@ -138,15 +138,15 @@ function CheckoutPage() {
   useEffect(() => {
     if (beginCheckoutFiredRef.current || count === 0) return;
     beginCheckoutFiredRef.current = true;
-    trackBeginCheckout({
-      value: subtotal,
-      items: items.map((it) => ({
+    trackBeginCheckout(
+      items.map((it) => ({
         item_id: it.sku || it.id,
         item_name: it.name,
         price: it.price,
         quantity: it.quantity,
       })),
-    });
+      subtotal,
+    );
   }, [count, subtotal, items]);
 
   const qrMmss = useMemo(() => {
