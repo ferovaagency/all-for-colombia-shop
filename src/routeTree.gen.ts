@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as MarcasLogitechRouteImport } from './routes/marcas.logitech'
 import { Route as VentasCorporativasRouteImport } from './routes/ventas-corporativas'
 import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -31,6 +30,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DistribuidoresIndexRouteImport } from './routes/distribuidores.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
+import { Route as MarcasLogitechRouteImport } from './routes/marcas.logitech'
 import { Route as DistribuidoresRegistroRouteImport } from './routes/distribuidores.registro'
 import { Route as DistribuidoresPortalRouteImport } from './routes/distribuidores.portal'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -54,11 +54,6 @@ import { Route as ApiOpenpayBrebQrRouteImport } from './routes/api/openpay/breb-
 import { Route as ApiOpenpayBanksRouteImport } from './routes/api/openpay/banks'
 import { Route as ApiAddiConfigRouteImport } from './routes/api/addi/config'
 
-const MarcasLogitechRoute = MarcasLogitechRouteImport.update({
-  id: '/marcas/logitech',
-  path: '/marcas/logitech',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
   id: '/ventas-corporativas',
   path: '/ventas-corporativas',
@@ -162,6 +157,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const ProductoSlugRoute = ProductoSlugRouteImport.update({
   id: '/producto/$slug',
   path: '/producto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarcasLogitechRoute = MarcasLogitechRouteImport.update({
+  id: '/marcas/logitech',
+  path: '/marcas/logitech',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DistribuidoresRegistroRoute = DistribuidoresRegistroRouteImport.update({
@@ -291,7 +291,6 @@ export interface FileRoutesByFullPath {
   '/contacto': typeof ContactoRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/legal': typeof LegalRoute
-  '/marcas/logitech': typeof MarcasLogitechRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
   '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
@@ -305,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
+  '/marcas/logitech': typeof MarcasLogitechRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
@@ -336,7 +336,6 @@ export interface FileRoutesByTo {
   '/contacto': typeof ContactoRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/legal': typeof LegalRoute
-  '/marcas/logitech': typeof MarcasLogitechRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
   '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
@@ -349,6 +348,7 @@ export interface FileRoutesByTo {
   '/admin/marcas': typeof AdminMarcasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
+  '/marcas/logitech': typeof MarcasLogitechRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin': typeof AdminIndexRoute
   '/distribuidores': typeof DistribuidoresIndexRoute
@@ -382,7 +382,6 @@ export interface FileRoutesById {
   '/contacto': typeof ContactoRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/legal': typeof LegalRoute
-  '/marcas/logitech': typeof MarcasLogitechRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
   '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
@@ -396,6 +395,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
+  '/marcas/logitech': typeof MarcasLogitechRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
@@ -430,7 +430,6 @@ export interface FileRouteTypes {
     | '/contacto'
     | '/feed.xml'
     | '/legal'
-    | '/marcas/logitech'
     | '/mi-cuenta'
     | '/nosotros'
     | '/producto-de-la-semana'
@@ -444,6 +443,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/distribuidores/portal'
     | '/distribuidores/registro'
+    | '/marcas/logitech'
     | '/producto/$slug'
     | '/admin/'
     | '/distribuidores/'
@@ -475,7 +475,6 @@ export interface FileRouteTypes {
     | '/contacto'
     | '/feed.xml'
     | '/legal'
-    | '/marcas/logitech'
     | '/mi-cuenta'
     | '/nosotros'
     | '/producto-de-la-semana'
@@ -488,6 +487,7 @@ export interface FileRouteTypes {
     | '/admin/marcas'
     | '/blog/$slug'
     | '/distribuidores/registro'
+    | '/marcas/logitech'
     | '/producto/$slug'
     | '/admin'
     | '/distribuidores'
@@ -520,7 +520,6 @@ export interface FileRouteTypes {
     | '/contacto'
     | '/feed.xml'
     | '/legal'
-    | '/marcas/logitech'
     | '/mi-cuenta'
     | '/nosotros'
     | '/producto-de-la-semana'
@@ -534,6 +533,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/distribuidores/portal'
     | '/distribuidores/registro'
+    | '/marcas/logitech'
     | '/producto/$slug'
     | '/admin/'
     | '/distribuidores/'
@@ -567,7 +567,6 @@ export interface RootRouteChildren {
   ContactoRoute: typeof ContactoRoute
   FeedDotxmlRoute: typeof FeedDotxmlRoute
   LegalRoute: typeof LegalRoute
-  MarcasLogitechRoute: typeof MarcasLogitechRoute
   MiCuentaRoute: typeof MiCuentaRoute
   NosotrosRoute: typeof NosotrosRoute
   ProductoDeLaSemanaRoute: typeof ProductoDeLaSemanaRoute
@@ -577,6 +576,7 @@ export interface RootRouteChildren {
   VentasCorporativasRoute: typeof VentasCorporativasRoute
   DistribuidoresPortalRoute: typeof DistribuidoresPortalRouteWithChildren
   DistribuidoresRegistroRoute: typeof DistribuidoresRegistroRoute
+  MarcasLogitechRoute: typeof MarcasLogitechRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
   DistribuidoresIndexRoute: typeof DistribuidoresIndexRoute
   ApiAddiConfigRoute: typeof ApiAddiConfigRoute
@@ -650,13 +650,6 @@ declare module '@tanstack/react-router' {
       path: '/legal'
       fullPath: '/legal'
       preLoaderRoute: typeof LegalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/marcas/logitech': {
-      id: '/marcas/logitech'
-      path: '/marcas/logitech'
-      fullPath: '/marcas/logitech'
-      preLoaderRoute: typeof MarcasLogitechRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed.xml': {
@@ -748,6 +741,13 @@ declare module '@tanstack/react-router' {
       path: '/producto/$slug'
       fullPath: '/producto/$slug'
       preLoaderRoute: typeof ProductoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marcas/logitech': {
+      id: '/marcas/logitech'
+      path: '/marcas/logitech'
+      fullPath: '/marcas/logitech'
+      preLoaderRoute: typeof MarcasLogitechRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/distribuidores/registro': {
@@ -960,7 +960,6 @@ const rootRouteChildren: RootRouteChildren = {
   ContactoRoute: ContactoRoute,
   FeedDotxmlRoute: FeedDotxmlRoute,
   LegalRoute: LegalRoute,
-  MarcasLogitechRoute: MarcasLogitechRoute,
   MiCuentaRoute: MiCuentaRoute,
   NosotrosRoute: NosotrosRoute,
   ProductoDeLaSemanaRoute: ProductoDeLaSemanaRoute,
@@ -970,6 +969,7 @@ const rootRouteChildren: RootRouteChildren = {
   VentasCorporativasRoute: VentasCorporativasRoute,
   DistribuidoresPortalRoute: DistribuidoresPortalRouteWithChildren,
   DistribuidoresRegistroRoute: DistribuidoresRegistroRoute,
+  MarcasLogitechRoute: MarcasLogitechRoute,
   ProductoSlugRoute: ProductoSlugRoute,
   DistribuidoresIndexRoute: DistribuidoresIndexRoute,
   ApiAddiConfigRoute: ApiAddiConfigRoute,
@@ -989,3 +989,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
