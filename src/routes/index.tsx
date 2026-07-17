@@ -107,34 +107,34 @@ function HomePage() {
 
       {/* ============ SEARCH + INTRO ============ */}
       <section className="relative border-b border-black/5 bg-white">
-        <div className="container mx-auto px-6 lg:px-10 py-8 md:py-10 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6 items-center">
+        <div className="container mx-auto px-6 lg:px-10 py-4 md:py-5 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4 items-center">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#4f46e5]/10 border border-[#4f46e5]/20 px-3 py-1 text-[10px] font-bold tracking-[0.25em] uppercase text-[#4f46e5] mb-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#4f46e5]/10 border border-[#4f46e5]/20 px-3 py-1 text-[10px] font-bold tracking-[0.25em] uppercase text-[#4f46e5] mb-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#4f46e5] animate-pulse" />
               Todo lo que necesitas — para todos
             </div>
-            <h2 style={SPACE} className="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em]">
+            <h2 style={SPACE} className="text-[clamp(1.5rem,3.5vw,2.5rem)] font-bold leading-[0.95] tracking-[-0.04em]">
               El futuro, <span className="text-[#4f46e5]">a tu alcance.</span>
             </h2>
-            <p className="text-base text-black/60 max-w-xl mt-3">
+            <p className="text-sm text-black/60 max-w-xl mt-2">
               Tecnología premium, hogar inteligente y equipamiento corporativo. Financiación hasta 24 meses y envíos a todo Colombia.
             </p>
           </motion.div>
 
           <form onSubmit={onSearch} className="w-full">
-            <div className="relative flex items-center bg-white border border-black/10 rounded-2xl p-1.5 shadow-sm focus-within:border-[#4f46e5] focus-within:ring-4 focus-within:ring-[#4f46e5]/15 transition-all">
-              <Search className="absolute left-5 h-5 w-5 text-black/40" />
+            <div className="relative flex items-center bg-white border border-black/10 rounded-2xl p-1 shadow-sm focus-within:border-[#4f46e5] focus-within:ring-4 focus-within:ring-[#4f46e5]/15 transition-all">
+              <Search className="absolute left-4 h-4 w-4 text-black/40" />
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="¿Qué estás buscando?"
-                className="h-12 pl-12 pr-4 bg-transparent border-0 text-[#0a0a1a] placeholder:text-black/40 text-base focus-visible:ring-0"
+                className="h-10 pl-10 pr-3 bg-transparent border-0 text-[#0a0a1a] placeholder:text-black/40 text-sm focus-visible:ring-0"
               />
-              <Button type="submit" className="h-12 px-6 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-sm shadow-lg shadow-[#4f46e5]/25">
+              <Button type="submit" className="h-10 px-5 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-sm shadow-lg shadow-[#4f46e5]/25">
                 Buscar
               </Button>
             </div>
@@ -144,7 +144,7 @@ function HomePage() {
 
       {/* ============ TRUST STRIP ============ */}
       <section className="border-b border-black/5 bg-white">
-        <div className="container mx-auto px-6 lg:px-10 py-6 grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="container mx-auto px-6 lg:px-10 py-3 grid grid-cols-2 md:grid-cols-4 gap-4">
           <TrustItem n="01" label="Envío express" desc="A todo Colombia" icon={<Truck className="h-4 w-4" />} />
           <TrustItem n="02" label="Garantía total" desc="Cobertura oficial" icon={<ShieldCheck className="h-4 w-4" />} />
           <TrustItem n="03" label="Facturación B2B" desc="Precios corporativos" icon={<Building2 className="h-4 w-4" />} />
@@ -153,18 +153,19 @@ function HomePage() {
       </section>
 
       {/* ============ PRODUCTO DE LA SEMANA ============ */}
-      <div className="py-6">
+      <div className="py-2">
         <WeeklyDealTeaser />
       </div>
+
 
       {/* ============ CATEGORÍAS — GRID COMPLETO ============ */}
       {categories.length > 0 && (
         <Reveal>
-          <section className="container mx-auto px-6 lg:px-10 py-10 md:py-14">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+          <section className="container mx-auto px-6 lg:px-10 py-5 md:py-7">
+            <div className="flex items-end justify-between gap-4 mb-4">
               <div>
                 <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#4f46e5]">Colecciones</span>
-                <h2 style={SPACE} className="text-3xl md:text-5xl font-bold tracking-[-0.03em] mt-2 text-[#0a0a1a]">
+                <h2 style={SPACE} className="text-xl md:text-2xl font-bold tracking-[-0.03em] mt-1 text-[#0a0a1a]">
                   Explora por categoría
                 </h2>
               </div>
@@ -174,14 +175,14 @@ function HomePage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
               {categories.map((c, i) => (
                 <motion.div
                   key={c.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 12 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.45, delay: (i % 4) * 0.06, ease: "easeOut" }}
+                  transition={{ duration: 0.35, delay: (i % 8) * 0.04, ease: "easeOut" }}
                 >
                   <CategoryCard cat={c} img={getCategoryImage(c)} />
                 </motion.div>
@@ -195,11 +196,11 @@ function HomePage() {
       {products.length > 0 && (
         <Reveal>
           <section className="border-y border-black/5 bg-white">
-            <div className="container mx-auto px-6 lg:px-10 py-10 md:py-14">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+            <div className="container mx-auto px-6 lg:px-10 py-5 md:py-7">
+              <div className="flex items-end justify-between gap-4 mb-4">
                 <div>
                   <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#4f46e5]">Novedades</span>
-                  <h2 style={SPACE} className="text-3xl md:text-5xl font-bold tracking-[-0.03em] mt-2 text-[#0a0a1a]">
+                  <h2 style={SPACE} className="text-xl md:text-2xl font-bold tracking-[-0.03em] mt-1 text-[#0a0a1a]">
                     Productos destacados
                   </h2>
                 </div>
@@ -208,14 +209,14 @@ function HomePage() {
                   <ArrowUpRight className="h-4 w-4 group-hover:rotate-45 transition-transform" />
                 </Link>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 md:gap-3">
                 {products.map((p, i) => (
                   <motion.div
                     key={p.id}
-                    initial={{ opacity: 0, y: 16 }}
+                    initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.35, delay: (i % 6) * 0.05 }}
+                    transition={{ duration: 0.3, delay: (i % 8) * 0.04 }}
                   >
                     <ProductCard product={p} />
                   </motion.div>
@@ -225,6 +226,7 @@ function HomePage() {
           </section>
         </Reveal>
       )}
+
 
       {/* ============ PROMO SLIDER (full width, natural aspect) ============ */}
       <Reveal>
@@ -242,31 +244,31 @@ function HomePage() {
       {brands.length > 0 && (
         <Reveal>
           <section className="bg-white border-b border-black/5">
-            <div className="container mx-auto px-6 lg:px-10 py-10">
-              <div className="text-center mb-6">
+            <div className="container mx-auto px-6 lg:px-10 py-5">
+              <div className="text-center mb-3">
                 <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#4f46e5]">Aliados</span>
-                <h2 style={SPACE} className="text-2xl md:text-4xl font-bold tracking-[-0.03em] mt-2 text-[#0a0a1a]">
+                <h2 style={SPACE} className="text-lg md:text-2xl font-bold tracking-[-0.03em] mt-1 text-[#0a0a1a]">
                   Marcas que confían en nosotros
                 </h2>
               </div>
-              <div className="flex flex-wrap justify-center items-center gap-3 md:gap-4">
+              <div className="flex flex-wrap justify-center items-center gap-2 md:gap-3">
                 {brands.map((b) => (
                   <Link
                     key={b.id}
                     to={b.slug === "logitech" ? "/marcas/logitech" : "/tienda"}
                     search={b.slug === "logitech" ? undefined : ({ marca: b.slug } as any)}
                     aria-label={`Ver productos de ${b.name}`}
-                    className="group bg-white rounded-xl border border-black/10 h-16 w-28 md:h-20 md:w-32 flex items-center justify-center p-2 hover:border-[#4f46e5]/50 hover:-translate-y-0.5 hover:shadow-md transition-all"
+                    className="group bg-white rounded-xl border border-black/10 h-12 w-20 md:h-14 md:w-24 flex items-center justify-center p-1.5 hover:border-[#4f46e5]/50 hover:-translate-y-0.5 hover:shadow-md transition-all"
                   >
                     {b.logo_url || b.logo ? (
                       <img
                         src={b.logo_url || b.logo}
                         alt={b.name}
                         loading="lazy"
-                        className="h-10 md:h-12 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity"
+                        className="h-7 md:h-9 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity"
                       />
                     ) : (
-                      <span className="text-xs font-semibold text-[#0a0a1a]">{b.name}</span>
+                      <span className="text-[11px] font-semibold text-[#0a0a1a]">{b.name}</span>
                     )}
                   </Link>
                 ))}
@@ -279,18 +281,18 @@ function HomePage() {
       {/* ============ BLOG ============ */}
       {posts.length > 0 && (
         <Reveal>
-          <section className="py-10 md:py-14">
+          <section className="py-5 md:py-7">
             <div className="container mx-auto px-6 lg:px-10">
-              <div className="flex items-end justify-between mb-6">
+              <div className="flex items-end justify-between mb-4">
                 <div>
                   <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#4f46e5]">Lectura</span>
-                  <h2 style={SPACE} className="text-3xl md:text-4xl font-bold tracking-[-0.03em] mt-2 text-[#0a0a1a]">Consejos y guías tech</h2>
+                  <h2 style={SPACE} className="text-xl md:text-2xl font-bold tracking-[-0.03em] mt-1 text-[#0a0a1a]">Consejos y guías tech</h2>
                 </div>
                 <Link to="/blog" className="group inline-flex items-center gap-2 text-sm font-bold text-[#4f46e5] hover:text-[#4338ca] transition-colors">
                   Ver blog <ArrowUpRight className="h-4 w-4 group-hover:rotate-45 transition-transform" />
                 </Link>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {posts.map((post) => (
                   <Link
                     key={post.id}
@@ -299,7 +301,7 @@ function HomePage() {
                     className="group bg-white rounded-2xl overflow-hidden border border-black/10 hover:border-[#4f46e5]/50 hover:-translate-y-1 hover:shadow-lg transition-all"
                   >
                     {post.cover_image && (
-                      <div className="overflow-hidden aspect-[16/10]">
+                      <div className="overflow-hidden aspect-[16/9]">
                         <img
                           src={post.cover_image}
                           alt={post.title}
@@ -309,16 +311,16 @@ function HomePage() {
                         />
                       </div>
                     )}
-                    <div className="p-6">
+                    <div className="p-4">
                       {post.category && (
                         <span className="text-[10px] font-bold text-[#4f46e5] uppercase tracking-[0.2em]">
                           {post.category}
                         </span>
                       )}
-                      <h3 className="font-bold text-[#0a0a1a] mt-3 line-clamp-2 text-lg group-hover:text-[#4f46e5] transition-colors" style={SPACE}>
+                      <h3 className="font-bold text-[#0a0a1a] mt-2 line-clamp-2 text-base group-hover:text-[#4f46e5] transition-colors" style={SPACE}>
                         {post.title}
                       </h3>
-                      <p className="text-sm text-black/60 mt-2 line-clamp-2">{post.excerpt}</p>
+                      <p className="text-sm text-black/60 mt-1 line-clamp-2">{post.excerpt}</p>
                     </div>
                   </Link>
                 ))}
@@ -329,27 +331,27 @@ function HomePage() {
       )}
 
       {/* ============ CORPORATE CTA ============ */}
-      <section className="pb-12 pt-4">
+      <section className="pb-6 pt-2">
         <div className="container mx-auto px-6 lg:px-10">
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#1e1e5a] via-[#141432] to-[#0a0a1a] p-8 md:p-12 text-white">
+          <div className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-[#1e1e5a] via-[#141432] to-[#0a0a1a] p-6 md:p-8 text-white">
             <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#4f46e5]/30 blur-[100px]" />
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-6 items-center">
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-4 items-center">
               <div>
                 <span className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.3em] uppercase text-[#a5b4fc]">
                   <Zap className="h-3 w-3" /> B2B
                 </span>
-                <h2 style={SPACE} className="text-3xl md:text-5xl font-bold tracking-[-0.03em] mt-3 leading-[0.95]">
+                <h2 style={SPACE} className="text-2xl md:text-3xl font-bold tracking-[-0.03em] mt-2 leading-[0.95]">
                   Escala tu empresa con nosotros.
                 </h2>
-                <p className="text-white/70 mt-4 max-w-lg">
+                <p className="text-white/70 mt-2 max-w-lg text-sm">
                   Precios especiales, facturación electrónica y soporte dedicado para compras corporativas.
                 </p>
               </div>
-              <div className="flex flex-col gap-3 md:items-end">
-                <Button asChild size="lg" className="bg-white text-[#0a0a1a] hover:bg-white/90 rounded-full px-8 h-12 font-bold w-full md:w-auto">
+              <div className="flex flex-col gap-2 md:items-end">
+                <Button asChild size="lg" className="bg-white text-[#0a0a1a] hover:bg-white/90 rounded-full px-6 h-10 font-bold w-full md:w-auto">
                   <Link to="/ventas-corporativas">Solicitar cotización <ArrowRight className="ml-2 h-4 w-4" /></Link>
                 </Button>
-                <Button asChild size="lg" variant="ghost" className="text-white hover:bg-white/10 rounded-full px-8 h-12 font-bold w-full md:w-auto">
+                <Button asChild size="lg" variant="ghost" className="text-white hover:bg-white/10 rounded-full px-6 h-10 font-bold w-full md:w-auto">
                   <Link to="/distribuidores">Programa de distribuidores</Link>
                 </Button>
               </div>
@@ -357,6 +359,7 @@ function HomePage() {
           </div>
         </div>
       </section>
+
     </div>
   );
 }
