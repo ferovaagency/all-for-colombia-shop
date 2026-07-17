@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Search, ChevronDown, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type SearchParams = {
   q?: string;
@@ -45,10 +45,8 @@ function ShopPage() {
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
   const [maxPrice, setMaxPrice] = useState(10000000);
-  const [expanded, setExpanded] = useState<string[]>([]);
 
   const parentCats = useMemo(() => categories.filter((c: any) => !c.parent_id), [categories]);
-  const getChildren = (parentId: string) => categories.filter((c: any) => c.parent_id === parentId);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,120 +127,15 @@ function ShopPage() {
     return list;
   }, [products, categories, search, priceRange]);
 
-  const Filters = (
-    <div className="space-y-6">
-      <div>
-        <Label className="font-semibold mb-3 block">Categorías</Label>
-        <div className="space-y-1">
-          <button
-            onClick={() => updateSearch({ categoria: undefined })}
-            className={`block text-sm w-full text-left px-3 py-2 rounded-lg font-medium transition-colors ${!search.categoria ? "bg-secondary text-secondary-foreground" : "hover:bg-muted"}`}
-          >
-            Todos los productos
-          </button>
-          {parentCats.map((parent: any) => {
-            const subs = getChildren(parent.id);
-            const isExpanded = expanded.includes(parent.id);
-            const isParentActive = search.categoria === parent.slug;
-            const hasActiveChild = subs.some((s: any) => s.slug === search.categoria);
-            return (
-              <div key={parent.id}>
-                <button
-                  onClick={() => {
-                    if (subs.length === 0) {
-                      updateSearch({ categoria: parent.slug });
-                    } else {
-                      setExpanded((prev) =>
-                        prev.includes(parent.id) ? prev.filter((id) => id !== parent.id) : [...prev, parent.id]
-                      );
-                    }
-                  }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                    isParentActive || hasActiveChild ? "bg-secondary/10 text-secondary" : "hover:bg-muted text-foreground"
-                  }`}
-                >
-                  <span>{parent.name}</span>
-                  {subs.length > 0 && (
-                    <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
-                  )}
-                </button>
-                {isExpanded && subs.length > 0 && (
-                  <div className="ml-3 mt-1 space-y-0.5 border-l border-border pl-2">
-                    {subs.map((sub: any) => (
-                      <button
-                        key={sub.id}
-                        onClick={() => updateSearch({ categoria: sub.slug })}
-                        className={`w-full text-left px-2 py-1.5 rounded-lg text-xs transition-colors ${
-                          search.categoria === sub.slug
-                            ? "bg-secondary text-secondary-foreground font-semibold"
-                            : "hover:bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {sub.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {brands.length > 0 && (
-        <div>
-          <Label className="font-semibold mb-3 block">Marcas</Label>
-          <div className="space-y-1.5">
-            <button
-              onClick={() => updateSearch({ marca: undefined })}
-              className={`block text-sm w-full text-left px-2 py-1 rounded ${!search.marca ? "bg-secondary/10 text-secondary font-medium" : "hover:bg-muted"}`}
-            >
-              Todas
-            </button>
-            {brands.map((b) => (
-              <button
-                key={b.id}
-                onClick={() => updateSearch({ marca: b.slug })}
-                className={`block text-sm w-full text-left px-2 py-1 rounded ${search.marca === b.slug ? "bg-secondary/10 text-secondary font-medium" : "hover:bg-muted"}`}
-              >
-                {b.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div>
-        <Label className="font-semibold mb-3 block">Precio</Label>
-        <Slider
-          min={0}
-          max={maxPrice}
-          step={50000}
-          value={priceRange}
-          onValueChange={(v) => setPriceRange([v[0], v[1]] as [number, number])}
-        />
-        <div className="flex justify-between text-xs text-muted-foreground mt-2">
-          <span>${priceRange[0].toLocaleString("es-CO")}</span>
-          <span>${priceRange[1].toLocaleString("es-CO")}</span>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Checkbox
-          id="oferta"
-          checked={search.oferta === "1"}
-          onCheckedChange={(v) => updateSearch({ oferta: v ? "1" : undefined })}
-        />
-        <Label htmlFor="oferta" className="cursor-pointer">Solo en oferta</Label>
-      </div>
-    </div>
-  );
+  const activeFilterCount = (search.marca ? 1 : 0) + (search.oferta === "1" ? 1 : 0) +
+    (priceRange[0] > 0 || priceRange[1] < maxPrice ? 1 : 0);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-4">Tienda</h1>
-        <div className="flex flex-col md:flex-row gap-3">
+
+        <div className="flex flex-col md:flex-row gap-3 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -252,59 +145,150 @@ function ShopPage() {
               className="pl-9"
             />
           </div>
-          <div className="flex gap-2">
-            <Select value={search.orden || "recientes"} onValueChange={(v) => updateSearch({ orden: v === "recientes" ? undefined : v })}>
-              <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recientes">Más recientes</SelectItem>
-                <SelectItem value="precio-asc">Precio menor</SelectItem>
-                <SelectItem value="precio-desc">Precio mayor</SelectItem>
-              </SelectContent>
-            </Select>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="lg:hidden">
-                  <SlidersHorizontal className="h-4 w-4 mr-2" /> Filtros
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left">
-                <SheetHeader><SheetTitle>Filtros</SheetTitle></SheetHeader>
-                <div className="mt-6">{Filters}</div>
-              </SheetContent>
-            </Sheet>
-          </div>
+          <Select value={search.orden || "recientes"} onValueChange={(v) => updateSearch({ orden: v === "recientes" ? undefined : v })}>
+            <SelectTrigger className="w-full md:w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recientes">Más recientes</SelectItem>
+              <SelectItem value="precio-asc">Precio menor</SelectItem>
+              <SelectItem value="precio-desc">Precio mayor</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
-        <aside className="hidden lg:block sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-2">
-          {Filters}
-        </aside>
+        {/* Barra de filtros horizontal */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Chip active={!search.categoria} onClick={() => updateSearch({ categoria: undefined })}>
+            Todos
+          </Chip>
+          {parentCats.map((cat: any) => (
+            <Chip key={cat.id} active={search.categoria === cat.slug} onClick={() => updateSearch({ categoria: cat.slug })}>
+              {cat.name}
+            </Chip>
+          ))}
 
-        <div>
-          {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-muted aspect-[3/4] rounded-xl animate-pulse" />
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="bg-muted/40 border rounded-xl p-12 text-center text-muted-foreground">
-              No encontramos productos con esos filtros.
-            </div>
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground mb-4">
-                {filtered.length} producto{filtered.length === 1 ? "" : "s"} encontrado{filtered.length === 1 ? "" : "s"}
-                {search.q && ` para "${search.q}"`}
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-                {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
+          <span className="h-6 w-px bg-border shrink-0 mx-1" />
+
+          {brands.length > 0 && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Chip active={!!search.marca}>
+                  Marca{search.marca ? `: ${brands.find((b) => b.slug === search.marca)?.name ?? ""}` : ""}
+                  <ChevronDown className="h-3.5 w-3.5 ml-1" />
+                </Chip>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-56 max-h-80 overflow-y-auto p-2">
+                <button
+                  onClick={() => updateSearch({ marca: undefined })}
+                  className={cn(
+                    "block w-full text-left px-3 py-1.5 rounded-md text-sm",
+                    !search.marca ? "bg-secondary/10 text-secondary font-medium" : "hover:bg-muted",
+                  )}
+                >
+                  Todas
+                </button>
+                {brands.map((b) => (
+                  <button
+                    key={b.id}
+                    onClick={() => updateSearch({ marca: b.slug })}
+                    className={cn(
+                      "block w-full text-left px-3 py-1.5 rounded-md text-sm",
+                      search.marca === b.slug ? "bg-secondary/10 text-secondary font-medium" : "hover:bg-muted",
+                    )}
+                  >
+                    {b.name}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+          )}
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Chip active={priceRange[0] > 0 || priceRange[1] < maxPrice}>
+                Precio
+                <ChevronDown className="h-3.5 w-3.5 ml-1" />
+              </Chip>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-72 p-4">
+              <Label className="font-semibold mb-3 block text-sm">Rango de precio</Label>
+              <Slider
+                min={0}
+                max={maxPrice}
+                step={50000}
+                value={priceRange}
+                onValueChange={(v) => setPriceRange([v[0], v[1]] as [number, number])}
+              />
+              <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                <span>${priceRange[0].toLocaleString("es-CO")}</span>
+                <span>${priceRange[1].toLocaleString("es-CO")}</span>
               </div>
-            </>
+            </PopoverContent>
+          </Popover>
+
+          <Chip active={search.oferta === "1"} onClick={() => updateSearch({ oferta: search.oferta === "1" ? undefined : "1" })}>
+            <Tag className="h-3.5 w-3.5 mr-1" /> Ofertas
+          </Chip>
+
+          {activeFilterCount > 0 && (
+            <button
+              onClick={() => {
+                updateSearch({ marca: undefined, oferta: undefined });
+                setPriceRange([0, maxPrice]);
+              }}
+              className="shrink-0 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2"
+            >
+              <X className="h-3.5 w-3.5" /> Limpiar
+            </button>
           )}
         </div>
       </div>
+
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="bg-muted aspect-[3/4] rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-muted/40 border rounded-xl p-12 text-center text-muted-foreground">
+          No encontramos productos con esos filtros.
+        </div>
+      ) : (
+        <>
+          <p className="text-sm text-muted-foreground mb-4">
+            {filtered.length} producto{filtered.length === 1 ? "" : "s"} encontrado{filtered.length === 1 ? "" : "s"}
+            {search.q && ` para "${search.q}"`}
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+            {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
+          </div>
+        </>
+      )}
     </div>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active?: boolean;
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "shrink-0 inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border transition-colors whitespace-nowrap",
+        active
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-background text-foreground border-border hover:bg-muted",
+      )}
+    >
+      {children}
+    </button>
   );
 }

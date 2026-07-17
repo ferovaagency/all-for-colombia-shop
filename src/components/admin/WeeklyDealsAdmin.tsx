@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { formatCOP } from "@/lib/cart";
-import { Trash2, Sparkles } from "lucide-react";
+import { Trash2, Sparkles, Pencil, X } from "lucide-react";
 
 type Product = { id: string; name: string; price: number | null; slug: string };
 type Deal = {
@@ -31,6 +31,7 @@ function toLocalInput(iso?: string) {
 export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [productId, setProductId] = useState("");
   const [discount, setDiscount] = useState<number>(50);
@@ -59,6 +60,27 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
     ? Math.max(0, Math.round(selectedProduct.price * (1 - Number(discount) / 100)))
     : null;
 
+  const resetForm = () => {
+    setEditingId(null);
+    setProductId("");
+    setDiscount(50);
+    setRevealAt(toLocalInput(new Date().toISOString()));
+    setEndsAt(toLocalInput(new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()));
+    setStockLimit("");
+    setIsActive(true);
+  };
+
+  const startEdit = (deal: Deal) => {
+    setEditingId(deal.id);
+    setProductId(deal.product_id);
+    setDiscount(Number(deal.discount_percent));
+    setRevealAt(toLocalInput(deal.reveal_at));
+    setEndsAt(toLocalInput(deal.ends_at));
+    setStockLimit(deal.stock_limit ? String(deal.stock_limit) : "");
+    setIsActive(deal.is_active);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const submit = async () => {
     if (!productId) return toast.error("Selecciona un producto");
     if (!revealAt || !endsAt) return toast.error("Configura las fechas");
@@ -68,23 +90,29 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
     if (!(d > 0 && d <= 80)) return toast.error("El descuento debe estar entre 1 y 80");
 
     setLoading(true);
-    // Desactivar deals previos si este va activo
+    // Desactivar otros deals si este va activo
     if (isActive) {
-      await supabase.from("weekly_deals").update({ is_active: false }).eq("is_active", true);
+      const deactivate = supabase.from("weekly_deals").update({ is_active: false }).eq("is_active", true);
+      await (editingId ? deactivate.neq("id", editingId) : deactivate);
     }
-    const { error } = await supabase.from("weekly_deals").insert({
+
+    const payload = {
       product_id: productId,
       discount_percent: d,
       reveal_at: new Date(revealAt).toISOString(),
       ends_at: new Date(endsAt).toISOString(),
       stock_limit: stockLimit ? Number(stockLimit) : null,
       is_active: isActive,
-    });
+    };
+
+    const { error } = editingId
+      ? await supabase.from("weekly_deals").update(payload).eq("id", editingId)
+      : await supabase.from("weekly_deals").insert(payload);
+
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success("Producto de la Semana configurado");
-    setProductId("");
-    setStockLimit("");
+    toast.success(editingId ? "Producto de la Semana actualizado" : "Producto de la Semana configurado");
+    resetForm();
     load();
   };
 
@@ -105,6 +133,7 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
     const { error } = await supabase.from("weekly_deals").delete().eq("id", deal.id);
     if (error) return toast.error(error.message);
     toast.success("Eliminada");
+    if (editingId === deal.id) resetForm();
     load();
   };
 
@@ -112,7 +141,8 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
     <div className="space-y-8">
       <div className="rounded-xl border p-5 bg-card">
         <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
-          <Sparkles className="h-4 w-4 text-primary" /> Nueva configuración
+          <Sparkles className="h-4 w-4 text-primary" />
+          {editingId ? "Editar configuración" : "Nueva configuración"}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -180,9 +210,14 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
             </div>
           </div>
         </div>
-        <div className="mt-5 flex justify-end">
+        <div className="mt-5 flex justify-end gap-2">
+          {editingId && (
+            <Button variant="outline" onClick={resetForm} disabled={loading}>
+              <X className="h-4 w-4 mr-1" /> Cancelar edición
+            </Button>
+          )}
           <Button onClick={submit} disabled={loading}>
-            {loading ? "Guardando…" : "Guardar configuración"}
+            {loading ? "Guardando…" : editingId ? "Guardar cambios" : "Guardar configuración"}
           </Button>
         </div>
       </div>
@@ -215,9 +250,14 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
                   />
                 </TableCell>
                 <TableCell>
-                  <Button size="sm" variant="ghost" onClick={() => remove(d)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => startEdit(d)} title="Editar">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => remove(d)} title="Eliminar">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

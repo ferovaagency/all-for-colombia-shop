@@ -1,11 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ChevronLeft, ChevronRight, Search, Sparkles, Truck, ShieldCheck, Building2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, Search, Sparkles, Truck, ShieldCheck, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/shop/ProductCard";
-import { cn } from "@/lib/utils";
+import { PromoBannerSlider, type PromoBannerItem } from "@/components/shop/PromoBanner";
+import { WeeklyDealTeaser } from "@/components/shop/WeeklyDealTeaser";
+import { CategoryBento } from "@/components/shop/CategoryBento";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerA50 from "@/assets/banner-logitech-gol.jpg";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
@@ -38,7 +40,8 @@ const CATEGORY_IMAGES: Record<string, string> = {
   monitores: monitorGamer,
 };
 
-const PROMO_BANNERS = [
+// Para agregar video: sube el archivo y añade `video: "/ruta/al/video.mp4"` al banner correspondiente.
+const PROMO_BANNERS: PromoBannerItem[] = [
   { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 2, image: bannerA50, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 3, image: bannerMsi, link: "/tienda?marca=msi", alt: "MSI — Juega sin límites" },
@@ -57,13 +60,6 @@ function HomePage() {
     const t = setInterval(() => setBannerIndex((p) => (p + 1) % PROMO_BANNERS.length), 4000);
     return () => clearInterval(t);
   }, []);
-
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const scrollCarousel = (dir: "left" | "right") => {
-    const el = carouselRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir === "left" ? -240 : 240, behavior: "smooth" });
-  };
 
   useEffect(() => {
     (async () => {
@@ -85,45 +81,21 @@ function HomePage() {
     navigate({ to: "/tienda", search: { q: q.trim() } as any });
   };
 
+  const getCategoryImage = (cat: any) =>
+    CATEGORY_IMAGES[cat.slug] || cat.image || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80";
+
   return (
     <>
-      {/* Hero - slider rotativo con todos los banners */}
+      {/* Hero - slider rotativo con todos los banners (soporta video) */}
       <section className="relative overflow-hidden bg-muted">
         <h1 className="sr-only">All For All — Tienda online de tecnología, hogar y soluciones empresariales en Colombia</h1>
-        <div className="relative w-full aspect-[1920/585]">
-          {PROMO_BANNERS.map((banner, i) => (
-            <Link
-              key={banner.id}
-              to={banner.link}
-              className={cn(
-                "absolute inset-0 block transition-opacity duration-500",
-                i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none",
-              )}
-            >
-              <img
-                src={banner.image}
-                alt={banner.alt}
-                className="absolute inset-0 h-full w-full object-cover object-center"
-                loading={i === 0 ? "eager" : "lazy"}
-                fetchPriority={i === 0 ? "high" : "auto"}
-                decoding="async"
-              />
-            </Link>
-          ))}
-
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-            {PROMO_BANNERS.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setBannerIndex(i)}
-                aria-label={`Banner ${i + 1}`}
-                className={cn("h-1.5 rounded-full transition-all", i === bannerIndex ? "w-5 bg-white" : "w-1.5 bg-white/60")}
-              />
-            ))}
-          </div>
-        </div>
-
+        <PromoBannerSlider
+          banners={PROMO_BANNERS}
+          index={bannerIndex}
+          onSelect={setBannerIndex}
+          eagerFirst
+          className="relative w-full aspect-[1920/585]"
+        />
 
         <div className="container mx-auto px-4 -mt-10 relative z-20">
           <form onSubmit={onSearch} className="max-w-2xl mx-auto">
@@ -153,48 +125,11 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Categories carousel */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold">Categorías</h2>
-            <p className="text-muted-foreground">Explora por tipo de producto</p>
-          </div>
-          <div className="hidden md:flex items-center gap-2">
-            <button type="button" onClick={() => scrollCarousel("left")} aria-label="Anterior" className="h-10 w-10 rounded-full border bg-background hover:bg-muted flex items-center justify-center transition-smooth">
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button type="button" onClick={() => scrollCarousel("right")} aria-label="Siguiente" className="h-10 w-10 rounded-full border bg-background hover:bg-muted flex items-center justify-center transition-smooth">
-              <ChevronRight className="h-5 w-5" />
-            </button>
-            <Link to="/categorias" className="ml-2 text-secondary text-sm font-medium hover:underline inline-flex items-center gap-1">
-              Ver todas <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
+      {/* Producto de la semana */}
+      <WeeklyDealTeaser />
 
-        <div ref={carouselRef} className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {categories.map((cat) => {
-            const img = CATEGORY_IMAGES[cat.slug] || cat.image || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80";
-            return (
-              <Link
-                key={cat.id}
-                to="/tienda"
-                search={{ categoria: cat.slug } as any}
-                className="group relative shrink-0 w-[200px] h-[200px] rounded-xl overflow-hidden snap-start shadow-card hover:shadow-elevated transition-smooth"
-              >
-                <img src={img} alt={cat.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
-                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/70 via-black/30 to-transparent text-white">
-                  <h3 className="font-semibold text-base leading-tight drop-shadow-md">{cat.name}</h3>
-                </div>
-              </Link>
-            );
-          })}
-          {categories.length === 0 && (
-            <div className="text-sm text-muted-foreground py-8">Cargando categorías…</div>
-          )}
-        </div>
-      </section>
+      {/* Categorías — tabs + bento grid */}
+      <CategoryBento categories={categories} getImage={getCategoryImage} />
 
       {/* Featured products */}
       {products.length > 0 && (
@@ -212,59 +147,15 @@ function HomePage() {
         </section>
       )}
 
-      {/* Promo banners slider */}
+      {/* Promo banners slider (soporta video) */}
       <section className="py-6 bg-background">
         <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-2xl w-full bg-background aspect-[1920/585]">
-            {PROMO_BANNERS.map((banner, i) => (
-              <Link
-                key={banner.id}
-                to={banner.link}
-                className={cn(
-                  "absolute inset-0 block transition-opacity duration-500",
-                  i === bannerIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none",
-                )}
-              >
-                <img
-                  src={banner.image}
-                  alt={banner.alt}
-                  className="absolute inset-0 h-full w-full object-cover object-center"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </Link>
-            ))}
-
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-              {PROMO_BANNERS.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setBannerIndex(i)}
-                  aria-label={`Banner ${i + 1}`}
-                  className={cn("h-1.5 rounded-full transition-all", i === bannerIndex ? "w-5 bg-white" : "w-1.5 bg-white/60")}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Corporate banner */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="bg-gradient-hero text-primary-foreground rounded-2xl p-8 md:p-12 grid md:grid-cols-2 gap-8 items-center shadow-elevated">
-          <div>
-            <Building2 className="h-10 w-10 mb-4 text-white/80" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">¿Eres empresa?</h2>
-            <p className="text-white/85 text-lg">
-              Tenemos precios especiales para compras corporativas, facturación a empresa y soporte dedicado.
-            </p>
-          </div>
-          <div className="flex md:justify-end">
-            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
-              <Link to="/ventas-corporativas">Conocer más <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-          </div>
+          <PromoBannerSlider
+            banners={PROMO_BANNERS}
+            index={bannerIndex}
+            onSelect={setBannerIndex}
+            className="relative overflow-hidden rounded-2xl w-full bg-background aspect-[1920/585]"
+          />
         </div>
       </section>
 
@@ -277,8 +168,8 @@ function HomePage() {
             {brands.map((b) => (
               <Link
                 key={b.id}
-                to="/tienda"
-                search={{ marca: b.slug } as any}
+                to={b.slug === "logitech" ? "/marcas/logitech" : "/tienda"}
+                search={b.slug === "logitech" ? undefined : ({ marca: b.slug } as any)}
                 aria-label={`Ver productos de ${b.name}`}
                 className="group bg-white rounded-lg border border-border h-16 w-28 md:h-20 md:w-32 flex items-center justify-center p-2 hover:shadow-md hover:border-secondary/40 transition-all"
               >
@@ -337,6 +228,18 @@ function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Corporate strip — achicado y al final, ya no domina la home */}
+      <section className="border-t bg-muted/30">
+        <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground text-center md:text-left">
+            <span className="font-semibold text-foreground">¿Eres empresa?</span> Precios especiales, facturación y soporte dedicado para compras corporativas.
+          </p>
+          <Button asChild variant="outline" size="sm" className="shrink-0">
+            <Link to="/ventas-corporativas">Conocer más <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+          </Button>
+        </div>
+      </section>
     </>
   );
 }

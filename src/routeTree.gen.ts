@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MarcasLogitechRouteImport } from './routes/marcas.logitech'
 import { Route as VentasCorporativasRouteImport } from './routes/ventas-corporativas'
 import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -53,6 +54,11 @@ import { Route as ApiOpenpayBrebQrRouteImport } from './routes/api/openpay/breb-
 import { Route as ApiOpenpayBanksRouteImport } from './routes/api/openpay/banks'
 import { Route as ApiAddiConfigRouteImport } from './routes/api/addi/config'
 
+const MarcasLogitechRoute = MarcasLogitechRouteImport.update({
+  id: '/marcas/logitech',
+  path: '/marcas/logitech',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
   id: '/ventas-corporativas',
   path: '/ventas-corporativas',
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/contacto': typeof ContactoRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/legal': typeof LegalRoute
+  '/marcas/logitech': typeof MarcasLogitechRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
   '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/contacto': typeof ContactoRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/legal': typeof LegalRoute
+  '/marcas/logitech': typeof MarcasLogitechRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
   '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
@@ -374,6 +382,7 @@ export interface FileRoutesById {
   '/contacto': typeof ContactoRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/legal': typeof LegalRoute
+  '/marcas/logitech': typeof MarcasLogitechRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
   '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
@@ -421,6 +430,7 @@ export interface FileRouteTypes {
     | '/contacto'
     | '/feed.xml'
     | '/legal'
+    | '/marcas/logitech'
     | '/mi-cuenta'
     | '/nosotros'
     | '/producto-de-la-semana'
@@ -465,6 +475,7 @@ export interface FileRouteTypes {
     | '/contacto'
     | '/feed.xml'
     | '/legal'
+    | '/marcas/logitech'
     | '/mi-cuenta'
     | '/nosotros'
     | '/producto-de-la-semana'
@@ -509,6 +520,7 @@ export interface FileRouteTypes {
     | '/contacto'
     | '/feed.xml'
     | '/legal'
+    | '/marcas/logitech'
     | '/mi-cuenta'
     | '/nosotros'
     | '/producto-de-la-semana'
@@ -555,6 +567,7 @@ export interface RootRouteChildren {
   ContactoRoute: typeof ContactoRoute
   FeedDotxmlRoute: typeof FeedDotxmlRoute
   LegalRoute: typeof LegalRoute
+  MarcasLogitechRoute: typeof MarcasLogitechRoute
   MiCuentaRoute: typeof MiCuentaRoute
   NosotrosRoute: typeof NosotrosRoute
   ProductoDeLaSemanaRoute: typeof ProductoDeLaSemanaRoute
@@ -637,6 +650,13 @@ declare module '@tanstack/react-router' {
       path: '/legal'
       fullPath: '/legal'
       preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marcas/logitech': {
+      id: '/marcas/logitech'
+      path: '/marcas/logitech'
+      fullPath: '/marcas/logitech'
+      preLoaderRoute: typeof MarcasLogitechRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed.xml': {
@@ -940,6 +960,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactoRoute: ContactoRoute,
   FeedDotxmlRoute: FeedDotxmlRoute,
   LegalRoute: LegalRoute,
+  MarcasLogitechRoute: MarcasLogitechRoute,
   MiCuentaRoute: MiCuentaRoute,
   NosotrosRoute: NosotrosRoute,
   ProductoDeLaSemanaRoute: ProductoDeLaSemanaRoute,
