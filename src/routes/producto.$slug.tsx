@@ -8,6 +8,7 @@ import { ProductCarousel } from "@/components/products/ProductCarousel";
 import { PaymentMethodsBadges } from "@/components/products/PaymentMethodsBadges";
 import { ShoppingCart, ChevronRight, Star, ShieldCheck, Package, Clock, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { trackViewItem, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/producto/$slug")({
@@ -84,6 +85,13 @@ function ProductDetailPage() {
     if (!product?.id) return;
     supabase.from('product_reviews').select('*').eq('product_id', product.id).order('created_at', { ascending: true })
       .then(({ data }) => setReviews((data || []) as Review[]));
+    trackViewItem({
+      item_id: product.sku || product.id,
+      item_name: product.name,
+      price: Number(product.sale_price ?? product.price ?? 0),
+      item_brand: product.brands?.name,
+      item_category: product.categories?.name,
+    });
   }, [product?.id]);
 
   // (carruseles delegados a <ProductCarousel />)
@@ -143,6 +151,14 @@ function ProductDetailPage() {
       price: finalPrice,
       image: images[0],
       sku: product.sku ?? undefined,
+    });
+    trackAddToCart({
+      item_id: product.sku || product.id,
+      item_name: product.name,
+      price: finalPrice,
+      quantity: 1,
+      item_brand: product.brands?.name,
+      item_category: product.categories?.name,
     });
     toast.success(`${product.name} agregado al carrito`);
   };
@@ -293,6 +309,7 @@ function ProductDetailPage() {
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => trackWhatsAppClick("product_detail", { sku: product.sku, product_id: product.id })}
               className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-md font-medium text-white shadow transition-colors"
               style={{ backgroundColor: "#25D366" }}
             >
@@ -339,6 +356,7 @@ function ProductDetailPage() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Consultar por WhatsApp"
+            onClick={() => trackWhatsAppClick("product_sticky", { sku: product.sku, product_id: product.id })}
             className="h-11 w-11 flex-shrink-0 inline-flex items-center justify-center rounded-md text-white shadow"
             style={{ backgroundColor: "#25D366" }}
           >

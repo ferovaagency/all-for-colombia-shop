@@ -1,10 +1,10 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { ShoppingCart, Menu, Search, X, ChevronDown } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ShoppingCart, Menu, X, ChevronDown } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useCart } from "@/lib/cart";
-import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/layout/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { SearchAutocomplete } from "@/components/shop/SearchAutocomplete";
 import { cn } from "@/lib/utils";
 
 type Cat = { id: string; slug: string; name: string; parent_id: string | null; sort_order: number | null };
@@ -21,12 +21,9 @@ const NAV = [
 export function Header() {
   const { count } = useCart();
   const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
   const [cats, setCats] = useState<Cat[]>([]);
-  const [productCounts, setProductCounts] = useState<Record<string, number>>({});
   const [hovered, setHovered] = useState<string | null>(null);
   const [mobileShop, setMobileShop] = useState(false);
-  const navigate = useNavigate();
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -35,25 +32,12 @@ export function Header() {
         .from("categories_with_products" as any)
         .select("id, slug, name, parent_id, sort_order, product_count")
         .order("sort_order", { ascending: true });
-      const all = ((data as any) || []) as Cat[];
-      const counts: Record<string, number> = {};
-      ((data as any) || []).forEach((c: any) => {
-        if (typeof c.product_count === "number") counts[c.id] = c.product_count;
-      });
-      setCats(all);
-      setProductCounts(counts);
+      setCats(((data as any) || []) as Cat[]);
     })();
   }, []);
 
   const parents = cats.filter((c) => !c.parent_id);
   const childrenOf = (id: string) => cats.filter((c) => c.parent_id === id);
-
-  const onSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!q.trim()) return;
-    navigate({ to: "/tienda", search: { q: q.trim() } as any });
-    setOpen(false);
-  };
 
   const openMega = (label: string) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -127,17 +111,12 @@ export function Header() {
             ))}
           </nav>
 
-          <form onSubmit={onSearch} className="hidden md:flex items-center flex-1 max-w-xs ml-2">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Buscar productos..."
-                className="pl-9 bg-white text-foreground border-transparent focus-visible:ring-secondary"
-              />
-            </div>
-          </form>
+          <div className="hidden md:flex items-center flex-1 max-w-xs ml-2">
+            <SearchAutocomplete
+              inputClassName="bg-white text-foreground border-transparent focus-visible:ring-secondary"
+              placeholder="Buscar productos..."
+            />
+          </div>
 
           <div className="flex items-center gap-2">
             <Link to="/carrito" aria-label={`Carrito de compras${count > 0 ? `, ${count} artículos` : ''}`} className="relative inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-white/10 transition-smooth">
@@ -160,17 +139,13 @@ export function Header() {
 
         {open && (
           <div className="lg:hidden pb-4 animate-fade-in-up">
-            <form onSubmit={onSearch} className="mb-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Buscar..."
-                  className="pl-9 bg-white text-foreground"
-                />
-              </div>
-            </form>
+            <div className="mb-3">
+              <SearchAutocomplete
+                inputClassName="bg-white text-foreground"
+                placeholder="Buscar..."
+                onSubmitted={() => setOpen(false)}
+              />
+            </div>
             <nav className="flex flex-col gap-1">
               {NAV.map((n) => (
                 <div key={n.path}>

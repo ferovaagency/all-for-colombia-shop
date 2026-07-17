@@ -14,6 +14,7 @@ import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, Alert
 import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
 import { startAddiCheckout } from "@/lib/addi.functions";
 import { syncToBrevo } from "@/lib/brevo";
+import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -126,6 +127,27 @@ function CheckoutPage() {
     pollRef.current = null;
   };
   useEffect(() => () => stopTimers(), []);
+
+  // Redirect empty carts back to tienda (broken funnel entry).
+  useEffect(() => {
+    if (count === 0) navigate({ to: "/tienda" });
+  }, [count]);
+
+  // Fire begin_checkout once when the user reaches checkout with a non-empty cart.
+  const beginCheckoutFiredRef = useRef(false);
+  useEffect(() => {
+    if (beginCheckoutFiredRef.current || count === 0) return;
+    beginCheckoutFiredRef.current = true;
+    trackBeginCheckout({
+      value: subtotal,
+      items: items.map((it) => ({
+        item_id: it.sku || it.id,
+        item_name: it.name,
+        price: it.price,
+        quantity: it.quantity,
+      })),
+    });
+  }, [count, subtotal, items]);
 
   const qrMmss = useMemo(() => {
     const m = Math.floor(qrSeconds / 60);

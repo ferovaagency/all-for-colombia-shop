@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
 import { MiniCountdown } from "@/components/WeeklyDealCountdown";
+import { trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
 
 function getEndOfWeek() {
   const now = new Date();
@@ -110,7 +111,7 @@ export function ProductCard({ product }: { product: Product }) {
               <Button
                 size="sm"
                 className="w-full bg-primary"
-                onClick={() =>
+                onClick={() => {
                   add({
                     id: product.id,
                     slug: product.slug,
@@ -118,8 +119,14 @@ export function ProductCard({ product }: { product: Product }) {
                     price: finalPrice,
                     image: img,
                     sku: product.sku ?? undefined,
-                  })
-                }
+                  });
+                  trackAddToCart({
+                    item_id: product.sku || product.id,
+                    item_name: product.name,
+                    price: finalPrice,
+                    quantity: 1,
+                  });
+                }}
               >
                 <ShoppingCart className="h-4 w-4 mr-1" />
                 Agregar al carrito
@@ -137,6 +144,12 @@ export function ProductCard({ product }: { product: Product }) {
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() =>
+                    trackWhatsAppClick("product_card_quote", {
+                      sku: product.sku,
+                      product_id: product.id,
+                    })
+                  }
                 >
                   <MessageCircle className="h-4 w-4 mr-1" />
                   Cotizar por WhatsApp
