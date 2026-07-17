@@ -198,6 +198,7 @@ function CheckoutPage() {
           await supabase.from("orders").update({ status: "paid" }).eq("id", orderId);
           setTimeout(() => {
             setQrOpen(false);
+            firePurchase(orderId, "openpay_qr_breb");
             clear();
             navigate({ to: "/resultado-pago", search: { id: orderId, status: "ok" } as any });
           }, 1500);
