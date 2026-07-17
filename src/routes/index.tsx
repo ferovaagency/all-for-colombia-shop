@@ -68,7 +68,7 @@ function HomePage() {
     (async () => {
       const [cats, prods, brs, blog] = await Promise.all([
         supabase.from("categories").select("*").is("parent_id", null).order("sort_order"),
-        supabase.from("products").select("*").eq("active", true).order("updated_at", { ascending: false }).limit(8),
+        supabase.from("products").select("*").eq("active", true).order("updated_at", { ascending: false }).limit(12),
         supabase.from("brands").select("*").eq("show_in_home", true).order("display_order", { ascending: true }).limit(20),
         supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false }).limit(3),
       ]);
@@ -87,90 +87,61 @@ function HomePage() {
   const getCategoryImage = (cat: any) =>
     CATEGORY_IMAGES[cat.slug] || cat.image || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80";
 
-  // Bento arrangement for categories (first = hero, next 4 = grid)
-  const heroCat = categories[0];
-  const bentoCats = categories.slice(1, 5);
-
   return (
-    <div className="bg-[#0a0a1a] text-white" style={DM}>
+    <div className="bg-[#f7f7fb] text-[#0a0a1a]" style={DM}>
       <h1 className="sr-only">All For All — Tienda online de tecnología, hogar y soluciones empresariales en Colombia</h1>
 
-      {/* ============ CINEMATIC HERO ============ */}
-      <section className="relative min-h-[92vh] flex items-center overflow-hidden">
-        {/* Ambient glow */}
-        <div className="pointer-events-none absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full bg-[#4f46e5]/25 blur-[140px]" />
-        <div className="pointer-events-none absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full bg-[#1e1e5a]/50 blur-[120px]" />
+      {/* ============ FULL-WIDTH HERO BANNER ============ */}
+      <section className="relative w-full overflow-hidden bg-[#0a0a1a]">
+        <PromoBannerSlider
+          banners={PROMO_BANNERS}
+          index={bannerIndex}
+          onSelect={setBannerIndex}
+          eagerFirst
+          className="relative w-full aspect-[1920/585]"
+        />
+      </section>
 
-        <div className="container mx-auto px-6 lg:px-10 relative z-10 grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-10 items-center py-16">
+      {/* ============ SEARCH + INTRO ============ */}
+      <section className="relative border-b border-black/5 bg-white">
+        <div className="container mx-auto px-6 lg:px-10 py-8 md:py-10 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/5 border border-white/10 px-3 py-1.5 text-[10px] font-bold tracking-[0.25em] uppercase text-white/70 backdrop-blur mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#4f46e5]/10 border border-[#4f46e5]/20 px-3 py-1 text-[10px] font-bold tracking-[0.25em] uppercase text-[#4f46e5] mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-[#4f46e5] animate-pulse" />
               Todo lo que necesitas — para todos
             </div>
-            <h2
-              style={SPACE}
-              className="text-[clamp(3.5rem,9vw,7.5rem)] font-bold leading-[0.88] tracking-[-0.055em] mb-8"
-            >
-              El futuro,<br />
-              <span className="text-[#4f46e5]">a tu alcance.</span>
+            <h2 style={SPACE} className="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-[0.95] tracking-[-0.04em]">
+              El futuro, <span className="text-[#4f46e5]">a tu alcance.</span>
             </h2>
-            <p className="text-lg md:text-xl text-white/55 max-w-lg mb-10 leading-relaxed">
+            <p className="text-base text-black/60 max-w-xl mt-3">
               Tecnología premium, hogar inteligente y equipamiento corporativo. Financiación hasta 24 meses y envíos a todo Colombia.
             </p>
-
-            <form onSubmit={onSearch} className="max-w-xl mb-8">
-              <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl p-1.5 backdrop-blur focus-within:border-[#4f46e5] focus-within:ring-4 focus-within:ring-[#4f46e5]/20 transition-all">
-                <Search className="absolute left-5 h-5 w-5 text-white/40" />
-                <Input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="¿Qué estás buscando?"
-                  className="h-12 pl-12 pr-4 bg-transparent border-0 text-white placeholder:text-white/40 text-base focus-visible:ring-0"
-                />
-                <Button type="submit" className="h-12 px-6 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] font-bold text-sm shadow-lg shadow-[#4f46e5]/30">
-                  Buscar
-                </Button>
-              </div>
-            </form>
-
-            <div className="flex flex-wrap items-center gap-4">
-              <Button asChild size="lg" className="bg-white text-[#0a0a1a] hover:bg-white/90 rounded-full px-8 h-12 font-bold">
-                <Link to="/tienda">Explorar tienda <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-              <Button asChild size="lg" variant="ghost" className="text-white hover:bg-white/10 rounded-full px-8 h-12 font-bold">
-                <Link to="/producto-de-la-semana">Producto de la semana</Link>
-              </Button>
-            </div>
           </motion.div>
 
-          {/* Hero visual: banner slider in premium frame */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-            className="relative"
-          >
-            <div className="absolute -inset-8 bg-[#4f46e5]/20 blur-3xl rounded-[3rem]" />
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl shadow-black/50 bg-[#141432]">
-              <PromoBannerSlider
-                banners={PROMO_BANNERS}
-                index={bannerIndex}
-                onSelect={setBannerIndex}
-                eagerFirst
-                className="relative w-full aspect-[16/10]"
+          <form onSubmit={onSearch} className="w-full">
+            <div className="relative flex items-center bg-white border border-black/10 rounded-2xl p-1.5 shadow-sm focus-within:border-[#4f46e5] focus-within:ring-4 focus-within:ring-[#4f46e5]/15 transition-all">
+              <Search className="absolute left-5 h-5 w-5 text-black/40" />
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="¿Qué estás buscando?"
+                className="h-12 pl-12 pr-4 bg-transparent border-0 text-[#0a0a1a] placeholder:text-black/40 text-base focus-visible:ring-0"
               />
+              <Button type="submit" className="h-12 px-6 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-sm shadow-lg shadow-[#4f46e5]/25">
+                Buscar
+              </Button>
             </div>
-          </motion.div>
+          </form>
         </div>
       </section>
 
       {/* ============ TRUST STRIP ============ */}
-      <section className="border-y border-white/5 bg-[#0f0f24]">
-        <div className="container mx-auto px-6 lg:px-10 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="border-b border-black/5 bg-white">
+        <div className="container mx-auto px-6 lg:px-10 py-6 grid grid-cols-2 md:grid-cols-4 gap-6">
           <TrustItem n="01" label="Envío express" desc="A todo Colombia" icon={<Truck className="h-4 w-4" />} />
           <TrustItem n="02" label="Garantía total" desc="Cobertura oficial" icon={<ShieldCheck className="h-4 w-4" />} />
           <TrustItem n="03" label="Facturación B2B" desc="Precios corporativos" icon={<Building2 className="h-4 w-4" />} />
@@ -179,38 +150,38 @@ function HomePage() {
       </section>
 
       {/* ============ PRODUCTO DE LA SEMANA ============ */}
-      <div className="[&_a]:!bg-none [&_a]:!bg-gradient-to-br [&_a]:!from-[#141432] [&_a]:!via-[#1e1e5a] [&_a]:!to-[#0a0a1a] [&_a]:!border [&_a]:!border-white/10">
+      <div className="py-6">
         <WeeklyDealTeaser />
       </div>
 
-      {/* ============ CATEGORÍAS — BENTO ASIMÉTRICO ============ */}
+      {/* ============ CATEGORÍAS — GRID COMPLETO ============ */}
       {categories.length > 0 && (
         <Reveal>
-          <section className="container mx-auto px-6 lg:px-10 py-24 lg:py-32">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
+          <section className="container mx-auto px-6 lg:px-10 py-10 md:py-14">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
               <div>
                 <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#4f46e5]">Colecciones</span>
-                <h2 style={SPACE} className="text-5xl md:text-7xl font-bold tracking-[-0.04em] mt-3">
-                  Explora por<br />categoría.
+                <h2 style={SPACE} className="text-3xl md:text-5xl font-bold tracking-[-0.03em] mt-2 text-[#0a0a1a]">
+                  Explora por categoría
                 </h2>
               </div>
-              <Link to="/tienda" className="group inline-flex items-center gap-2 text-sm font-bold text-white/70 hover:text-white transition-colors">
+              <Link to="/tienda" className="group inline-flex items-center gap-2 text-sm font-bold text-[#4f46e5] hover:text-[#4338ca] transition-colors">
                 Ver toda la tienda
                 <ArrowUpRight className="h-4 w-4 group-hover:rotate-45 transition-transform" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4 md:gap-5 min-h-[560px] md:h-[680px]">
-              {heroCat && (
-                <BentoCategory cat={heroCat} img={getCategoryImage(heroCat)} className="md:col-span-2 md:row-span-2" hero />
-              )}
-              {bentoCats.map((c, i) => (
-                <BentoCategory
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+              {categories.map((c, i) => (
+                <motion.div
                   key={c.id}
-                  cat={c}
-                  img={getCategoryImage(c)}
-                  className={i === 0 ? "md:col-span-2" : ""}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.45, delay: (i % 4) * 0.06, ease: "easeOut" }}
+                >
+                  <CategoryCard cat={c} img={getCategoryImage(c)} />
+                </motion.div>
               ))}
             </div>
           </section>
@@ -220,23 +191,31 @@ function HomePage() {
       {/* ============ FEATURED PRODUCTS ============ */}
       {products.length > 0 && (
         <Reveal>
-          <section className="border-t border-white/5 bg-[#0f0f24]">
-            <div className="container mx-auto px-6 lg:px-10 py-24">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+          <section className="border-y border-black/5 bg-white">
+            <div className="container mx-auto px-6 lg:px-10 py-10 md:py-14">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
                 <div>
                   <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#4f46e5]">Novedades</span>
-                  <h2 style={SPACE} className="text-4xl md:text-6xl font-bold tracking-[-0.04em] mt-3">
-                    Productos destacados.
+                  <h2 style={SPACE} className="text-3xl md:text-5xl font-bold tracking-[-0.03em] mt-2 text-[#0a0a1a]">
+                    Productos destacados
                   </h2>
                 </div>
-                <Link to="/tienda" className="group inline-flex items-center gap-2 text-sm font-bold text-white/70 hover:text-white transition-colors">
+                <Link to="/tienda" className="group inline-flex items-center gap-2 text-sm font-bold text-[#4f46e5] hover:text-[#4338ca] transition-colors">
                   Ver todos
                   <ArrowUpRight className="h-4 w-4 group-hover:rotate-45 transition-transform" />
                 </Link>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-5 [&_article]:!bg-[#141432] [&_article]:!border-white/10 [&_article]:!text-white [&_h3]:!text-white [&_p]:!text-white/60">
-                {products.map((p) => (
-                  <ProductCard key={p.id} product={p} />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                {products.map((p, i) => (
+                  <motion.div
+                    key={p.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.35, delay: (i % 6) * 0.05 }}
+                  >
+                    <ProductCard product={p} />
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -244,30 +223,27 @@ function HomePage() {
         </Reveal>
       )}
 
-      {/* ============ PROMO SLIDER ============ */}
+      {/* ============ PROMO SLIDER (full width, natural aspect) ============ */}
       <Reveal>
-        <section className="container mx-auto px-6 lg:px-10 py-20">
-          <div className="relative">
-            <div className="absolute -inset-6 bg-[#4f46e5]/10 blur-3xl rounded-[3rem]" />
-            <PromoBannerSlider
-              banners={PROMO_BANNERS}
-              index={bannerIndex}
-              onSelect={setBannerIndex}
-              className="relative overflow-hidden rounded-3xl w-full aspect-[1920/585] border border-white/10 shadow-2xl shadow-black/40"
-            />
-          </div>
+        <section className="w-full bg-[#0a0a1a]">
+          <PromoBannerSlider
+            banners={PROMO_BANNERS}
+            index={bannerIndex}
+            onSelect={setBannerIndex}
+            className="relative w-full aspect-[1920/585]"
+          />
         </section>
       </Reveal>
 
       {/* ============ BRANDS ============ */}
       {brands.length > 0 && (
         <Reveal>
-          <section className="border-y border-white/5 bg-[#0f0f24]">
-            <div className="container mx-auto px-6 lg:px-10 py-16">
-              <div className="text-center mb-10">
+          <section className="bg-white border-b border-black/5">
+            <div className="container mx-auto px-6 lg:px-10 py-10">
+              <div className="text-center mb-6">
                 <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#4f46e5]">Aliados</span>
-                <h2 style={SPACE} className="text-3xl md:text-5xl font-bold tracking-[-0.04em] mt-3">
-                  Marcas que confían en nosotros.
+                <h2 style={SPACE} className="text-2xl md:text-4xl font-bold tracking-[-0.03em] mt-2 text-[#0a0a1a]">
+                  Marcas que confían en nosotros
                 </h2>
               </div>
               <div className="flex flex-wrap justify-center items-center gap-3 md:gap-4">
@@ -277,17 +253,17 @@ function HomePage() {
                     to={b.slug === "logitech" ? "/marcas/logitech" : "/tienda"}
                     search={b.slug === "logitech" ? undefined : ({ marca: b.slug } as any)}
                     aria-label={`Ver productos de ${b.name}`}
-                    className="group bg-white/[0.03] rounded-xl border border-white/10 h-16 w-28 md:h-20 md:w-32 flex items-center justify-center p-2 hover:border-[#4f46e5]/50 hover:bg-white/[0.06] hover:-translate-y-0.5 transition-all backdrop-blur"
+                    className="group bg-white rounded-xl border border-black/10 h-16 w-28 md:h-20 md:w-32 flex items-center justify-center p-2 hover:border-[#4f46e5]/50 hover:-translate-y-0.5 hover:shadow-md transition-all"
                   >
                     {b.logo_url || b.logo ? (
                       <img
                         src={b.logo_url || b.logo}
                         alt={b.name}
                         loading="lazy"
-                        className="h-10 md:h-12 w-auto object-contain opacity-60 group-hover:opacity-100 transition-opacity brightness-0 invert"
+                        className="h-10 md:h-12 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity"
                       />
                     ) : (
-                      <span className="text-xs font-semibold text-white/80">{b.name}</span>
+                      <span className="text-xs font-semibold text-[#0a0a1a]">{b.name}</span>
                     )}
                   </Link>
                 ))}
@@ -300,14 +276,14 @@ function HomePage() {
       {/* ============ BLOG ============ */}
       {posts.length > 0 && (
         <Reveal>
-          <section className="py-24">
+          <section className="py-10 md:py-14">
             <div className="container mx-auto px-6 lg:px-10">
-              <div className="flex items-end justify-between mb-12">
+              <div className="flex items-end justify-between mb-6">
                 <div>
                   <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#4f46e5]">Lectura</span>
-                  <h2 style={SPACE} className="text-4xl md:text-5xl font-bold tracking-[-0.04em] mt-3">Consejos y guías tech.</h2>
+                  <h2 style={SPACE} className="text-3xl md:text-4xl font-bold tracking-[-0.03em] mt-2 text-[#0a0a1a]">Consejos y guías tech</h2>
                 </div>
-                <Link to="/blog" className="group inline-flex items-center gap-2 text-sm font-bold text-white/70 hover:text-white transition-colors">
+                <Link to="/blog" className="group inline-flex items-center gap-2 text-sm font-bold text-[#4f46e5] hover:text-[#4338ca] transition-colors">
                   Ver blog <ArrowUpRight className="h-4 w-4 group-hover:rotate-45 transition-transform" />
                 </Link>
               </div>
@@ -317,7 +293,7 @@ function HomePage() {
                     key={post.id}
                     to="/blog/$slug"
                     params={{ slug: post.slug }}
-                    className="group bg-[#141432] rounded-2xl overflow-hidden border border-white/10 hover:border-[#4f46e5]/50 hover:-translate-y-1 transition-all"
+                    className="group bg-white rounded-2xl overflow-hidden border border-black/10 hover:border-[#4f46e5]/50 hover:-translate-y-1 hover:shadow-lg transition-all"
                   >
                     {post.cover_image && (
                       <div className="overflow-hidden aspect-[16/10]">
@@ -326,7 +302,7 @@ function HomePage() {
                           alt={post.title}
                           loading="lazy"
                           decoding="async"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
                     )}
@@ -336,10 +312,10 @@ function HomePage() {
                           {post.category}
                         </span>
                       )}
-                      <h3 className="font-bold text-white mt-3 line-clamp-2 text-lg group-hover:text-[#4f46e5] transition-colors" style={SPACE}>
+                      <h3 className="font-bold text-[#0a0a1a] mt-3 line-clamp-2 text-lg group-hover:text-[#4f46e5] transition-colors" style={SPACE}>
                         {post.title}
                       </h3>
-                      <p className="text-sm text-white/50 mt-2 line-clamp-2">{post.excerpt}</p>
+                      <p className="text-sm text-black/60 mt-2 line-clamp-2">{post.excerpt}</p>
                     </div>
                   </Link>
                 ))}
@@ -350,20 +326,20 @@ function HomePage() {
       )}
 
       {/* ============ CORPORATE CTA ============ */}
-      <section className="pb-24">
+      <section className="pb-12 pt-4">
         <div className="container mx-auto px-6 lg:px-10">
-          <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-gradient-to-br from-[#1e1e5a] via-[#141432] to-[#0a0a1a] p-10 md:p-16">
+          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#1e1e5a] via-[#141432] to-[#0a0a1a] p-8 md:p-12 text-white">
             <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#4f46e5]/30 blur-[100px]" />
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-8 items-center">
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-6 items-center">
               <div>
-                <span className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.3em] uppercase text-[#4f46e5]">
+                <span className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.3em] uppercase text-[#a5b4fc]">
                   <Zap className="h-3 w-3" /> B2B
                 </span>
-                <h2 style={SPACE} className="text-4xl md:text-6xl font-bold tracking-[-0.04em] mt-4 leading-[0.95]">
-                  Escala tu<br />empresa con nosotros.
+                <h2 style={SPACE} className="text-3xl md:text-5xl font-bold tracking-[-0.03em] mt-3 leading-[0.95]">
+                  Escala tu empresa con nosotros.
                 </h2>
-                <p className="text-white/60 mt-5 max-w-lg">
-                  Precios especiales, facturación electrónica y soporte dedicado para compras corporativas. Financiación y catálogo a medida.
+                <p className="text-white/70 mt-4 max-w-lg">
+                  Precios especiales, facturación electrónica y soporte dedicado para compras corporativas.
                 </p>
               </div>
               <div className="flex flex-col gap-3 md:items-end">
@@ -384,35 +360,25 @@ function HomePage() {
 
 function TrustItem({ n, label, desc, icon }: { n: string; label: string; desc: string; icon: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="w-10 h-10 shrink-0 rounded-xl bg-[#4f46e5]/15 border border-[#4f46e5]/30 flex items-center justify-center text-[#4f46e5]">
+    <div className="flex items-start gap-3">
+      <div className="w-10 h-10 shrink-0 rounded-xl bg-[#4f46e5]/10 border border-[#4f46e5]/20 flex items-center justify-center text-[#4f46e5]">
         {icon}
       </div>
       <div className="min-w-0">
         <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#4f46e5]">{n}</div>
-        <div className="font-bold text-sm mt-0.5" style={SPACE}>{label}</div>
-        <div className="text-xs text-white/50">{desc}</div>
+        <div className="font-bold text-sm mt-0.5 text-[#0a0a1a]" style={SPACE}>{label}</div>
+        <div className="text-xs text-black/55">{desc}</div>
       </div>
     </div>
   );
 }
 
-function BentoCategory({
-  cat,
-  img,
-  className = "",
-  hero = false,
-}: {
-  cat: any;
-  img: string;
-  className?: string;
-  hero?: boolean;
-}) {
+function CategoryCard({ cat, img }: { cat: any; img: string }) {
   return (
     <Link
       to="/tienda"
       search={{ categoria: cat.slug } as any}
-      className={`group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#141432] transition-all duration-500 hover:border-[#4f46e5]/50 hover:-translate-y-1 ${className}`}
+      className="group relative block overflow-hidden rounded-2xl border border-black/10 bg-white aspect-[4/5] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#4f46e5]/40"
     >
       <div className="absolute inset-0">
         <img
@@ -420,22 +386,24 @@ function BentoCategory({
           alt={cat.name}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          onError={(e) => {
+            const t = e.target as HTMLImageElement;
+            if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
       </div>
-      <div className={`relative z-10 h-full flex flex-col justify-end p-6 md:p-8 min-h-[220px] ${hero ? "md:p-10" : ""}`}>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#4f46e5]">Colección</span>
-        </div>
+      <div className="relative z-10 h-full flex flex-col justify-end p-4 md:p-5">
+        <span className="text-[9px] font-bold tracking-[0.25em] uppercase text-white/80 drop-shadow">Colección</span>
         <h3
           style={SPACE}
-          className={`font-bold tracking-[-0.03em] leading-[0.95] drop-shadow-lg ${hero ? "text-4xl md:text-6xl" : "text-2xl md:text-3xl"}`}
+          className="font-bold tracking-[-0.02em] leading-tight text-white text-lg md:text-xl drop-shadow-lg mt-1"
         >
           {cat.name}
         </h3>
-        <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-white/80 group-hover:text-white transition-colors">
-          Ver colección
+        <div className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-white/90 group-hover:text-white transition-colors">
+          Ver
           <ArrowUpRight className="h-3.5 w-3.5 group-hover:rotate-45 transition-transform" />
         </div>
       </div>
