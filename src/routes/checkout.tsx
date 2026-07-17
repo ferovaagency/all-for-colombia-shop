@@ -335,6 +335,7 @@ function CheckoutPage() {
           );
           return;
         }
+        firePurchase(orderId, "openpay_pse");
         clear();
         window.location.href = json.redirectUrl;
         return;
@@ -372,6 +373,7 @@ function CheckoutPage() {
           toast.error(result?.error || "Addi no devolvió URL de pago");
           return;
         }
+        firePurchase(orderId, "addi");
         clear();
         window.location.href = result.redirectUrl;
         return;
@@ -387,6 +389,7 @@ function CheckoutPage() {
     const summary = items.map(i => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`).join("\n");
     const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
     window.open(whatsappUrl(msg), "_blank");
+    firePurchase(orderId, payment);
     clear();
     navigate({ to: "/resultado-pago", search: { id: orderId, status: "ok" } as any });
   };
