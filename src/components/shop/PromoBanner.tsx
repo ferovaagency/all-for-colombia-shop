@@ -38,7 +38,7 @@ export function PromoBannerSlide({
     <Link
       to={banner.link}
       className={cn(
-        "absolute inset-0 block transition-opacity duration-500",
+        "absolute inset-0 block overflow-hidden transition-opacity duration-500",
         active ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none",
       )}
     >
@@ -57,12 +57,16 @@ export function PromoBannerSlide({
         <img
           src={banner.image}
           alt={banner.alt}
-          className="absolute inset-0 h-full w-full object-cover object-center"
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover object-center",
+            !reducedMotion && "animate-kenburns",
+          )}
           loading={eager ? "eager" : "lazy"}
           fetchPriority={eager ? "high" : "auto"}
           decoding="async"
         />
       )}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
     </Link>
   );
 }

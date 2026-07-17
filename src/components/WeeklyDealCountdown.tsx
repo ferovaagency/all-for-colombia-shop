@@ -20,6 +20,13 @@ export function useCountdown(target: string | Date | null) {
   return { ms, totalSec, days, hours, minutes, seconds, done: ms <= 0 };
 }
 
+export function MiniCountdown({ target }: { target: string | Date }) {
+  const { days, hours, minutes, seconds, done } = useCountdown(target);
+  if (done) return null;
+  const label = days > 0 ? `${days}d ${pad(hours)}h` : `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return <span className="text-[10px] font-bold tabular-nums text-destructive">{label}</span>;
+}
+
 type Props = {
   target: string | Date;
   urgent?: boolean;

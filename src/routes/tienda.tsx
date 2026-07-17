@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { Input } from "@/components/ui/input";
@@ -268,27 +268,20 @@ function ShopPage() {
   );
 }
 
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active?: boolean;
-  onClick?: () => void;
-  children: React.ReactNode;
-}) {
-  return (
+const Chip = forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }>(
+  ({ active, className, ...props }, ref) => (
     <button
+      ref={ref}
       type="button"
-      onClick={onClick}
       className={cn(
         "shrink-0 inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border transition-colors whitespace-nowrap",
         active
           ? "bg-primary text-primary-foreground border-primary"
           : "bg-background text-foreground border-border hover:bg-muted",
+        className,
       )}
-    >
-      {children}
-    </button>
-  );
-}
+      {...props}
+    />
+  ),
+);
+Chip.displayName = "Chip";

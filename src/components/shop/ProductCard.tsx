@@ -1,7 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingCart, MessageCircle } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
+import { MiniCountdown } from "@/components/WeeklyDealCountdown";
+
+function getEndOfWeek() {
+  const now = new Date();
+  const daysUntilSunday = (7 - now.getDay()) % 7;
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilSunday, 23, 59, 59, 999);
+}
 
 type Product = {
   id: string;
@@ -16,6 +24,7 @@ type Product = {
 
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
+  const [endOfWeek] = useState(getEndOfWeek);
   const finalPrice = product.sale_price ?? product.price ?? 0;
   const hasDiscount =
     !!product.sale_price && !!product.price && product.sale_price < product.price;
@@ -74,16 +83,24 @@ export function ProductCard({ product }: { product: Product }) {
           {hasStock ? (
             <div className="space-y-2">
               {hasDiscount ? (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-lg font-bold text-primary">
-                    {formatCOP(product.sale_price as number)}
-                  </span>
-                  <span className="text-sm text-muted-foreground line-through">
-                    {formatCOP(product.price as number)}
-                  </span>
-                  <span className="text-xs bg-destructive/10 text-destructive px-1.5 py-0.5 rounded font-semibold">
-                    -{discountPct}%
-                  </span>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-lg font-bold text-primary">
+                      {formatCOP(product.sale_price as number)}
+                    </span>
+                    <span className="text-sm text-muted-foreground line-through">
+                      {formatCOP(product.price as number)}
+                    </span>
+                    <span className="text-xs bg-destructive/10 text-destructive px-1.5 py-0.5 rounded font-semibold">
+                      -{discountPct}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-semibold text-destructive uppercase tracking-wide">
+                      Termina en
+                    </span>
+                    <MiniCountdown target={endOfWeek} />
+                  </div>
                 </div>
               ) : (
                 product.price != null && (

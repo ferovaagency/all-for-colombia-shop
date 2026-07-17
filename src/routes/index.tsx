@@ -52,6 +52,7 @@ function HomePage() {
   const [q, setQ] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [bentoProducts, setBentoProducts] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
 
@@ -63,14 +64,16 @@ function HomePage() {
 
   useEffect(() => {
     (async () => {
-      const [cats, prods, brs, blog] = await Promise.all([
+      const [cats, prods, bentoProds, brs, blog] = await Promise.all([
         supabase.from("categories").select("*").is("parent_id", null).order("sort_order"),
         supabase.from("products").select("*").eq("active", true).order("updated_at", { ascending: false }).limit(8),
+        supabase.from("products").select("id, slug, name, price, sale_price, images, category_id").eq("active", true).order("updated_at", { ascending: false }).limit(60),
         supabase.from("brands").select("*").eq("show_in_home", true).order("display_order", { ascending: true }).limit(20),
         supabase.from("blog_posts").select("*").eq("published", true).order("created_at", { ascending: false }).limit(3),
       ]);
       setCategories(cats.data || []);
       setProducts(prods.data || []);
+      setBentoProducts(bentoProds.data || []);
       setBrands(brs.data || []);
       setPosts(blog.data || []);
     })();
@@ -129,7 +132,7 @@ function HomePage() {
       <WeeklyDealTeaser />
 
       {/* Categorías — tabs + bento grid */}
-      <CategoryBento categories={categories} getImage={getCategoryImage} />
+      <CategoryBento categories={categories} products={bentoProducts} getImage={getCategoryImage} />
 
       {/* Featured products */}
       {products.length > 0 && (
