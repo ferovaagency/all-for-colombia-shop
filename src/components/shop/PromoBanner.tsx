@@ -58,7 +58,7 @@ export function PromoBannerSlide({
           src={banner.image}
           alt={banner.alt}
           className={cn(
-            "absolute inset-0 h-full w-full object-cover object-center",
+            "absolute inset-0 h-full w-full object-contain object-center",
             !reducedMotion && "animate-kenburns",
           )}
           loading={eager ? "eager" : "lazy"}
