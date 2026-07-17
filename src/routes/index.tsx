@@ -48,6 +48,7 @@ const PROMO_BANNERS: PromoBannerItem[] = [
   { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 2, image: bannerA50, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 3, image: bannerMsi, link: "/tienda?marca=msi", alt: "MSI — Juega sin límites" },
+  { id: 4, image: bannerMsi, video: videoJbl.url, link: "/tienda?marca=jbl", alt: "JBL — Sonido premium" },
 ];
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
