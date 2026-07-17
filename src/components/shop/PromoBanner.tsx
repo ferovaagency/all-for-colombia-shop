@@ -84,8 +84,17 @@ export function PromoBannerSlider({
   eagerFirst?: boolean;
   className?: string;
 }) {
+  const active = banners[index] ?? banners[0];
   return (
-    <div className={className}>
+    <div className={cn("relative w-full", className)}>
+      {/* Sizer: sets the container height to the active banner's natural aspect ratio */}
+      <img
+        key={active?.id}
+        src={active?.image}
+        alt=""
+        aria-hidden="true"
+        className="block w-full h-auto invisible select-none pointer-events-none"
+      />
       {banners.map((banner, i) => (
         <PromoBannerSlide key={banner.id} banner={banner} active={i === index} eager={eagerFirst && i === 0} />
       ))}
