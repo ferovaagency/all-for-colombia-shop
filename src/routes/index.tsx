@@ -14,6 +14,7 @@ import bannerA50 from "@/assets/banner-logitech-gol.jpg";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
 import monitorGamer from "@/assets/monitor-gamer.png";
 import { getHomeData } from "@/lib/ssr-data.functions";
+import videoJbl from "@/assets/video-productos-jbl.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
@@ -47,6 +48,7 @@ const PROMO_BANNERS: PromoBannerItem[] = [
   { id: 1, image: bannerPadre, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 2, image: bannerA50, link: "/tienda", alt: "Si es Logitech, es gol — Mundial Colombia" },
   { id: 3, image: bannerMsi, link: "/tienda?marca=msi", alt: "MSI — Juega sin límites" },
+  { id: 4, image: bannerMsi, video: videoJbl.url, link: "/tienda?marca=jbl", alt: "JBL — Sonido premium" },
 ];
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
@@ -101,7 +103,7 @@ function HomePage() {
           index={bannerIndex}
           onSelect={setBannerIndex}
           eagerFirst
-          className="relative w-full aspect-[1920/585]"
+          className="relative w-full aspect-video"
         />
       </section>
 
@@ -235,7 +237,7 @@ function HomePage() {
             banners={PROMO_BANNERS}
             index={bannerIndex}
             onSelect={setBannerIndex}
-            className="relative w-full aspect-[1920/585]"
+            className="relative w-full aspect-video"
           />
         </section>
       </Reveal>
