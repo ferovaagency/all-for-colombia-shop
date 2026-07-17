@@ -14,6 +14,7 @@ import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, Alert
 import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
 import { startAddiCheckout } from "@/lib/addi.functions";
 import { syncToBrevo } from "@/lib/brevo";
+import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -127,6 +128,36 @@ function CheckoutPage() {
   };
   useEffect(() => () => stopTimers(), []);
 
+  // Redirect empty carts back to tienda (broken funnel entry).
+  useEffect(() => {
+    if (count === 0) navigate({ to: "/tienda" });
+  }, [count]);
+
+  // Fire begin_checkout once when the user reaches checkout with a non-empty cart.
+  const beginCheckoutFiredRef = useRef(false);
+  const purchaseItemsRef = useRef<Array<{ item_id: string; item_name: string; price: number; quantity: number }>>([]);
+  useEffect(() => {
+    if (beginCheckoutFiredRef.current || count === 0) return;
+    beginCheckoutFiredRef.current = true;
+    const snapshot = items.map((it) => ({
+      item_id: it.sku || it.id,
+      item_name: it.name,
+      price: it.price,
+      quantity: it.quantity,
+    }));
+    purchaseItemsRef.current = snapshot;
+    trackBeginCheckout(snapshot, subtotal);
+  }, [count, subtotal, items]);
+
+  const firePurchase = (orderId: string, method: string, valueOverride?: number) => {
+    trackPurchase({
+      transaction_id: orderId,
+      value: valueOverride ?? subtotal,
+      items: purchaseItemsRef.current,
+      payment_method: method,
+    });
+  };
+
   const qrMmss = useMemo(() => {
     const m = Math.floor(qrSeconds / 60);
     const s = qrSeconds % 60;
@@ -167,6 +198,7 @@ function CheckoutPage() {
           await supabase.from("orders").update({ status: "paid" }).eq("id", orderId);
           setTimeout(() => {
             setQrOpen(false);
+            firePurchase(orderId, "openpay_qr_breb");
             clear();
             navigate({ to: "/resultado-pago", search: { id: orderId, status: "ok" } as any });
           }, 1500);
@@ -303,6 +335,7 @@ function CheckoutPage() {
           );
           return;
         }
+        firePurchase(orderId, "openpay_pse");
         clear();
         window.location.href = json.redirectUrl;
         return;
@@ -340,6 +373,7 @@ function CheckoutPage() {
           toast.error(result?.error || "Addi no devolvió URL de pago");
           return;
         }
+        firePurchase(orderId, "addi");
         clear();
         window.location.href = result.redirectUrl;
         return;
@@ -355,6 +389,7 @@ function CheckoutPage() {
     const summary = items.map(i => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`).join("\n");
     const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
     window.open(whatsappUrl(msg), "_blank");
+    firePurchase(orderId, payment);
     clear();
     navigate({ to: "/resultado-pago", search: { id: orderId, status: "ok" } as any });
   };
@@ -478,6 +513,7 @@ function CheckoutPage() {
                   email: form.email,
                 }}
                 onSuccess={({ charge_id }) => {
+                  if (cardOrderId) firePurchase(cardOrderId, "openpay_card");
                   clear();
                   navigate({ to: "/resultado-pago", search: { id: cardOrderId, status: "ok", ref: charge_id } as any });
                 }}

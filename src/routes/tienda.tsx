@@ -9,6 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search, ChevronDown, ChevronLeft, ChevronRight, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fuzzyIncludes } from "@/lib/fuzzy";
+import { trackSearch, trackZeroResults } from "@/lib/analytics";
+import { useDebounce } from "@/hooks/use-debounce";
+import { ZeroResults } from "@/components/shop/ZeroResults";
 import { cn } from "@/lib/utils";
 
 type SearchParams = {
@@ -81,6 +85,18 @@ function ShopPage() {
   }, []);
 
 
+  const debouncedQ = useDebounce(search.q ?? "", 400);
+  const filteredCountRef = useRef(0);
+  useEffect(() => {
+    if (!debouncedQ || debouncedQ.length < 3) return;
+    const t = setTimeout(() => {
+      const total = filteredCountRef.current;
+      trackSearch(debouncedQ, total);
+      if (total === 0) trackZeroResults(debouncedQ);
+    }, 0);
+    return () => clearTimeout(t);
+  }, [debouncedQ]);
+
   const updateSearch = (patch: Partial<SearchParams>) => {
     navigate({ to: "/tienda", search: (prev: any) => ({ ...prev, ...patch }) });
   };
@@ -88,11 +104,12 @@ function ShopPage() {
   const filtered = useMemo(() => {
     let list = [...products];
     if (search.q) {
-      const q = search.q.toLowerCase();
+      const q = search.q;
       list = list.filter((p) =>
-        p.name?.toLowerCase().includes(q) ||
-        p.description?.toLowerCase().includes(q) ||
-        p.sku?.toLowerCase().includes(q)
+        fuzzyIncludes(
+          `${p.name ?? ""} ${p.description ?? ""} ${p.sku ?? ""} ${p.brands?.name ?? ""}`,
+          q,
+        ),
       );
     }
     if (search.categoria) {
@@ -126,6 +143,8 @@ function ShopPage() {
     }
     return list;
   }, [products, categories, search, priceRange]);
+
+  filteredCountRef.current = filtered.length;
 
   const activeFilterCount = (search.marca ? 1 : 0) + (search.oferta === "1" ? 1 : 0) +
     (priceRange[0] > 0 || priceRange[1] < maxPrice ? 1 : 0);
@@ -274,9 +293,8 @@ function ShopPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-muted/40 border rounded-xl p-12 text-center text-muted-foreground">
-          No encontramos productos con esos filtros.
-        </div>
+        <ZeroResults term={search.q} />
+      
       ) : (
         <>
           <p className="text-sm text-muted-foreground mb-4">
