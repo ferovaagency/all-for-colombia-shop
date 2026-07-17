@@ -300,6 +300,13 @@ function ProductDetailPage() {
             </a>
           </div>
 
+          {/* Trust micro-signals to reduce bounce */}
+          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-muted-foreground mb-4">
+            <li className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-green-600" /> Compra 100% segura</li>
+            <li className="flex items-center gap-1.5"><Package className="h-3.5 w-3.5 text-blue-600" /> Envíos a toda Colombia</li>
+            <li className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-orange-600" /> Despacho en 24–48h</li>
+          </ul>
+
           <PaymentMethodsBadges />
 
           {specsEntries.length > 0 && (
