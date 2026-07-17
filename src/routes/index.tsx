@@ -14,6 +14,7 @@ import bannerA50 from "@/assets/banner-logitech-gol.jpg";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
 import monitorGamer from "@/assets/monitor-gamer.png";
 import { getHomeData } from "@/lib/ssr-data.functions";
+import videoJbl from "@/assets/video-productos-jbl.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
