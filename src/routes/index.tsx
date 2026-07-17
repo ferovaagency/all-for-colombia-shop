@@ -13,8 +13,10 @@ import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerA50 from "@/assets/banner-logitech-gol.jpg";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
 import monitorGamer from "@/assets/monitor-gamer.png";
+import { getHomeData } from "@/lib/ssr-data.functions";
 
 export const Route = createFileRoute("/")({
+  loader: () => getHomeData(),
   head: () => ({
     meta: [
       { title: "All For All — Tecnología premium, hogar y soluciones empresariales en Colombia" },
@@ -51,12 +53,13 @@ const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
 const DM = { fontFamily: "'DM Sans', 'Inter', sans-serif" };
 
 function HomePage() {
+  const initial = Route.useLoaderData();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
-  const [categories, setCategories] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
-  const [brands, setBrands] = useState<any[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>(initial.categories ?? []);
+  const [products, setProducts] = useState<any[]>(initial.products ?? []);
+  const [brands, setBrands] = useState<any[]>(initial.brands ?? []);
+  const [posts, setPosts] = useState<any[]>(initial.posts ?? []);
 
   const [bannerIndex, setBannerIndex] = useState(0);
   useEffect(() => {

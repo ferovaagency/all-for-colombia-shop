@@ -10,8 +10,29 @@ import { ShoppingCart, ChevronRight, Star, ShieldCheck, Package, Clock, MessageC
 import { toast } from "sonner";
 import { trackViewItem, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { getProductBySlug } from "@/lib/ssr-data.functions";
 
 export const Route = createFileRoute("/producto/$slug")({
+  loader: ({ params }) => getProductBySlug({ data: { slug: params.slug } }),
+  head: ({ loaderData }) => {
+    const p: any = (loaderData as any)?.product;
+    if (!p) return { meta: [{ title: "Producto — All For All" }] };
+    const title = p.meta_title || `${p.name} — All For All`;
+    const description = p.meta_description || p.short_description || `Compra ${p.name} en All For All. Envíos a toda Colombia.`;
+    const image = Array.isArray(p.images) && p.images[0] ? p.images[0] : undefined;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "product" },
+    ];
+    if (image) {
+      meta.push({ property: "og:image", content: image });
+      meta.push({ name: "twitter:image", content: image });
+    }
+    return { meta };
+  },
   component: ProductDetailPage,
 });
 
@@ -59,15 +80,15 @@ type Review = {
 
 function ProductDetailPage() {
   const { slug } = Route.useParams();
+  const initial = Route.useLoaderData();
   const { add } = useCart();
-  
-  const [product, setProduct] = useState<DBProduct | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  const [product, setProduct] = useState<DBProduct | null>((initial as any)?.product ?? null);
+  const [loading, setLoading] = useState(!(initial as any)?.product);
   const [imageIdx, setImageIdx] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
-    setLoading(true);
     setImageIdx(0);
     (async () => {
       const { data } = await supabase
