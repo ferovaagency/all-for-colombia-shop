@@ -2,7 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/legal")({
-  head: () => ({ meta: [{ title: "Legal — All For All" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Legal — All For All" }, { name: "robots", content: "noindex" }],
+  }),
   component: LegalPage,
 });
 
@@ -23,11 +25,14 @@ function LegalPage() {
           <TabsTrigger value="cookies">Cookies</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="terminos" className="mt-6 space-y-4 text-muted-foreground leading-relaxed">
+        <TabsContent
+          value="terminos"
+          className="mt-6 space-y-4 text-muted-foreground leading-relaxed"
+        >
           <h2 className="text-2xl font-bold text-foreground">Términos y Condiciones</h2>
           <p>
-            All For All S.A.S., NIT 901.009.310-8, con sede en Bogotá, Colombia, opera la tienda
-            en línea allforall.com.co. Al realizar una compra acepta estos términos.
+            All For All S.A.S., NIT 901.009.310-8, con sede en Bogotá, Colombia, opera la tienda en
+            línea allforall.com.co. Al realizar una compra acepta estos términos.
           </p>
           <p>Precios en COP. Envíos a todo Colombia.</p>
           <p>
@@ -36,19 +41,22 @@ function LegalPage() {
           </p>
         </TabsContent>
 
-        <TabsContent value="garantia" className="mt-6 space-y-4 text-muted-foreground leading-relaxed">
+        <TabsContent
+          value="garantia"
+          className="mt-6 space-y-4 text-muted-foreground leading-relaxed"
+        >
           <h2 className="text-2xl font-bold text-foreground">Garantía y Devoluciones</h2>
           <p>
-            En cumplimiento del Estatuto del Consumidor (Ley 1480 de 2011), todos nuestros
-            productos cuentan con garantía legal frente a defectos de fabricación.
+            En cumplimiento del Estatuto del Consumidor (Ley 1480 de 2011), todos nuestros productos
+            cuentan con garantía legal frente a defectos de fabricación.
           </p>
           <p>
-            <strong className="text-foreground">Plazo de garantía:</strong> el establecido por el fabricante
-            (generalmente 12 meses), contados desde la fecha de entrega.
+            <strong className="text-foreground">Plazo de garantía:</strong> el establecido por el
+            fabricante (generalmente 12 meses), contados desde la fecha de entrega.
           </p>
           <p>
-            <strong className="text-foreground">Retracto:</strong> dispone de 5 días hábiles a partir
-            de la entrega para ejercer el derecho de retracto, siempre que el producto se
+            <strong className="text-foreground">Retracto:</strong> dispone de 5 días hábiles a
+            partir de la entrega para ejercer el derecho de retracto, siempre que el producto se
             encuentre en su empaque original, sin uso y con todos sus accesorios.
           </p>
           <p>
@@ -67,19 +75,38 @@ function LegalPage() {
           </p>
         </TabsContent>
 
-        <TabsContent value="envios" className="mt-6 space-y-4 text-muted-foreground leading-relaxed">
+        <TabsContent
+          value="envios"
+          className="mt-6 space-y-4 text-muted-foreground leading-relaxed"
+        >
           <h2 className="text-2xl font-bold text-foreground">Política de Envíos</h2>
           <p>Realizamos envíos a todo el territorio colombiano.</p>
+
+          <h3 className="text-lg font-bold text-foreground pt-2">Envío gratis</h3>
+          <p>
+            El envío es <strong>gratuito</strong> en pedidos iguales o superiores a{" "}
+            <strong>$200.000 COP</strong> con destino a{" "}
+            <strong>Bogotá, Medellín, Cali y Barranquilla</strong>.
+          </p>
+          <p>
+            Para el resto del país, y para pedidos inferiores a $200.000 en las ciudades
+            principales, el valor del flete <strong>se cotiza al confirmar el pedido</strong> según
+            peso, volumen y destino. Te contactamos antes de despachar.
+          </p>
+
+          <h3 className="text-lg font-bold text-foreground pt-2">Tiempos de entrega</h3>
           <ul className="list-disc pl-6 space-y-1">
             <li>Bogotá y área metropolitana: 1-3 días hábiles.</li>
             <li>Ciudades principales: 2-5 días hábiles.</li>
             <li>Municipios: 3-7 días hábiles.</li>
           </ul>
-          <p>El costo se calcula al momento del pago según peso y destino.</p>
           <p>Para rastreo de pedidos contáctenos por WhatsApp.</p>
         </TabsContent>
 
-        <TabsContent value="privacidad" className="mt-6 space-y-4 text-muted-foreground leading-relaxed">
+        <TabsContent
+          value="privacidad"
+          className="mt-6 space-y-4 text-muted-foreground leading-relaxed"
+        >
           <h2 className="text-2xl font-bold text-foreground">
             Política de Privacidad y Tratamiento de Datos Personales
           </h2>
@@ -90,14 +117,17 @@ function LegalPage() {
           </p>
           <div>
             <h3 className="font-semibold text-foreground">1. Datos recopilados</h3>
-            <p>Nombre completo, correo electrónico, teléfono, dirección de entrega, información de pago.</p>
+            <p>
+              Nombre completo, correo electrónico, teléfono, dirección de entrega, información de
+              pago.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold text-foreground">2. Finalidad del tratamiento</h3>
             <p>
               Procesamiento de pedidos, envío de productos, comunicaciones comerciales con
-              consentimiento previo, mejora de la experiencia de compra, cumplimiento de obligaciones
-              legales y contables.
+              consentimiento previo, mejora de la experiencia de compra, cumplimiento de
+              obligaciones legales y contables.
             </p>
           </div>
           <div>
@@ -105,9 +135,7 @@ function LegalPage() {
             <ul className="list-disc pl-5 space-y-1">
               <li>Conocer, actualizar, rectificar y suprimir sus datos.</li>
               <li>Revocar la autorización otorgada.</li>
-              <li>
-                Presentar quejas ante la Superintendencia de Industria y Comercio (SIC).
-              </li>
+              <li>Presentar quejas ante la Superintendencia de Industria y Comercio (SIC).</li>
             </ul>
           </div>
           <div>
@@ -119,8 +147,8 @@ function LegalPage() {
                 className="text-secondary hover:underline"
               >
                 ventas.marketplace@allforall.com.co
-              </a>
-              {" "}indicando nombre completo, solicitud específica y documento de identidad.
+              </a>{" "}
+              indicando nombre completo, solicitud específica y documento de identidad.
             </p>
           </div>
           <div>
@@ -150,7 +178,10 @@ function LegalPage() {
           </p>
         </TabsContent>
 
-        <TabsContent value="cookies" className="mt-6 space-y-4 text-muted-foreground leading-relaxed">
+        <TabsContent
+          value="cookies"
+          className="mt-6 space-y-4 text-muted-foreground leading-relaxed"
+        >
           <h2 className="text-2xl font-bold text-foreground">Cookies</h2>
           <p>Usamos cookies para mejorar la experiencia de navegación.</p>
           <p>Las cookies nos ayudan a recordar tus preferencias y analizar el uso del sitio.</p>

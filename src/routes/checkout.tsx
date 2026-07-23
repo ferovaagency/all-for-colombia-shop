@@ -6,22 +6,47 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, FileCheck2, Info, X, ExternalLink, Loader2, CheckCircle2, AlertTriangle, RefreshCw, QrCode, Lock } from "lucide-react";
+import {
+  Upload,
+  FileCheck2,
+  Info,
+  X,
+  ExternalLink,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
+  QrCode,
+  Lock,
+} from "lucide-react";
 import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
 import { startAddiCheckout } from "@/lib/addi.functions";
 import { syncToBrevo } from "@/lib/brevo";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
+import { ShippingSummary } from "@/components/shop/ShippingNotice";
+import { MAIN_CITIES, OTHER_CITY_VALUE, getShippingStatus } from "@/lib/shipping";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
   email: z.string().trim().email("Email inválido").max(255),
   phone: z.string().trim().min(7, "Teléfono requerido").max(20),
   customer_id_type: z.enum(["CC", "CE", "NIT", "PA"], { message: "Selecciona tipo de documento" }),
-  customer_id_number: z.string().trim().regex(/^[\d-]+$/, "Solo números y guion").min(5, "Número requerido").max(20),
+  customer_id_number: z
+    .string()
+    .trim()
+    .regex(/^[\d-]+$/, "Solo números y guion")
+    .min(5, "Número requerido")
+    .max(20),
   address: z.string().trim().min(5, "Dirección requerida").max(200),
   city: z.string().trim().min(2, "Ciudad requerida").max(80),
   notes: z.string().max(500).optional(),
@@ -53,12 +78,32 @@ const PAYMENT_OPTIONS: {
   description: string;
 }[] = [
   // Openpay temporalmente oculto mientras se termina de configurar.
-  { value: "addi", label: "🟣 Addi — Paga a cuotas sin tarjeta", description: "Financia tu compra en cuotas con aprobación en minutos" },
-  { value: "bancolombia", label: "🏦 Transferencia Bancolombia", description: "Transfiere y sube tu comprobante" },
-  { value: "davivienda", label: "🏦 Transferencia Davivienda", description: "Transfiere y sube tu comprobante" },
+  {
+    value: "addi",
+    label: "🟣 Addi — Paga a cuotas sin tarjeta",
+    description: "Financia tu compra en cuotas con aprobación en minutos",
+  },
+  {
+    value: "bancolombia",
+    label: "🏦 Transferencia Bancolombia",
+    description: "Transfiere y sube tu comprobante",
+  },
+  {
+    value: "davivienda",
+    label: "🏦 Transferencia Davivienda",
+    description: "Transfiere y sube tu comprobante",
+  },
   { value: "nequi", label: "📱 Nequi", description: "Transfiere por Nequi y sube comprobante" },
-  { value: "breb", label: "⚡ Bre-B (transferencia manual)", description: "Transferencia inmediata con llave Bre-B" },
-  { value: "telefono", label: "📞 Transferencia directa", description: "Llama o escribe al 313 497 7955" },
+  {
+    value: "breb",
+    label: "⚡ Bre-B (transferencia manual)",
+    description: "Transferencia inmediata con llave Bre-B",
+  },
+  {
+    value: "telefono",
+    label: "📞 Transferencia directa",
+    description: "Llama o escribe al 313 497 7955",
+  },
 ];
 
 // Map our doc types to Openpay accepted ones (CC | NIT | CE). PA -> CE as fallback.
@@ -72,10 +117,19 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
-    name: "", email: "", phone: "", customer_id_type: "CC", customer_id_number: "", address: "", city: "", notes: "",
+    name: "",
+    email: "",
+    phone: "",
+    customer_id_type: "CC",
+    customer_id_number: "",
+    address: "",
+    city: "",
+    notes: "",
   });
   const [payment, setPayment] = useState<PaymentMethod>("addi");
   const [receipt, setReceipt] = useState<File | null>(null);
+
+  const shippingStatus = getShippingStatus(subtotal, form.city);
 
   // ----- Openpay PSE bank list -----
   const [banks, setBanks] = useState<{ bankCode: string; bankName: string }[]>([]);
@@ -101,12 +155,16 @@ function CheckoutPage() {
       .then((list: { bankCode: string; bankName: string }[]) => {
         if (!cancelled) setBanks(list);
       })
-      .catch(e => {
+      .catch((e) => {
         console.error("DETALLE DEL ERROR DE OPENPAY (banks, catch):", e);
         if (!cancelled) toast.error(e.message);
       })
-      .finally(() => { if (!cancelled) setLoadingBanks(false); });
-    return () => { cancelled = true; };
+      .finally(() => {
+        if (!cancelled) setLoadingBanks(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [payment, banks.length]);
 
   // ----- Openpay QR Bre-B state -----
@@ -135,7 +193,9 @@ function CheckoutPage() {
 
   // Fire begin_checkout once when the user reaches checkout with a non-empty cart.
   const beginCheckoutFiredRef = useRef(false);
-  const purchaseItemsRef = useRef<Array<{ item_id: string; item_name: string; price: number; quantity: number }>>([]);
+  const purchaseItemsRef = useRef<
+    Array<{ item_id: string; item_name: string; price: number; quantity: number }>
+  >([]);
   useEffect(() => {
     if (beginCheckoutFiredRef.current || count === 0) return;
     beginCheckoutFiredRef.current = true;
@@ -170,7 +230,9 @@ function CheckoutPage() {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-2xl font-bold mb-2">No hay productos en tu carrito</h1>
-        <Button asChild><Link to="/tienda">Ir a la tienda</Link></Button>
+        <Button asChild>
+          <Link to="/tienda">Ir a la tienda</Link>
+        </Button>
       </div>
     );
   }
@@ -180,9 +242,15 @@ function CheckoutPage() {
   const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("El archivo no debe superar 5MB"); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("El archivo no debe superar 5MB");
+      return;
+    }
     const valid = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
-    if (!valid.includes(file.type)) { toast.error("Solo JPG, PNG o PDF"); return; }
+    if (!valid.includes(file.type)) {
+      toast.error("Solo JPG, PNG o PDF");
+      return;
+    }
     setReceipt(file);
   };
 
@@ -203,7 +271,9 @@ function CheckoutPage() {
             navigate({ to: "/resultado-pago", search: { id: orderId, status: "ok" } as any });
           }, 1500);
         }
-      } catch { /* ignore polling errors */ }
+      } catch {
+        /* ignore polling errors */
+      }
     }, POLL_INTERVAL_MS);
   }
 
@@ -242,7 +312,12 @@ function CheckoutPage() {
       setQrStatus("active");
       countdownRef.current = setInterval(() => {
         setQrSeconds((s) => {
-          if (s <= 1) { stopTimers(); setQrStatus("expired"); setQrBase64(null); return 0; }
+          if (s <= 1) {
+            stopTimers();
+            setQrStatus("expired");
+            setQrBase64(null);
+            return 0;
+          }
           return s - 1;
         });
       }, 1000);
@@ -257,10 +332,22 @@ function CheckoutPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const res = schema.safeParse(form);
-    if (!res.success) { toast.error(res.error.issues[0]?.message || "Revisa los campos"); return; }
-    if (payment === "openpay_pse" && !bankCode) { toast.error("Selecciona tu banco PSE"); return; }
-    if (payment === "openpay_card" && cardOrderId) { toast.info("Ya creaste el pedido. Completa los datos de tu tarjeta abajo."); return; }
-    if (requiresReceipt && !receipt) { toast.error("Sube el comprobante de pago para continuar"); return; }
+    if (!res.success) {
+      toast.error(res.error.issues[0]?.message || "Revisa los campos");
+      return;
+    }
+    if (payment === "openpay_pse" && !bankCode) {
+      toast.error("Selecciona tu banco PSE");
+      return;
+    }
+    if (payment === "openpay_card" && cardOrderId) {
+      toast.info("Ya creaste el pedido. Completa los datos de tu tarjeta abajo.");
+      return;
+    }
+    if (requiresReceipt && !receipt) {
+      toast.error("Sube el comprobante de pago para continuar");
+      return;
+    }
     setSubmitting(true);
 
     let receiptUrl: string | null = null;
@@ -270,7 +357,11 @@ function CheckoutPage() {
       const { error: upErr } = await supabase.storage
         .from("payment-receipts")
         .upload(path, receipt, { contentType: receipt.type });
-      if (upErr) { setSubmitting(false); toast.error("No se pudo subir el comprobante. Intenta de nuevo."); return; }
+      if (upErr) {
+        setSubmitting(false);
+        toast.error("No se pudo subir el comprobante. Intenta de nuevo.");
+        return;
+      }
       receiptUrl = path;
     }
 
@@ -288,16 +379,30 @@ function CheckoutPage() {
       total: subtotal,
       payment_method: payment,
       receipt_url: receiptUrl,
-      shipping_address: { address: form.address, city: form.city, notes: form.notes },
+      shipping_address: {
+        address: form.address,
+        city: form.city,
+        notes: form.notes,
+        shipping_policy: shippingStatus.kind, // free | below | quote
+        shipping_note: shippingStatus.note,
+      },
     });
 
     setSubmitting(false);
 
-    if (error) { toast.error("No se pudo crear el pedido. Intenta de nuevo."); return; }
+    if (error) {
+      toast.error("No se pudo crear el pedido. Intenta de nuevo.");
+      return;
+    }
 
-    await supabase.from("customers").upsert({
-      name: form.name, email: form.email, phone: form.phone,
-    }, { onConflict: "email" });
+    await supabase.from("customers").upsert(
+      {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+      },
+      { onConflict: "email" },
+    );
 
     syncToBrevo(form.email.trim().toLowerCase(), "buyers", {
       NOMBRE: form.name,
@@ -386,8 +491,11 @@ function CheckoutPage() {
     }
 
     // ------- Métodos manuales (WhatsApp) -------
-    const summary = items.map(i => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`).join("\n");
-    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0,8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\n\n${summary}\n\n*Total:* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
+    const summary = items
+      .map((i) => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`)
+      .join("\n");
+    const envio = shippingStatus.kind === "free" ? "GRATIS ✅" : "Por cotizar al confirmar";
+    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0, 8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\nEnvío: ${envio}\n\n${summary}\n\n*Total (sin flete):* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
     window.open(whatsappUrl(msg), "_blank");
     firePurchase(orderId, payment);
     clear();
@@ -402,14 +510,39 @@ function CheckoutPage() {
           <section className="bg-card border rounded-xl p-6">
             <h2 className="font-semibold text-lg mb-4">Datos de contacto</h2>
             <div className="grid sm:grid-cols-2 gap-4">
-              <div><Label>Nombre completo *</Label><Input value={form.name} onChange={e => setField("name", e.target.value)} required maxLength={100} /></div>
-              <div><Label>Email *</Label><Input type="email" value={form.email} onChange={e => setField("email", e.target.value)} required maxLength={255} /></div>
-              <div><Label>Teléfono *</Label><Input value={form.phone} onChange={e => setField("phone", e.target.value)} required maxLength={20} /></div>
+              <div>
+                <Label>Nombre completo *</Label>
+                <Input
+                  value={form.name}
+                  onChange={(e) => setField("name", e.target.value)}
+                  required
+                  maxLength={100}
+                />
+              </div>
+              <div>
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setField("email", e.target.value)}
+                  required
+                  maxLength={255}
+                />
+              </div>
+              <div>
+                <Label>Teléfono *</Label>
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setField("phone", e.target.value)}
+                  required
+                  maxLength={20}
+                />
+              </div>
               <div>
                 <Label>Tipo de documento *</Label>
                 <select
                   value={form.customer_id_type}
-                  onChange={e => setField("customer_id_type", e.target.value)}
+                  onChange={(e) => setField("customer_id_type", e.target.value)}
                   required
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
@@ -423,7 +556,9 @@ function CheckoutPage() {
                 <Label>Número de documento *</Label>
                 <Input
                   value={form.customer_id_number}
-                  onChange={e => setField("customer_id_number", e.target.value.replace(/[^\d-]/g, ""))}
+                  onChange={(e) =>
+                    setField("customer_id_number", e.target.value.replace(/[^\d-]/g, ""))
+                  }
                   required
                   maxLength={20}
                   placeholder="Solo números y guion"
@@ -436,15 +571,68 @@ function CheckoutPage() {
           <section className="bg-card border rounded-xl p-6">
             <h2 className="font-semibold text-lg mb-4">Dirección de envío</h2>
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="sm:col-span-2"><Label>Dirección *</Label><Input value={form.address} onChange={e => setField("address", e.target.value)} required maxLength={200} /></div>
-              <div className="sm:col-span-2"><Label>Ciudad *</Label><Input value={form.city} onChange={e => setField("city", e.target.value)} required maxLength={80} /></div>
-              <div className="sm:col-span-2"><Label>Notas (opcional)</Label><Textarea value={form.notes} onChange={e => setField("notes", e.target.value)} maxLength={500} /></div>
+              <div className="sm:col-span-2">
+                <Label>Dirección *</Label>
+                <Input
+                  value={form.address}
+                  onChange={(e) => setField("address", e.target.value)}
+                  required
+                  maxLength={200}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Ciudad *</Label>
+                <select
+                  value={
+                    MAIN_CITIES.some((c) => c.name === form.city) ? form.city : OTHER_CITY_VALUE
+                  }
+                  onChange={(e) =>
+                    setField("city", e.target.value === OTHER_CITY_VALUE ? "" : e.target.value)
+                  }
+                  required
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">Selecciona tu ciudad</option>
+                  {MAIN_CITIES.map((c) => (
+                    <option key={c.slug} value={c.name}>
+                      {c.name} — envío gratis desde $200.000
+                    </option>
+                  ))}
+                  <option value={OTHER_CITY_VALUE}>Otra ciudad (flete se cotiza)</option>
+                </select>
+                {!MAIN_CITIES.some((c) => c.name === form.city) && (
+                  <Input
+                    className="mt-2"
+                    value={form.city}
+                    onChange={(e) => setField("city", e.target.value)}
+                    placeholder="Escribe tu ciudad"
+                    required
+                    maxLength={80}
+                  />
+                )}
+                <ShippingSummary subtotal={subtotal} city={form.city} className="mt-3" />
+              </div>
+              <div className="sm:col-span-2">
+                <Label>Notas (opcional)</Label>
+                <Textarea
+                  value={form.notes}
+                  onChange={(e) => setField("notes", e.target.value)}
+                  maxLength={500}
+                />
+              </div>
             </div>
           </section>
 
           <section className="bg-card border rounded-xl p-6">
             <h2 className="font-semibold text-lg mb-4">Método de pago</h2>
-            <RadioGroup value={payment} onValueChange={(v) => { setPayment(v as PaymentMethod); setReceipt(null); }} className="space-y-2">
+            <RadioGroup
+              value={payment}
+              onValueChange={(v) => {
+                setPayment(v as PaymentMethod);
+                setReceipt(null);
+              }}
+              className="space-y-2"
+            >
               {PAYMENT_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
@@ -472,9 +660,13 @@ function CheckoutPage() {
                   disabled={loadingBanks || banks.length === 0}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
-                  <option value="">{loadingBanks ? "Cargando bancos..." : "Selecciona tu banco"}</option>
-                  {banks.map(b => (
-                    <option key={b.bankCode} value={b.bankCode}>{b.bankName}</option>
+                  <option value="">
+                    {loadingBanks ? "Cargando bancos..." : "Selecciona tu banco"}
+                  </option>
+                  {banks.map((b) => (
+                    <option key={b.bankCode} value={b.bankCode}>
+                      {b.bankName}
+                    </option>
                   ))}
                 </select>
                 <p className="text-xs text-muted-foreground">
@@ -486,9 +678,12 @@ function CheckoutPage() {
             {/* Openpay QR Bre-B info */}
             {payment === "openpay_qr_breb" && (
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
-                <p className="font-semibold mb-1 flex items-center gap-2"><QrCode className="h-4 w-4" /> Pago QR Bre-B</p>
+                <p className="font-semibold mb-1 flex items-center gap-2">
+                  <QrCode className="h-4 w-4" /> Pago QR Bre-B
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  Al confirmar el pedido generaremos un código QR dinámico. Tendrás 10 minutos para escanearlo desde tu app bancaria.
+                  Al confirmar el pedido generaremos un código QR dinámico. Tendrás 10 minutos para
+                  escanearlo desde tu app bancaria.
                 </p>
               </div>
             )}
@@ -496,9 +691,12 @@ function CheckoutPage() {
             {/* Openpay Tarjeta */}
             {payment === "openpay_card" && !cardOrderId && (
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
-                <p className="font-semibold mb-1 flex items-center gap-2"><Lock className="h-4 w-4" /> Pago con tarjeta</p>
+                <p className="font-semibold mb-1 flex items-center gap-2">
+                  <Lock className="h-4 w-4" /> Pago con tarjeta
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  Al confirmar el pedido te pediremos los datos de tu tarjeta de forma segura (tokenización Openpay).
+                  Al confirmar el pedido te pediremos los datos de tu tarjeta de forma segura
+                  (tokenización Openpay).
                 </p>
               </div>
             )}
@@ -515,27 +713,59 @@ function CheckoutPage() {
                 onSuccess={({ charge_id }) => {
                   if (cardOrderId) firePurchase(cardOrderId, "openpay_card");
                   clear();
-                  navigate({ to: "/resultado-pago", search: { id: cardOrderId, status: "ok", ref: charge_id } as any });
+                  navigate({
+                    to: "/resultado-pago",
+                    search: { id: cardOrderId, status: "ok", ref: charge_id } as any,
+                  });
                 }}
               />
             )}
 
             {payment === "bancolombia" && (
-              <BankDetails items={[["Banco","Bancolombia"],["Tipo","Cuenta de Ahorros NUEVO"],["Número","69800001277"],["Titular","ALL FOR ALL SAS"],["NIT","901.009.310-8"]]} />
+              <BankDetails
+                items={[
+                  ["Banco", "Bancolombia"],
+                  ["Tipo", "Cuenta de Ahorros NUEVO"],
+                  ["Número", "69800001277"],
+                  ["Titular", "ALL FOR ALL SAS"],
+                  ["NIT", "901.009.310-8"],
+                ]}
+              />
             )}
             {payment === "davivienda" && (
-              <BankDetails items={[["Banco","Davivienda"],["Tipo","Cuenta de Ahorros"],["Número","462970017556"],["Titular","ALL FOR ALL SAS"],["NIT","901.009.310-8"]]} />
+              <BankDetails
+                items={[
+                  ["Banco", "Davivienda"],
+                  ["Tipo", "Cuenta de Ahorros"],
+                  ["Número", "462970017556"],
+                  ["Titular", "ALL FOR ALL SAS"],
+                  ["NIT", "901.009.310-8"],
+                ]}
+              />
             )}
             {payment === "nequi" && (
-              <BankDetails items={[["Llave Nequi","@9010093108"],["Titular","ALL FOR ALL SAS"]]} />
+              <BankDetails
+                items={[
+                  ["Llave Nequi", "@9010093108"],
+                  ["Titular", "ALL FOR ALL SAS"],
+                ]}
+              />
             )}
             {payment === "breb" && (
-              <BankDetails items={[["Llave Bre-B","@9010093108"],["Titular","ALL FOR ALL SAS"],["Tipo","Empresa"]]} />
+              <BankDetails
+                items={[
+                  ["Llave Bre-B", "@9010093108"],
+                  ["Titular", "ALL FOR ALL SAS"],
+                  ["Tipo", "Empresa"],
+                ]}
+              />
             )}
             {payment === "telefono" && (
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
                 <p className="font-semibold mb-1">📞 Teléfono: 321 828 0762</p>
-                <p className="text-sm text-muted-foreground">Coordina tu pago directamente con nuestro equipo.</p>
+                <p className="text-sm text-muted-foreground">
+                  Coordina tu pago directamente con nuestro equipo.
+                </p>
               </div>
             )}
 
@@ -547,8 +777,12 @@ function CheckoutPage() {
                     <label className="cursor-pointer flex flex-col items-center text-center">
                       <Upload className="h-8 w-8 text-secondary mb-2" />
                       <p className="font-semibold text-sm">Subir comprobante de pago *</p>
-                      <p className="text-xs text-muted-foreground mt-1">JPG, PNG o PDF — máximo 5MB</p>
-                      <p className="text-xs text-secondary mt-2">Click aquí para seleccionar el archivo</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        JPG, PNG o PDF — máximo 5MB
+                      </p>
+                      <p className="text-xs text-secondary mt-2">
+                        Click aquí para seleccionar el archivo
+                      </p>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/jpg,application/pdf"
@@ -561,9 +795,15 @@ function CheckoutPage() {
                       <FileCheck2 className="h-6 w-6 text-green-600 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{receipt.name}</p>
-                        <p className="text-xs text-muted-foreground">{(receipt.size / 1024).toFixed(0)} KB</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(receipt.size / 1024).toFixed(0)} KB
+                        </p>
                       </div>
-                      <button type="button" onClick={() => setReceipt(null)} className="text-xs text-red-500 hover:text-red-700 inline-flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setReceipt(null)}
+                        className="text-xs text-red-500 hover:text-red-700 inline-flex items-center gap-1"
+                      >
                         <X className="h-3 w-3" /> Cambiar
                       </button>
                     </div>
@@ -590,21 +830,36 @@ function CheckoutPage() {
         <aside className="bg-card border rounded-xl p-6 h-fit sticky top-20">
           <h2 className="font-semibold text-lg mb-4">Tu pedido</h2>
           <div className="space-y-2 text-sm mb-4 max-h-64 overflow-y-auto">
-            {items.map(it => (
+            {items.map((it) => (
               <div key={it.id} className="flex justify-between gap-2">
-                <span className="text-muted-foreground line-clamp-1">{it.name} ×{it.quantity}</span>
-                <span className="font-medium whitespace-nowrap">{formatCOP(it.price * it.quantity)}</span>
+                <span className="text-muted-foreground line-clamp-1">
+                  {it.name} ×{it.quantity}
+                </span>
+                <span className="font-medium whitespace-nowrap">
+                  {formatCOP(it.price * it.quantity)}
+                </span>
               </div>
             ))}
           </div>
+          <ShippingSummary subtotal={subtotal} city={form.city} className="mb-4" />
           <div className="border-t pt-4 mb-6">
             <div className="flex justify-between text-lg font-bold">
-              <span>Total</span><span className="text-primary">{formatCOP(subtotal)}</span>
+              <span>Total</span>
+              <span className="text-primary">{formatCOP(subtotal)}</span>
             </div>
+            {shippingStatus.kind !== "free" && (
+              <p className="text-xs text-muted-foreground mt-1">
+                No incluye flete. {shippingStatus.label}.
+              </p>
+            )}
           </div>
           <Button
             type="submit"
-            disabled={submitting || (requiresReceipt && !receipt) || (payment === "openpay_card" && !!cardOrderId)}
+            disabled={
+              submitting ||
+              (requiresReceipt && !receipt) ||
+              (payment === "openpay_card" && !!cardOrderId)
+            }
             size="lg"
             className="w-full bg-primary"
           >
@@ -628,7 +883,10 @@ function CheckoutPage() {
       <Dialog
         open={qrOpen}
         onOpenChange={(open) => {
-          if (!open) { stopTimers(); setQrOpen(false); }
+          if (!open) {
+            stopTimers();
+            setQrOpen(false);
+          }
         }}
       >
         <DialogContent className="max-w-md">
@@ -659,7 +917,9 @@ function CheckoutPage() {
               </div>
               <div className="text-center">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">Expira en</p>
-                <p className={`text-3xl font-mono font-bold ${qrSeconds < 60 ? "text-destructive" : "text-foreground"}`}>
+                <p
+                  className={`text-3xl font-mono font-bold ${qrSeconds < 60 ? "text-destructive" : "text-foreground"}`}
+                >
                   {qrMmss}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">

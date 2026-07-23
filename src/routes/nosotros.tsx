@@ -1,13 +1,30 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { MapPin, Truck, Heart, Target, Clock, ShieldCheck, Award, Instagram } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  MapPin,
+  Truck,
+  Heart,
+  Target,
+  Clock,
+  ShieldCheck,
+  Award,
+  Instagram,
+  ArrowRight,
+} from "lucide-react";
 
 export const Route = createFileRoute("/nosotros")({
   head: () => ({
     meta: [
       { title: "Sobre nosotros — All For All" },
-      { name: "description", content: "Más de 10 años garantizando compras de tecnología seguras, transparentes y sin sorpresas. Something for everyone." },
+      {
+        name: "description",
+        content:
+          "Más de 10 años garantizando compras de tecnología seguras, transparentes y sin sorpresas. Something for everyone.",
+      },
       { property: "og:title", content: "Sobre All For All" },
-      { property: "og:description", content: "Tecnología confiable con respaldo real. Más de 10 años en Colombia." },
+      {
+        property: "og:description",
+        content: "Tecnología confiable con respaldo real. Más de 10 años en Colombia.",
+      },
     ],
   }),
   component: AboutPage,
@@ -25,8 +42,8 @@ function AboutPage() {
             Comprar tecnología en línea no debería ser una apuesta
           </h1>
           <p className="text-lg md:text-xl text-white/85 leading-relaxed">
-            En All For All llevamos más de 10 años garantizando que cada compra sea
-            segura, transparente y sin sorpresas. <em>Something for everyone.</em>
+            En All For All llevamos más de 10 años garantizando que cada compra sea segura,
+            transparente y sin sorpresas. <em>Something for everyone.</em>
           </p>
         </div>
       </section>
@@ -34,15 +51,33 @@ function AboutPage() {
       {/* Trust cards */}
       <section className="container mx-auto px-4 -mt-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <TrustCard icon={<Award className="h-6 w-6" />} title="10+ años" text="De experiencia en el sector tecnológico" />
-          <TrustCard icon={<MapPin className="h-6 w-6" />} title="Bogotá, Colombia" text="Con envíos a todo el país" />
-          <TrustCard icon={<ShieldCheck className="h-6 w-6" />} title="Marcas certificadas" text="Solo trabajamos con marcas reconocidas" />
-          <TrustCard icon={<Heart className="h-6 w-6" />} title="Garantía real" text="Respaldo en cada producto que vendemos" />
+          <TrustCard
+            icon={<Award className="h-6 w-6" />}
+            title="10+ años"
+            text="De experiencia en el sector tecnológico"
+          />
+          <TrustCard
+            icon={<MapPin className="h-6 w-6" />}
+            title="Bogotá, Colombia"
+            text="Con envíos a todo el país"
+          />
+          <TrustCard
+            icon={<ShieldCheck className="h-6 w-6" />}
+            title="Marcas certificadas"
+            text="Solo trabajamos con marcas reconocidas"
+          />
+          <TrustCard
+            icon={<Heart className="h-6 w-6" />}
+            title="Garantía real"
+            text="Respaldo en cada producto que vendemos"
+          />
         </div>
       </section>
 
       <section className="container mx-auto px-4 py-16 max-w-3xl">
-        <h2 className="text-3xl font-bold mb-6">¿Por qué comprar en All For All y no en otro lugar?</h2>
+        <h2 className="text-3xl font-bold mb-6">
+          ¿Por qué comprar en All For All y no en otro lugar?
+        </h2>
         <div className="space-y-5 text-muted-foreground leading-relaxed">
           <p>Entendemos la duda. En internet hay cientos de tiendas y no todas son confiables.</p>
           <p>
@@ -97,6 +132,26 @@ function AboutPage() {
           </div>
         </div>
 
+        {/* Microsite de marca */}
+        <Link
+          to="/marcas/logitech"
+          className="group mt-6 block relative overflow-hidden rounded-2xl bg-neutral-950 text-white"
+        >
+          <div className="relative z-10 p-6 md:p-8">
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/60">
+              Microsite oficial
+            </span>
+            <h3 className="text-2xl md:text-3xl font-bold mt-2">Tienda Logitech</h3>
+            <p className="text-white/70 text-sm mt-2 max-w-lg">
+              Somos aliados oficiales de Logitech. Explora las series MX, ERGO, Esencial, Lifestyle,
+              Serie G, Racing y Gamer PRO con garantía de fábrica.
+            </p>
+            <span className="mt-5 inline-flex items-center gap-2 rounded-full bg-white text-neutral-950 px-5 py-2.5 text-sm font-bold group-hover:gap-3 transition-all">
+              Entrar al microsite <ArrowRight className="h-4 w-4" />
+            </span>
+          </div>
+        </Link>
+
         {/* Redes */}
         <div className="mt-8 text-center">
           <h3 className="font-bold text-lg mb-4">Síguenos en redes</h3>
@@ -116,7 +171,9 @@ function AboutPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-card border hover:border-secondary hover:text-secondary transition-colors"
             >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.36a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.84-.21z"/></svg>
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.36a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.84-.21z" />
+              </svg>
               <span className="text-sm font-medium">@allforallcol</span>
             </a>
           </div>
@@ -129,17 +186,29 @@ function AboutPage() {
 function TrustCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
   return (
     <div className="bg-card border rounded-xl p-5 shadow-sm">
-      <div className="h-10 w-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center mb-3">{icon}</div>
+      <div className="h-10 w-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center mb-3">
+        {icon}
+      </div>
       <p className="font-bold text-sm md:text-base">{title}</p>
       <p className="text-xs md:text-sm text-muted-foreground mt-1 leading-snug">{text}</p>
     </div>
   );
 }
 
-function Card({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function Card({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-card border rounded-xl p-6">
-      <div className="h-10 w-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center mb-3">{icon}</div>
+      <div className="h-10 w-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center mb-3">
+        {icon}
+      </div>
       <h3 className="font-bold text-lg mb-2">{title}</h3>
       <p className="text-sm text-muted-foreground leading-relaxed">{children}</p>
     </div>

@@ -4,12 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { formatCOP } from "@/lib/cart";
 import { Trash2, Sparkles, Pencil, X } from "lucide-react";
+import { PromoCouponsAdmin } from "@/components/admin/PromoCouponsAdmin";
 
-type Product = { id: string; name: string; price: number | null; slug: string };
+type Product = {
+  id: string;
+  name: string;
+  price: number | null;
+  slug: string;
+  images?: string[] | null;
+};
 type Deal = {
   id: string;
   product_id: string;
@@ -18,8 +33,17 @@ type Deal = {
   ends_at: string;
   stock_limit: number | null;
   is_active: boolean;
+  teaser_images: string[] | null;
   products?: { name: string; price: number | null } | null;
 };
+
+/** Convierte el textarea (una URL por línea) en array limpio. */
+function parseImages(raw: string): string[] {
+  return raw
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
 
 function toLocalInput(iso?: string) {
   if (!iso) return "";
@@ -41,6 +65,7 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
   );
   const [stockLimit, setStockLimit] = useState<string>("");
   const [isActive, setIsActive] = useState(true);
+  const [teaserImages, setTeaserImages] = useState<string>("");
 
   const load = async () => {
     const { data, error } = await supabase
@@ -68,6 +93,7 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
     setEndsAt(toLocalInput(new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString()));
     setStockLimit("");
     setIsActive(true);
+    setTeaserImages("");
   };
 
   const startEdit = (deal: Deal) => {
@@ -78,6 +104,7 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
     setEndsAt(toLocalInput(deal.ends_at));
     setStockLimit(deal.stock_limit ? String(deal.stock_limit) : "");
     setIsActive(deal.is_active);
+    setTeaserImages((deal.teaser_images ?? []).join("\n"));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -92,7 +119,10 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
     setLoading(true);
     // Desactivar otros deals si este va activo
     if (isActive) {
-      const deactivate = supabase.from("weekly_deals").update({ is_active: false }).eq("is_active", true);
+      const deactivate = supabase
+        .from("weekly_deals")
+        .update({ is_active: false })
+        .eq("is_active", true);
       await (editingId ? deactivate.neq("id", editingId) : deactivate);
     }
 
@@ -103,6 +133,7 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
       ends_at: new Date(endsAt).toISOString(),
       stock_limit: stockLimit ? Number(stockLimit) : null,
       is_active: isActive,
+      teaser_images: parseImages(teaserImages),
     };
 
     const { error } = editingId
@@ -111,7 +142,9 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
 
     setLoading(false);
     if (error) return toast.error(error.message);
-    toast.success(editingId ? "Producto de la Semana actualizado" : "Producto de la Semana configurado");
+    toast.success(
+      editingId ? "Producto de la Semana actualizado" : "Producto de la Semana configurado",
+    );
     resetForm();
     load();
   };
@@ -209,6 +242,34 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
               <Label className="!m-0">Activar ahora (desactiva las anteriores)</Label>
             </div>
           </div>
+
+          <div className="md:col-span-2">
+            <Label>Fotos sorpresa para el home (una URL por línea)</Label>
+            <Textarea
+              rows={4}
+              value={teaserImages}
+              onChange={(e) => setTeaserImages(e.target.value)}
+              placeholder={"https://…/foto-1.jpg\nhttps://…/foto-2.jpg"}
+              className="mt-1 font-mono text-xs"
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Son las imágenes que rotan en el cuadro grande del home. Usa fotos distintas a las de
+              la ficha para mantener la sorpresa. Si lo dejas vacío se usan las imágenes del
+              producto.
+            </p>
+            {parseImages(teaserImages).length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {parseImages(teaserImages).map((src) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt=""
+                    className="h-14 w-14 rounded-lg object-cover bg-muted border"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <div className="mt-5 flex justify-end gap-2">
           {editingId && (
@@ -244,10 +305,7 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
                 <TableCell className="text-xs">{new Date(d.ends_at).toLocaleString()}</TableCell>
                 <TableCell>{d.stock_limit ?? "—"}</TableCell>
                 <TableCell>
-                  <Switch
-                    checked={d.is_active}
-                    onCheckedChange={(v) => toggleActive(d, v)}
-                  />
+                  <Switch checked={d.is_active} onCheckedChange={(v) => toggleActive(d, v)} />
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
@@ -270,6 +328,15 @@ export function WeeklyDealsAdmin({ products }: { products: Product[] }) {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* ---- Cupones de descuento por producto (vista "Ofertas" del home) ---- */}
+      <div className="pt-4 border-t">
+        <h2 className="text-xl font-bold mb-1">Cupones de descuento</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Acompañan al Producto de la Semana en el cuadro de <strong>Ofertas</strong> del home.
+        </p>
+        <PromoCouponsAdmin products={products} />
       </div>
     </div>
   );

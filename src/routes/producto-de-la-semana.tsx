@@ -1,11 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Countdown, useCountdown } from "@/components/WeeklyDealCountdown";
 import { formatCOP, useCart } from "@/lib/cart";
 import { syncToBrevo } from "@/lib/brevo";
+import { FREE_SHIPPING_CITIES_TEXT, FREE_SHIPPING_REST_TEXT } from "@/lib/shipping";
 import { Sparkles, ShoppingBag, Zap, ShieldCheck, Truck, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/producto-de-la-semana")({
   head: () => ({
@@ -26,6 +29,8 @@ export const Route = createFileRoute("/producto-de-la-semana")({
   component: WeeklyDealPage,
 });
 
+const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
+
 type Deal = {
   id: string;
   product_id: string;
@@ -34,6 +39,7 @@ type Deal = {
   ends_at: string;
   stock_limit: number | null;
   is_active: boolean;
+  teaser_images: string[] | null;
   product: {
     id: string;
     slug: string;
@@ -55,7 +61,7 @@ function WeeklyDealPage() {
       const { data } = await supabase
         .from("weekly_deals")
         .select(
-          "id, product_id, discount_percent, reveal_at, ends_at, stock_limit, is_active, product:products(id, slug, name, description, short_description, price, images, sku)",
+          "id, product_id, discount_percent, reveal_at, ends_at, stock_limit, is_active, teaser_images, product:products(id, slug, name, description, short_description, price, images, sku)",
         )
         .eq("is_active", true)
         .order("created_at", { ascending: false })
@@ -68,24 +74,28 @@ function WeeklyDealPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-[60vh] flex items-center justify-center bg-black">
+        <Loader2 className="h-8 w-8 animate-spin text-white/50" />
       </div>
     );
   }
 
   if (!deal || !deal.product) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-        <Sparkles className="h-14 w-14 text-primary mb-6" />
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 bg-black text-white">
+        <Sparkles className="h-14 w-14 text-white/40 mb-6" />
+        <h1 style={SPACE} className="text-4xl md:text-6xl font-bold tracking-[-0.04em] mb-3">
           Muy pronto: Producto de la Semana
         </h1>
-        <p className="text-muted-foreground max-w-lg mb-6">
+        <p className="text-white/60 max-w-lg mb-8">
           Estamos preparando una oferta exclusiva con hasta 80% de descuento. Vuelve pronto para
           descubrirla.
         </p>
-        <Button asChild size="lg">
+        <Button
+          asChild
+          size="lg"
+          className="rounded-full bg-white text-black hover:bg-white/90 font-bold px-8"
+        >
           <Link to="/tienda">Explorar la tienda</Link>
         </Button>
       </div>
@@ -97,57 +107,86 @@ function WeeklyDealPage() {
 
 function DealBody({ deal }: { deal: Deal }) {
   const reveal = useCountdown(deal.reveal_at);
-  const revealed = reveal.done;
-
-  if (!revealed) return <TeaserState deal={deal} />;
+  if (!reveal.done) return <TeaserState deal={deal} />;
   return <RevealedState deal={deal} />;
 }
 
 /* ============================== ESTADO 1: EXPECTATIVA ============================== */
 
 function TeaserState({ deal }: { deal: Deal }) {
+  const teasers = (deal.teaser_images ?? []).filter(Boolean);
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    if (teasers.length < 2) return;
+    const t = setInterval(() => setIdx((p) => (p + 1) % teasers.length), 3500);
+    return () => clearInterval(t);
+  }, [teasers.length]);
+
   return (
-    <div className="relative min-h-[85vh] overflow-hidden bg-gradient-to-br from-slate-950 via-primary/40 to-slate-900 text-white">
-      {/* Ambient blobs */}
-      <div className="pointer-events-none absolute inset-0 opacity-60">
-        <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-secondary/40 blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-primary/50 blur-3xl animate-pulse" />
-      </div>
-
-      <div className="relative container mx-auto px-4 py-20 md:py-28 flex flex-col items-center text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs uppercase tracking-[0.25em] backdrop-blur mb-8">
-          <Sparkles className="h-3.5 w-3.5" /> Producto de la Semana
+    <div className="bg-black text-white">
+      <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-6 py-20 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 opacity-50">
+          <div className="absolute -top-40 -left-40 h-[32rem] w-[32rem] rounded-full bg-secondary/25 blur-[120px]" />
+          <div className="absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-primary/40 blur-[120px]" />
         </div>
 
-        <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight max-w-4xl leading-[1.05]">
-          Algo <span className="text-secondary">increíble</span> está por revelarse
-        </h1>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          className="relative z-10 flex flex-col items-center"
+        >
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[10px] uppercase tracking-[0.3em] backdrop-blur mb-8">
+            <Sparkles className="h-3 w-3" /> Producto de la Semana
+          </span>
 
-        <p className="mt-6 text-lg md:text-xl text-white/70 max-w-2xl">
-          Un producto seleccionado con hasta{" "}
-          <span className="font-bold text-white">{Math.round(deal.discount_percent)}% OFF</span>.
-          Stock limitado, tiempo limitado.
-        </p>
+          <h1
+            style={SPACE}
+            className="text-[clamp(2.5rem,9vw,7rem)] font-bold tracking-[-0.05em] leading-[0.92] max-w-5xl bg-gradient-to-b from-white via-white to-white/40 bg-clip-text text-transparent"
+          >
+            Algo increíble
+            <br />
+            está por llegar.
+          </h1>
 
-        <div className="mt-12">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/60 mb-4">Se revela en</p>
+          <p className="mt-8 text-lg md:text-2xl text-white/50 max-w-2xl font-light">
+            Un producto seleccionado con hasta{" "}
+            <span className="text-white font-medium">
+              {Math.round(deal.discount_percent)}% menos
+            </span>
+            . Stock limitado. Tiempo limitado.
+          </p>
+
+          <p className="mt-14 text-[10px] uppercase tracking-[0.35em] text-white/40 mb-4">
+            Se revela en
+          </p>
           <Countdown target={deal.reveal_at} />
-        </div>
+        </motion.div>
 
-        {/* Silueta / caja misteriosa */}
-        <div className="mt-16 relative w-full max-w-lg aspect-square">
-          <div className="absolute inset-0 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md" />
-          <div className="absolute inset-8 rounded-2xl bg-gradient-to-br from-white/5 to-transparent flex items-center justify-center">
-            <ShoppingBag className="h-32 w-32 text-white/20" strokeWidth={1} />
-          </div>
-          <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-primary/30 via-secondary/30 to-primary/30 blur-2xl -z-10 animate-pulse" />
+        {/* Silueta o foto sorpresa */}
+        <div className="relative z-10 mt-16 w-full max-w-2xl aspect-square rounded-[2rem] border border-white/10 bg-white/[0.03] overflow-hidden flex items-center justify-center">
+          {teasers[idx] ? (
+            <motion.img
+              key={teasers[idx]}
+              src={teasers[idx]}
+              alt="Pista del Producto de la Semana"
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.9 }}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <ShoppingBag className="h-40 w-40 text-white/10" strokeWidth={0.75} />
+          )}
         </div>
+      </section>
 
-        <p className="mt-12 text-white/60 text-sm max-w-md">
-          Activa las notificaciones o vuelve pronto — cuando el reloj llegue a cero, la oferta se
-          revela y comienza la cuenta regresiva para comprar.
-        </p>
-      </div>
+      <section className="py-20 border-t border-white/10">
+        <div className="container mx-auto px-6 max-w-xl">
+          <NewsletterSignup />
+        </div>
+      </section>
     </div>
   );
 }
@@ -156,7 +195,7 @@ function TeaserState({ deal }: { deal: Deal }) {
 
 function RevealedState({ deal }: { deal: Deal }) {
   const product = deal.product!;
-  const images = product.images ?? [];
+  const images = (product.images ?? []).filter(Boolean);
   const [idx, setIdx] = useState(0);
   const { add } = useCart();
   const navigate = useNavigate();
@@ -173,12 +212,18 @@ function RevealedState({ deal }: { deal: Deal }) {
 
   if (end.done) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-        <h1 className="text-4xl md:text-5xl font-bold mb-3">La oferta terminó</h1>
-        <p className="text-muted-foreground mb-6 max-w-md">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 bg-black text-white">
+        <h1 style={SPACE} className="text-4xl md:text-6xl font-bold tracking-[-0.04em] mb-3">
+          La oferta terminó
+        </h1>
+        <p className="text-white/60 mb-8 max-w-md">
           El Producto de la Semana ya no está disponible. Vuelve pronto para la próxima revelación.
         </p>
-        <Button asChild size="lg">
+        <Button
+          asChild
+          size="lg"
+          className="rounded-full bg-white text-black hover:bg-white/90 font-bold px-8"
+        >
           <Link to="/tienda">Ir a la tienda</Link>
         </Button>
       </div>
@@ -200,66 +245,92 @@ function RevealedState({ deal }: { deal: Deal }) {
     navigate({ to: "/checkout" });
   };
 
-  return (
-    <div className="bg-white text-neutral-900">
-      {/* ============ HERO (Apple-style) ============ */}
-      <section
-        className={`relative overflow-hidden ${
-          urgent ? "bg-gradient-to-b from-red-950 to-neutral-950" : "bg-gradient-to-b from-neutral-950 to-neutral-900"
-        } text-white`}
-      >
-        <div className="container mx-auto px-6 pt-16 pb-8 md:pt-24 md:pb-12 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-[11px] uppercase tracking-[0.3em] backdrop-blur mb-6">
-            <Zap className="h-3.5 w-3.5 text-secondary" /> Oferta Revelada · Solo por tiempo limitado
-          </div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold tracking-tight leading-[1.02] max-w-5xl mx-auto">
-            {product.name}
-          </h1>
-          {product.short_description && (
-            <p className="mt-6 text-xl md:text-2xl text-white/70 max-w-2xl mx-auto font-light">
-              {product.short_description}
-            </p>
-          )}
+  // Los párrafos de la descripción se muestran como bloques grandes alternando fondo.
+  const paragraphs = (product.description ?? "")
+    .split("\n")
+    .map((p) => p.trim())
+    .filter(Boolean);
 
-          <div className="mt-10 flex flex-col items-center gap-3">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/60">
-              {urgent ? "¡Se acaba pronto!" : "Termina en"}
-            </p>
-            <Countdown target={deal.ends_at} urgent={urgent} />
-          </div>
+  return (
+    <div className="bg-black text-white">
+      {/* ============ HERO ============ */}
+      <section className="relative overflow-hidden">
+        <div className="container mx-auto px-6 pt-16 md:pt-24 pb-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[10px] uppercase tracking-[0.3em] backdrop-blur mb-8">
+              <Zap className="h-3 w-3 text-secondary" /> Producto de la Semana
+            </span>
+
+            <h1
+              style={SPACE}
+              className="text-[clamp(2.5rem,8vw,6.5rem)] font-bold tracking-[-0.05em] leading-[0.92] max-w-5xl mx-auto bg-gradient-to-b from-white via-white to-white/50 bg-clip-text text-transparent"
+            >
+              {product.name}
+            </h1>
+
+            {product.short_description && (
+              <p className="mt-7 text-xl md:text-3xl text-white/50 max-w-3xl mx-auto font-light leading-snug">
+                {product.short_description}
+              </p>
+            )}
+
+            <div className="mt-8 flex flex-wrap items-baseline justify-center gap-x-4 gap-y-1">
+              <span style={SPACE} className="text-4xl md:text-6xl font-bold tracking-[-0.03em]">
+                {formatCOP(final)}
+              </span>
+              <span className="text-lg md:text-2xl text-white/30 line-through">
+                {formatCOP(original)}
+              </span>
+              <span className="text-sm md:text-base font-semibold text-secondary">
+                Ahorras {formatCOP(savings)}
+              </span>
+            </div>
+          </motion.div>
         </div>
 
-        {/* Imagen protagónica */}
-        <div className="container mx-auto px-6 pb-16 md:pb-24">
-          <div className="relative mx-auto max-w-4xl aspect-[4/3] md:aspect-[16/10] rounded-3xl bg-white overflow-hidden shadow-2xl">
+        {/* Imagen protagónica a sangre */}
+        <div className="relative">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+            className="relative mx-auto max-w-6xl aspect-[16/10] md:aspect-[16/9]"
+          >
             {images[idx] ? (
               <img
                 src={images[idx]}
                 alt={product.name}
-                className="absolute inset-0 h-full w-full object-contain p-6 md:p-12"
+                className="absolute inset-0 h-full w-full object-contain"
                 onError={(e) => {
                   const t = e.target as HTMLImageElement;
                   if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
                 }}
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-neutral-400">
+              <div className="absolute inset-0 flex items-center justify-center text-white/30">
                 Sin imagen
               </div>
             )}
-            <div className="absolute top-4 left-4 md:top-6 md:left-6 rounded-full bg-red-600 text-white font-bold px-4 py-2 text-sm md:text-base shadow-lg">
+            <span className="absolute top-2 left-2 md:top-6 md:left-6 rounded-full bg-secondary text-white font-bold px-4 py-2 text-sm">
               −{Math.round(deal.discount_percent)}%
-            </div>
-          </div>
+            </span>
+          </motion.div>
+
           {images.length > 1 && (
-            <div className="mt-6 flex justify-center gap-3">
-              {images.slice(0, 5).map((img, i) => (
+            <div className="mt-6 flex justify-center gap-2.5 pb-4">
+              {images.slice(0, 6).map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setIdx(i)}
-                  className={`h-16 w-16 rounded-lg overflow-hidden border-2 transition ${
-                    i === idx ? "border-white" : "border-white/20 hover:border-white/50"
-                  }`}
+                  aria-label={`Ver imagen ${i + 1}`}
+                  className={cn(
+                    "h-14 w-14 rounded-xl overflow-hidden border transition-all",
+                    i === idx ? "border-white scale-105" : "border-white/15 hover:border-white/40",
+                  )}
                 >
                   <img src={img} alt="" className="h-full w-full object-cover" />
                 </button>
@@ -267,28 +338,36 @@ function RevealedState({ deal }: { deal: Deal }) {
             </div>
           )}
         </div>
+
+        {/* Contador */}
+        <div className="container mx-auto px-6 pb-16 md:pb-24 flex flex-col items-center">
+          <p className="text-[10px] uppercase tracking-[0.35em] text-white/40 mb-4">
+            {urgent ? "¡Se acaba pronto!" : "Termina en"}
+          </p>
+          <Countdown target={deal.ends_at} urgent={urgent} />
+        </div>
       </section>
 
-      {/* ============ PRECIO + CTA ============ */}
-      <section className="border-b border-neutral-200 bg-white sticky top-16 z-30 backdrop-blur">
-        <div className="container mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-baseline gap-3 flex-wrap justify-center">
-            <span className="text-3xl md:text-4xl font-bold text-red-600">{formatCOP(final)}</span>
-            <span className="text-lg text-neutral-400 line-through">{formatCOP(original)}</span>
-            <span className="text-sm font-semibold text-green-600">
-              Ahorras {formatCOP(savings)}
-            </span>
+      {/* ============ BARRA STICKY DE COMPRA ============ */}
+      <section className="sticky top-[calc(5rem+1.75rem)] md:top-[calc(6rem+1.75rem)] z-30 bg-black/80 backdrop-blur-xl border-y border-white/10">
+        <div className="container mx-auto px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3">
+            <span className="text-2xl font-bold">{formatCOP(final)}</span>
+            <span className="text-sm text-white/30 line-through">{formatCOP(original)}</span>
           </div>
-          <div className="flex items-center gap-3">
-            <Button asChild variant="outline" size="lg">
+          <div className="flex items-center gap-2">
+            <Button
+              asChild
+              variant="ghost"
+              className="rounded-full text-white hover:bg-white/10 font-semibold"
+            >
               <Link to="/producto/$slug" params={{ slug: product.slug }}>
                 Ver detalles
               </Link>
             </Button>
             <Button
-              size="lg"
               onClick={buyNow}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-8"
+              className="rounded-full bg-white text-black hover:bg-white/90 font-bold px-8"
             >
               Comprar ahora
             </Button>
@@ -297,66 +376,116 @@ function RevealedState({ deal }: { deal: Deal }) {
         {deal.stock_limit && deal.stock_limit > 0 && <StockBar limit={deal.stock_limit} />}
       </section>
 
-      {/* ============ BENEFICIOS (Apple-style tipografía grande) ============ */}
-      {product.description && (
-        <section className="py-20 md:py-32">
-          <div className="container mx-auto px-6 max-w-3xl">
-            <h2 className="text-4xl md:text-6xl font-semibold tracking-tight text-center mb-12 leading-tight">
-              Todo lo que necesitas.
-              <br />
-              <span className="text-neutral-500">Nada de lo que no.</span>
-            </h2>
-            <div className="prose prose-lg md:prose-xl max-w-none prose-neutral text-neutral-700 leading-relaxed">
-              {product.description.split("\n").map((line, i) => (
-                <p key={i}>{line}</p>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ============ TRUST BADGES ============ */}
-      <section className="bg-neutral-50 py-16">
-        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="flex flex-col items-center gap-3">
-            <Truck className="h-10 w-10 text-primary" />
-            <h3 className="font-semibold text-lg">Envío a todo Colombia</h3>
-            <p className="text-sm text-neutral-500">Coordinamos el despacho en menos de 24h.</p>
-          </div>
-          <div className="flex flex-col items-center gap-3">
-            <ShieldCheck className="h-10 w-10 text-primary" />
-            <h3 className="font-semibold text-lg">Producto 100% original</h3>
-            <p className="text-sm text-neutral-500">Garantía del fabricante incluida.</p>
-          </div>
-          <div className="flex flex-col items-center gap-3">
-            <Zap className="h-10 w-10 text-primary" />
-            <h3 className="font-semibold text-lg">Checkout rápido</h3>
-            <p className="text-sm text-neutral-500">Compra en menos de 60 segundos.</p>
-          </div>
+      {/* ============ BLOQUES DE BENEFICIOS (alternando negro/blanco) ============ */}
+      <section className="bg-white text-neutral-950">
+        <div className="container mx-auto px-6 py-24 md:py-36 text-center max-w-4xl">
+          <h2
+            style={SPACE}
+            className="text-[clamp(2rem,6vw,4.5rem)] font-bold tracking-[-0.04em] leading-[1.02]"
+          >
+            Todo lo que necesitas.
+            <br />
+            <span className="text-neutral-400">Nada de lo que no.</span>
+          </h2>
+          {paragraphs[0] && (
+            <p className="mt-8 text-lg md:text-2xl text-neutral-600 font-light leading-relaxed">
+              {paragraphs[0]}
+            </p>
+          )}
         </div>
       </section>
 
-      {/* ============ CTA FINAL + NEWSLETTER ============ */}
-      <section className="py-20 bg-gradient-to-b from-neutral-900 to-black text-white text-center">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl md:text-5xl font-semibold mb-4">No lo pienses más.</h2>
-          <p className="text-white/70 mb-8">Cuando el reloj llegue a cero, la oferta desaparece.</p>
-          <Countdown target={deal.ends_at} urgent={urgent} compact />
-          <div className="mt-8">
-            <Button
-              size="lg"
-              onClick={buyNow}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-10 py-6 text-lg"
+      {images[1] && (
+        <section className="bg-black">
+          <img
+            src={images[1]}
+            alt={product.name}
+            className="w-full max-h-[80vh] object-contain mx-auto"
+          />
+        </section>
+      )}
+
+      {paragraphs.slice(1).map((text, i) => (
+        <section
+          key={i}
+          className={cn(i % 2 === 0 ? "bg-black text-white" : "bg-white text-neutral-950")}
+        >
+          <div className="container mx-auto px-6 py-20 md:py-28 max-w-3xl text-center">
+            <p
+              className={cn(
+                "text-xl md:text-3xl font-light leading-relaxed",
+                i % 2 === 0 ? "text-white/70" : "text-neutral-600",
+              )}
             >
-              Comprar ahora por {formatCOP(final)}
-            </Button>
+              {text}
+            </p>
+          </div>
+        </section>
+      ))}
+
+      {/* ============ GARANTÍAS ============ */}
+      <section className="bg-[#f5f5f7] text-neutral-950">
+        <div className="container mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+          <Perk
+            icon={<Truck className="h-8 w-8" />}
+            title="Envío gratis desde $200.000"
+            text={`${FREE_SHIPPING_CITIES_TEXT}. ${FREE_SHIPPING_REST_TEXT}`}
+          />
+          <Perk
+            icon={<ShieldCheck className="h-8 w-8" />}
+            title="Producto 100% original"
+            text="Garantía del fabricante incluida en cada compra."
+          />
+          <Perk
+            icon={<Zap className="h-8 w-8" />}
+            title="Checkout en 60 segundos"
+            text="Paga con PSE, tarjeta, Nequi o financia con Addi."
+          />
+        </div>
+      </section>
+
+      {/* ============ CIERRE ============ */}
+      <section className="bg-black text-white text-center">
+        <div className="container mx-auto px-6 py-24 md:py-32">
+          <h2
+            style={SPACE}
+            className="text-[clamp(2rem,6vw,4.5rem)] font-bold tracking-[-0.04em] leading-[1.02]"
+          >
+            No lo pienses más.
+          </h2>
+          <p className="text-white/50 mt-4 text-lg">
+            Cuando el reloj llegue a cero, la oferta desaparece.
+          </p>
+
+          <div className="mt-10 flex justify-center">
+            <Countdown target={deal.ends_at} urgent={urgent} compact />
           </div>
 
-          <div className="mt-16 max-w-xl mx-auto">
+          <Button
+            size="lg"
+            onClick={buyNow}
+            className="mt-10 rounded-full bg-white text-black hover:bg-white/90 font-bold px-10 py-6 text-lg"
+          >
+            Comprar ahora por {formatCOP(final)}
+          </Button>
+
+          <div className="mt-20 max-w-xl mx-auto">
             <NewsletterSignup />
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function Perk({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="text-neutral-950">{icon}</div>
+      <h3 style={SPACE} className="font-bold text-lg">
+        {title}
+      </h3>
+      <p className="text-sm text-neutral-500 max-w-xs leading-relaxed">{text}</p>
     </div>
   );
 }
@@ -392,9 +521,9 @@ function NewsletterSignup() {
 
   if (done) {
     return (
-      <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
+      <div className="rounded-2xl border border-white/15 bg-white/5 p-6 text-white">
         <p className="text-lg font-semibold">¡Listo! Te avisaremos.</p>
-        <p className="text-white/70 text-sm mt-1">
+        <p className="text-white/60 text-sm mt-1">
           Recibirás un correo cuando revelemos el próximo Producto de la Semana.
         </p>
       </div>
@@ -402,11 +531,14 @@ function NewsletterSignup() {
   }
 
   return (
-    <form onSubmit={submit} className="text-left">
-      <p className="text-xs uppercase tracking-[0.3em] text-white/60 mb-2 text-center">
+    <form onSubmit={submit} className="text-left text-white">
+      <p className="text-[10px] uppercase tracking-[0.35em] text-white/40 mb-2 text-center">
         No te pierdas el próximo
       </p>
-      <h3 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+      <h3
+        style={SPACE}
+        className="text-2xl md:text-3xl font-bold text-center mb-6 tracking-[-0.02em]"
+      >
         Recibe las próximas revelaciones
       </h3>
       <div className="flex flex-col sm:flex-row gap-2">
@@ -416,18 +548,18 @@ function NewsletterSignup() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="tu@correo.com"
-          className="flex-1 rounded-lg bg-white/10 border border-white/20 px-4 py-3 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-secondary"
+          className="flex-1 rounded-full bg-white/10 border border-white/20 px-5 py-3 text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-white/40"
         />
         <Button
           type="submit"
           size="lg"
           disabled={loading}
-          className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold"
+          className="rounded-full bg-white text-black hover:bg-white/90 font-bold px-8"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Suscribirme"}
         </Button>
       </div>
-      <label className="mt-4 flex items-start gap-2 text-xs text-white/70 cursor-pointer">
+      <label className="mt-4 flex items-start gap-2 text-xs text-white/60 cursor-pointer">
         <input
           type="checkbox"
           checked={consent}
@@ -436,7 +568,7 @@ function NewsletterSignup() {
         />
         <span>
           Acepto el tratamiento de mis datos personales conforme a la{" "}
-          <Link to="/politica-privacidad" className="underline hover:text-white">
+          <Link to="/legal" className="underline hover:text-white">
             Política de Privacidad
           </Link>{" "}
           de All For All para recibir comunicaciones comerciales.
@@ -463,14 +595,11 @@ function StockBar({ limit }: { limit: number }) {
   return (
     <div className="container mx-auto px-6 pb-3">
       <div className="flex items-center justify-between text-xs mb-1">
-        <span className="font-semibold text-red-600">¡Últimas unidades!</span>
-        <span className="text-neutral-500">{pct}% reservado</span>
+        <span className="font-semibold text-secondary">¡Últimas unidades!</span>
+        <span className="text-white/40">{pct}% reservado</span>
       </div>
-      <div className="h-2 rounded-full bg-neutral-200 overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all"
-          style={{ width: `${pct}%` }}
-        />
+      <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+        <div className="h-full bg-secondary transition-all" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );

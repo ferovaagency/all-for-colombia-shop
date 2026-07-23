@@ -818,6 +818,59 @@ export type Database = {
           },
         ]
       }
+      promo_coupons: {
+        Row: {
+          code: string
+          created_at: string
+          discount_percent: number | null
+          ends_at: string | null
+          headline: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          product_id: string
+          sort_order: number
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          discount_percent?: number | null
+          ends_at?: string | null
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          product_id: string
+          sort_order?: number
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          discount_percent?: number | null
+          ends_at?: string | null
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          product_id?: string
+          sort_order?: number
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_coupons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -849,6 +902,7 @@ export type Database = {
           product_id: string
           reveal_at: string
           stock_limit: number | null
+          teaser_images: string[]
           updated_at: string
         }
         Insert: {
@@ -860,6 +914,7 @@ export type Database = {
           product_id: string
           reveal_at: string
           stock_limit?: number | null
+          teaser_images?: string[]
           updated_at?: string
         }
         Update: {
@@ -871,6 +926,7 @@ export type Database = {
           product_id?: string
           reveal_at?: string
           stock_limit?: number | null
+          teaser_images?: string[]
           updated_at?: string
         }
         Relationships: [

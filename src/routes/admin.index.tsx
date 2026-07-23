@@ -216,7 +216,7 @@ function AdminPage() {
           </TabsTrigger>
           <TabsTrigger value="blog">Blog ({posts.length})</TabsTrigger>
           <TabsTrigger value="weekly-deal">
-            <Sparkles className="h-3.5 w-3.5 mr-1" /> Producto Semana
+            <Sparkles className="h-3.5 w-3.5 mr-1" /> Producto Semana y Cupones
           </TabsTrigger>
           <TabsTrigger value="conversations">
             <MessageSquare className="h-3.5 w-3.5 mr-1" /> Conversaciones IA ({conversations.length})

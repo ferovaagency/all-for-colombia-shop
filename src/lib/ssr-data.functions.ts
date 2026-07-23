@@ -11,14 +11,17 @@ import { z } from "zod";
 export const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // El home necesita el árbol completo de categorías (para agrupar por
+    // subcategoría en el grid dinámico) y suficientes productos para el
+    // catálogo con "Ver más".
     const [cats, prods, brs, blog] = await Promise.all([
-      supabaseAdmin.from("categories").select("*").is("parent_id", null).order("sort_order"),
+      supabaseAdmin.from("categories").select("*").order("sort_order"),
       supabaseAdmin
         .from("products")
         .select("*")
         .eq("active", true)
         .order("updated_at", { ascending: false })
-        .limit(12),
+        .limit(60),
       supabaseAdmin
         .from("brands")
         .select("*")
