@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { WideProductCard } from "@/components/shop/HomeCatalog";
 import { Reveal } from "@/components/shop/Reveal";
 import { FreeShippingStrip } from "@/components/shop/ShippingNotice";
+import { LogitechColorViewer } from "@/components/shop/LogitechColorViewer";
 import { formatCOP, useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/analytics";
 import { ArrowRight, ArrowUpRight, ShoppingCart } from "lucide-react";
@@ -349,6 +350,9 @@ function LogitechMicrosite() {
           </section>
         </Reveal>
       )}
+
+      {/* ============ VISOR DE COLORES (fotos oficiales del fabricante) ============ */}
+      <LogitechColorViewer />
 
       {/* ============ PRODUCTO DESTACADO (imagen 5) ============ */}
       {hero && <FeaturedShowcase product={hero} />}

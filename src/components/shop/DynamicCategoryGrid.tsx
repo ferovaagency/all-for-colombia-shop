@@ -146,9 +146,9 @@ export function DynamicCategoryGrid({
         </div>
 
         {/* ---- Grid ----
-             Sin AnimatePresence: con mode="wait" el panel saliente bloqueaba
-             al entrante y el contenido se quedaba congelado al cambiar de
-             pestaña. La animación de entrada por `key` es suficiente. */}
+             Al cambiar de pestaña sólo animamos la entrada del panel nuevo:
+             una salida encadenada con AnimatePresence mode="wait" retrasa el
+             cambio sin aportar nada. La `key` reinicia la animación. */}
         <motion.div
           key={tab}
           initial={{ opacity: 0, y: 12 }}
@@ -156,26 +156,26 @@ export function DynamicCategoryGrid({
           transition={{ duration: 0.3 }}
           className="mt-6 md:mt-8 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-3 md:gap-4"
         >
-            {tab === OFERTAS ? (
-              <>
-                <WeeklyDealBigCard deal={deal} />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  {coupons.map((c) => (
-                    <CouponCard key={c.id} coupon={c} />
-                  ))}
-                  {coupons.length === 0 && <EmptySlot text="Cupones próximamente" />}
-                </div>
-              </>
-            ) : (
-              <>
-                <CategoryBigCard product={catProducts[0]} catName={activeCat?.name ?? ""} />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                  {catProducts.slice(1, 5).map((p) => (
-                    <SmallProductCard key={p.id} product={p} />
-                  ))}
-                  {catProducts.length <= 1 && <EmptySlot text="Muy pronto más productos" />}
-                </div>
-              </>
+          {tab === OFERTAS ? (
+            <>
+              <WeeklyDealBigCard deal={deal} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                {coupons.map((c) => (
+                  <CouponCard key={c.id} coupon={c} />
+                ))}
+                {coupons.length === 0 && <EmptySlot text="Cupones próximamente" />}
+              </div>
+            </>
+          ) : (
+            <>
+              <CategoryBigCard product={catProducts[0]} catName={activeCat?.name ?? ""} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                {catProducts.slice(1, 5).map((p) => (
+                  <SmallProductCard key={p.id} product={p} />
+                ))}
+                {catProducts.length <= 1 && <EmptySlot text="Muy pronto más productos" />}
+              </div>
+            </>
           )}
         </motion.div>
       </div>

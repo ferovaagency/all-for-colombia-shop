@@ -350,3 +350,10 @@
 @media (min-width: 1536px) {
   .container { padding-left: 3rem; padding-right: 3rem; }
 }
+
+/* Fundido de entrada del visor de colores Logitech. Se dispara al remontar
+   la imagen (cambio de `key`), sin depender del evento onLoad. */
+@keyframes logi-fade {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
