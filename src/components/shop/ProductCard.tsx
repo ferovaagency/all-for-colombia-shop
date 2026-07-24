@@ -1,16 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingCart, MessageCircle } from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
-import { MiniCountdown } from "@/components/WeeklyDealCountdown";
+import { OfferCountdownBadge } from "@/components/shop/OfferCountdown";
 import { trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
-
-function getEndOfWeek() {
-  const now = new Date();
-  const daysUntilSunday = (7 - now.getDay()) % 7;
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilSunday, 23, 59, 59, 999);
-}
 
 type Product = {
   id: string;
@@ -25,15 +18,12 @@ type Product = {
 
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
-  const [endOfWeek] = useState(getEndOfWeek);
   const finalPrice = product.sale_price ?? product.price ?? 0;
-  const hasDiscount =
-    !!product.sale_price && !!product.price && product.sale_price < product.price;
+  const hasDiscount = !!product.sale_price && !!product.price && product.sale_price < product.price;
   const discountPct = hasDiscount
     ? Math.round((1 - (product.sale_price as number) / (product.price as number)) * 100)
     : 0;
-  const hasStock =
-    product.stock !== null && product.stock !== undefined && product.stock > 0;
+  const hasStock = product.stock !== null && product.stock !== undefined && product.stock > 0;
   const img = product.images?.[0];
 
   return (
@@ -52,7 +42,7 @@ export function ProductCard({ product }: { product: Product }) {
             decoding="async"
             onError={(e) => {
               const t = e.target as HTMLImageElement;
-              if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg';
+              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
             }}
           />
         ) : (
@@ -78,7 +68,9 @@ export function ProductCard({ product }: { product: Product }) {
             {product.name}
           </h3>
         </Link>
-        {product.sku && <p className="text-[10px] text-muted-foreground mb-1.5">SKU: {product.sku}</p>}
+        {product.sku && (
+          <p className="text-[10px] text-muted-foreground mb-1.5">SKU: {product.sku}</p>
+        )}
 
         <div className="mt-auto">
           {hasStock ? (
@@ -100,7 +92,7 @@ export function ProductCard({ product }: { product: Product }) {
                     <span className="text-[10px] font-semibold text-destructive uppercase tracking-wide">
                       Termina en
                     </span>
-                    <MiniCountdown target={endOfWeek} />
+                    <OfferCountdownBadge />
                   </div>
                 </div>
               ) : (

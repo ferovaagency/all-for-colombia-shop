@@ -7,6 +7,8 @@ import { Countdown, useCountdown } from "@/components/WeeklyDealCountdown";
 import { formatCOP, useCart } from "@/lib/cart";
 import { syncToBrevo } from "@/lib/brevo";
 import { FREE_SHIPPING_CITIES_TEXT, FREE_SHIPPING_REST_TEXT } from "@/lib/shipping";
+import { recordLegalAcceptance } from "@/lib/consent";
+import { LegalLink } from "@/components/legal/ConsentControls";
 import { Sparkles, ShoppingBag, Zap, ShieldCheck, Truck, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -515,6 +517,11 @@ function NewsletterSignup() {
       return;
     }
     await syncToBrevo(emailLc, "weekly_deal", { SOURCE: "producto-semana" }).catch(() => {});
+    recordLegalAcceptance({
+      keys: ["privacidad"],
+      origin: "newsletter-producto-semana",
+      reference: emailLc,
+    }).catch(() => {});
     setLoading(false);
     setDone(true);
   };
@@ -568,10 +575,8 @@ function NewsletterSignup() {
         />
         <span>
           Acepto el tratamiento de mis datos personales conforme a la{" "}
-          <Link to="/legal" className="underline hover:text-white">
-            Política de Privacidad
-          </Link>{" "}
-          de All For All para recibir comunicaciones comerciales.
+          <LegalLink doc="privacidad" className="hover:text-white" /> de All For All para recibir
+          comunicaciones comerciales.
         </span>
       </label>
       {error && <p className="mt-3 text-sm text-red-400">{error}</p>}

@@ -6,11 +6,21 @@ import { useCart, formatCOP } from "@/lib/cart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCarousel } from "@/components/products/ProductCarousel";
 import { PaymentMethodsBadges } from "@/components/products/PaymentMethodsBadges";
-import { ShoppingCart, ChevronRight, Star, ShieldCheck, Package, Clock, MessageCircle } from "lucide-react";
+import {
+  ShoppingCart,
+  ChevronRight,
+  Star,
+  ShieldCheck,
+  Package,
+  Clock,
+  MessageCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { trackViewItem, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { getProductBySlug } from "@/lib/ssr-data.functions";
+import { LegalLink } from "@/components/legal/ConsentControls";
+import { OfferCountdownBadge, OfferCountdownBanner } from "@/components/shop/OfferCountdown";
 
 export const Route = createFileRoute("/producto/$slug")({
   loader: ({ params }) => getProductBySlug({ data: { slug: params.slug } }),
@@ -18,7 +28,10 @@ export const Route = createFileRoute("/producto/$slug")({
     const p: any = (loaderData as any)?.product;
     if (!p) return { meta: [{ title: "Producto — All For All" }] };
     const title = p.meta_title || `${p.name} — All For All`;
-    const description = p.meta_description || p.short_description || `Compra ${p.name} en All For All. Envíos a toda Colombia.`;
+    const description =
+      p.meta_description ||
+      p.short_description ||
+      `Compra ${p.name} en All For All. Envíos a toda Colombia.`;
     const image = Array.isArray(p.images) && p.images[0] ? p.images[0] : undefined;
     const meta: Array<Record<string, string>> = [
       { title },
@@ -104,7 +117,11 @@ function ProductDetailPage() {
 
   useEffect(() => {
     if (!product?.id) return;
-    supabase.from('product_reviews').select('*').eq('product_id', product.id).order('created_at', { ascending: true })
+    supabase
+      .from("product_reviews")
+      .select("*")
+      .eq("product_id", product.id)
+      .order("created_at", { ascending: true })
       .then(({ data }) => setReviews((data || []) as Review[]));
     trackViewItem({
       item_id: product.sku || product.id,
@@ -117,7 +134,6 @@ function ProductDetailPage() {
 
   // (carruseles delegados a <ProductCarousel />)
 
-
   // Update document head with meta tags + Open Graph
   useEffect(() => {
     if (!product) return;
@@ -126,12 +142,20 @@ function ProductDetailPage() {
     document.title = title;
     const setMeta = (name: string, content: string) => {
       let m = document.querySelector(`meta[name="${name}"]`);
-      if (!m) { m = document.createElement("meta"); m.setAttribute("name", name); document.head.appendChild(m); }
+      if (!m) {
+        m = document.createElement("meta");
+        m.setAttribute("name", name);
+        document.head.appendChild(m);
+      }
       m.setAttribute("content", content);
     };
     const setOG = (property: string, content: string) => {
       let m = document.querySelector(`meta[property="${property}"]`);
-      if (!m) { m = document.createElement("meta"); m.setAttribute("property", property); document.head.appendChild(m); }
+      if (!m) {
+        m = document.createElement("meta");
+        m.setAttribute("property", property);
+        document.head.appendChild(m);
+      }
       m.setAttribute("content", content);
     };
     setMeta("description", desc);
@@ -142,7 +166,11 @@ function ProductDetailPage() {
   }, [product?.id]);
 
   const finalPrice = product?.sale_price ?? product?.price ?? 0;
-  const hasDiscount = !!(product?.sale_price && product?.price && product.sale_price < product.price);
+  const hasDiscount = !!(
+    product?.sale_price &&
+    product?.price &&
+    product.sale_price < product.price
+  );
   const inStock = (product?.stock ?? 0) > 0;
   const images = useMemo(() => product?.images ?? [], [product?.images]);
 
@@ -156,7 +184,9 @@ function ProductDetailPage() {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h1 className="text-2xl font-bold mb-2">Producto no encontrado</h1>
-        <p className="text-muted-foreground mb-6">El producto que buscas no existe o no está disponible.</p>
+        <p className="text-muted-foreground mb-6">
+          El producto que buscas no existe o no está disponible.
+        </p>
         <Button asChild>
           <Link to="/tienda">Volver a la tienda</Link>
         </Button>
@@ -184,13 +214,12 @@ function ProductDetailPage() {
     toast.success(`${product.name} agregado al carrito`);
   };
 
-  const specsEntries = product.specs && typeof product.specs === "object"
-    ? Object.entries(product.specs as Record<string, unknown>)
-    : [];
+  const specsEntries =
+    product.specs && typeof product.specs === "object"
+      ? Object.entries(product.specs as Record<string, unknown>)
+      : [];
 
-  const avgRating = reviews.length
-    ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
-    : 0;
+  const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
 
   const jsonLd = {
     "@context": "https://schema.org/",
@@ -211,13 +240,20 @@ function ProductDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-6 flex-wrap">
-        <Link to="/" className="hover:text-foreground">Inicio</Link>
+        <Link to="/" className="hover:text-foreground">
+          Inicio
+        </Link>
         <ChevronRight className="h-3 w-3" />
-        <Link to="/tienda" className="hover:text-foreground">Tienda</Link>
+        <Link to="/tienda" className="hover:text-foreground">
+          Tienda
+        </Link>
         {product.categories?.name && (
           <>
             <ChevronRight className="h-3 w-3" />
@@ -240,9 +276,19 @@ function ProductDetailPage() {
         <div>
           <div className="aspect-square max-w-md mx-auto md:mx-0 bg-white rounded-xl overflow-hidden border flex items-center justify-center p-6 md:p-10">
             {images[imageIdx] ? (
-              <img src={images[imageIdx]} alt={product.name} className="max-w-full max-h-full object-contain" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
+              <img
+                src={images[imageIdx]}
+                alt={product.name}
+                className="max-w-full max-h-full object-contain"
+                onError={(e) => {
+                  const t = e.target as HTMLImageElement;
+                  if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+                }}
+              />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">Sin imagen</div>
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                Sin imagen
+              </div>
             )}
           </div>
           {images.length > 1 && (
@@ -253,10 +299,20 @@ function ProductDetailPage() {
                   onClick={() => setImageIdx(i)}
                   className={cn(
                     "aspect-square rounded-lg overflow-hidden border-2 bg-white flex items-center justify-center p-1",
-                    i === imageIdx ? "border-primary" : "border-transparent hover:border-muted-foreground/30",
+                    i === imageIdx
+                      ? "border-primary"
+                      : "border-transparent hover:border-muted-foreground/30",
                   )}
                 >
-                  <img src={img} alt="" className="max-w-full max-h-full object-contain" onError={(e) => { const t = e.target as HTMLImageElement; if (!t.src.endsWith('/placeholder.svg')) t.src = '/placeholder.svg'; }} />
+                  <img
+                    src={img}
+                    alt=""
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      const t = e.target as HTMLImageElement;
+                      if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+                    }}
+                  />
                 </button>
               ))}
             </div>
@@ -287,7 +343,9 @@ function ProductDetailPage() {
                     key={s}
                     className={cn(
                       "h-4 w-4",
-                      s <= Math.round(avgRating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300",
+                      s <= Math.round(avgRating)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300",
                     )}
                   />
                 ))}
@@ -300,13 +358,22 @@ function ProductDetailPage() {
             <span className="text-3xl font-bold text-primary">{formatCOP(finalPrice)}</span>
             {hasDiscount && (
               <>
-                <span className="text-xl line-through text-muted-foreground">{formatCOP(product.price ?? 0)}</span>
+                <span className="text-xl line-through text-muted-foreground">
+                  {formatCOP(product.price ?? 0)}
+                </span>
                 <span className="bg-destructive/10 text-destructive text-sm font-bold px-2 py-1 rounded">
-                  -{Math.round((1 - (product.sale_price as number) / (product.price as number)) * 100)}%
+                  -
+                  {Math.round(
+                    (1 - (product.sale_price as number) / (product.price as number)) * 100,
+                  )}
+                  %
                 </span>
               </>
             )}
           </div>
+
+          {/* Urgencia: el precio de oferta sólo se mantiene mientras corra el reloj */}
+          {hasDiscount && <OfferCountdownBanner className="mb-4" />}
 
           {product.short_description && (
             <p className="text-muted-foreground mb-4">{product.short_description}</p>
@@ -330,7 +397,9 @@ function ProductDetailPage() {
               href={whatsappLink}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => trackWhatsAppClick("product_detail", { sku: product.sku, product_id: product.id })}
+              onClick={() =>
+                trackWhatsAppClick("product_detail", { sku: product.sku, product_id: product.id })
+              }
               className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-md font-medium text-white shadow transition-colors"
               style={{ backgroundColor: "#25D366" }}
             >
@@ -340,12 +409,41 @@ function ProductDetailPage() {
 
           {/* Trust micro-signals to reduce bounce */}
           <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-muted-foreground mb-4">
-            <li className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-green-600" /> Compra 100% segura</li>
-            <li className="flex items-center gap-1.5"><Package className="h-3.5 w-3.5 text-blue-600" /> Envíos a toda Colombia</li>
-            <li className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-orange-600" /> Despacho en 24–48h</li>
+            <li className="flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-green-600" /> Compra 100% segura
+            </li>
+            <li className="flex items-center gap-1.5">
+              <Package className="h-3.5 w-3.5 text-blue-600" /> Envíos a toda Colombia
+            </li>
+            <li className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-orange-600" /> Despacho en 24–48h
+            </li>
           </ul>
 
           <PaymentMethodsBadges />
+
+          {/* Advertencias legales obligatorias en la ficha de producto */}
+          <div className="mt-4 space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
+            <p>
+              Los precios publicados incluyen los impuestos aplicables, salvo que se indique
+              expresamente lo contrario. Los costos de envío, cuando correspondan, se informarán
+              antes de finalizar la compra.
+            </p>
+            <p>
+              Las imágenes son ilustrativas y pueden presentar ligeras variaciones respecto al
+              producto recibido, sin afectar sus características esenciales.
+            </p>
+            <p>
+              La disponibilidad del inventario se actualiza periódicamente. La existencia mostrada
+              puede variar hasta la confirmación definitiva del pedido.
+            </p>
+            <p>
+              Las garantías aplican conforme al Estatuto del Consumidor y a las condiciones
+              particulares de cada fabricante. Consulta la{" "}
+              <LegalLink doc="garantias" className="text-secondary" /> y la{" "}
+              <LegalLink doc="cambios" className="text-secondary" />.
+            </p>
+          </div>
 
           {specsEntries.length > 0 && (
             <div className="bg-muted/40 border rounded-lg p-4">
@@ -371,13 +469,16 @@ function ProductDetailPage() {
           <div className="flex-shrink-0">
             <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Precio</p>
             <p className="text-base font-bold text-primary leading-none">{formatCOP(finalPrice)}</p>
+            {hasDiscount && <OfferCountdownBadge className="mt-1" />}
           </div>
           <a
             href={whatsappLink}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Consultar por WhatsApp"
-            onClick={() => trackWhatsAppClick("product_sticky", { sku: product.sku, product_id: product.id })}
+            onClick={() =>
+              trackWhatsAppClick("product_sticky", { sku: product.sku, product_id: product.id })
+            }
             className="h-11 w-11 flex-shrink-0 inline-flex items-center justify-center rounded-md text-white shadow"
             style={{ backgroundColor: "#25D366" }}
           >
@@ -419,13 +520,12 @@ function ProductDetailPage() {
               {product.afirmacion_inicial && (
                 <p className="lead-paragraph">{product.afirmacion_inicial}</p>
               )}
-              {product.description && (
-                product.description.trim().startsWith("<") ? (
+              {product.description &&
+                (product.description.trim().startsWith("<") ? (
                   <div dangerouslySetInnerHTML={{ __html: product.description }} />
                 ) : (
                   <p className="whitespace-pre-wrap">{product.description}</p>
-                )
-              )}
+                ))}
               {!product.afirmacion_inicial && !product.description && (
                 <p className="text-muted-foreground">Sin descripción disponible.</p>
               )}
@@ -506,7 +606,7 @@ function ProductDetailPage() {
           </TabsContent>
 
           <TabsContent value="specs" className="pt-6">
-            {(product.specs_contexto && product.specs_contexto.length > 0) ? (
+            {product.specs_contexto && product.specs_contexto.length > 0 ? (
               <div className="border rounded-lg overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-muted">
@@ -550,7 +650,9 @@ function ProductDetailPage() {
               <div className="text-center py-10 border-2 border-dashed rounded-lg">
                 <Star className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
                 <p className="font-semibold mb-1">Sé el primero en reseñar</p>
-                <p className="text-sm text-muted-foreground">Comparte tu experiencia con este producto.</p>
+                <p className="text-sm text-muted-foreground">
+                  Comparte tu experiencia con este producto.
+                </p>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 gap-4">
@@ -562,7 +664,9 @@ function ProductDetailPage() {
                       </div>
                       <div>
                         <p className="font-semibold text-sm">{rev.nombre_completo}</p>
-                        <p className="text-xs text-muted-foreground">{rev.cargo} · {rev.ciudad}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {rev.cargo} · {rev.ciudad}
+                        </p>
                       </div>
                     </div>
                     <div className="flex mb-2">
@@ -577,7 +681,11 @@ function ProductDetailPage() {
                       ))}
                     </div>
                     <p className="text-sm text-muted-foreground">{rev.contenido}</p>
-                    {rev.pie_nota && <p className="text-[10px] text-muted-foreground italic mt-2">{rev.pie_nota}</p>}
+                    {rev.pie_nota && (
+                      <p className="text-[10px] text-muted-foreground italic mt-2">
+                        {rev.pie_nota}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -585,7 +693,6 @@ function ProductDetailPage() {
           </TabsContent>
         </Tabs>
       </section>
-
 
       {/* Related al final */}
       <ProductCarousel
@@ -605,12 +712,12 @@ function ProductDetailPage() {
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'FAQPage',
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
               mainEntity: product.faq.map((f) => ({
-                '@type': 'Question',
+                "@type": "Question",
                 name: f.pregunta,
-                acceptedAnswer: { '@type': 'Answer', text: f.respuesta },
+                acceptedAnswer: { "@type": "Answer", text: f.respuesta },
               })),
             }),
           }}
@@ -623,18 +730,20 @@ function ProductDetailPage() {
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Product',
+              "@context": "https://schema.org",
+              "@type": "Product",
               name: product.name,
               review: reviews.map((r) => ({
-                '@type': 'Review',
-                author: { '@type': 'Person', name: r.nombre_completo },
-                reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5 },
+                "@type": "Review",
+                author: { "@type": "Person", name: r.nombre_completo },
+                reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
                 reviewBody: r.contenido,
               })),
               aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1),
+                "@type": "AggregateRating",
+                ratingValue: (
+                  reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
+                ).toFixed(1),
                 reviewCount: reviews.length,
               },
             }),

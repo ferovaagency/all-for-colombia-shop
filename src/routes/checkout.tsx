@@ -35,6 +35,12 @@ import { syncToBrevo } from "@/lib/brevo";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 import { ShippingSummary } from "@/components/shop/ShippingNotice";
 import { MAIN_CITIES, OTHER_CITY_VALUE, getShippingStatus } from "@/lib/shipping";
+import {
+  EMPTY_PURCHASE_CONSENT,
+  PurchaseConsent,
+  type PurchaseConsentState,
+} from "@/components/legal/ConsentControls";
+import { recordLegalAcceptance } from "@/lib/consent";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Nombre requerido").max(100),
@@ -130,6 +136,9 @@ function CheckoutPage() {
   const [receipt, setReceipt] = useState<File | null>(null);
 
   const shippingStatus = getShippingStatus(subtotal, form.city);
+
+  const [consent, setConsent] = useState<PurchaseConsentState>(EMPTY_PURCHASE_CONSENT);
+  const consentComplete = consent.terms && consent.adult;
 
   // ----- Openpay PSE bank list -----
   const [banks, setBanks] = useState<{ bankCode: string; bankName: string }[]>([]);
@@ -348,6 +357,10 @@ function CheckoutPage() {
       toast.error("Sube el comprobante de pago para continuar");
       return;
     }
+    if (!consentComplete) {
+      toast.error("Debes aceptar los Términos y Condiciones y declarar que eres mayor de edad");
+      return;
+    }
     setSubmitting(true);
 
     let receiptUrl: string | null = null;
@@ -395,6 +408,16 @@ function CheckoutPage() {
       return;
     }
 
+    // Evidencia del consentimiento, ligada al pedido para poder acreditarla
+    // ante una reclamación. No bloquea el flujo si falla.
+    recordLegalAcceptance({
+      keys: consent.marketing
+        ? ["terminos", "privacidad", "envios", "cambios"]
+        : ["terminos", "privacidad"],
+      origin: "checkout",
+      reference: orderId,
+    }).catch(() => {});
+
     await supabase.from("customers").upsert(
       {
         name: form.name,
@@ -404,11 +427,14 @@ function CheckoutPage() {
       { onConflict: "email" },
     );
 
-    syncToBrevo(form.email.trim().toLowerCase(), "buyers", {
-      NOMBRE: form.name,
-      TELEFONO: form.phone,
-      CIUDAD: form.city,
-    }).catch(() => {});
+    // Sólo sincronizamos con la plataforma de marketing si lo autorizó.
+    if (consent.marketing) {
+      syncToBrevo(form.email.trim().toLowerCase(), "buyers", {
+        NOMBRE: form.name,
+        TELEFONO: form.phone,
+        CIUDAD: form.city,
+      }).catch(() => {});
+    }
 
     // ------- Openpay PSE -------
     if (payment === "openpay_pse") {
@@ -853,10 +879,14 @@ function CheckoutPage() {
               </p>
             )}
           </div>
+          {/* Consentimientos obligatorios antes de pagar (Ley 1581 / Ley 1480) */}
+          <PurchaseConsent value={consent} onChange={setConsent} className="mb-4" />
+
           <Button
             type="submit"
             disabled={
               submitting ||
+              !consentComplete ||
               (requiresReceipt && !receipt) ||
               (payment === "openpay_card" && !!cardOrderId)
             }
@@ -867,14 +897,23 @@ function CheckoutPage() {
               ? "Procesando..."
               : payment === "openpay_card" && cardOrderId
                 ? "Ingresa los datos de tu tarjeta ↓"
-                : requiresReceipt && !receipt
-                  ? "⬆️ Primero sube el comprobante"
-                  : payment === "openpay_card"
-                    ? "Continuar al pago con tarjeta →"
-                    : "Confirmar pedido →"}
+                : !consentComplete
+                  ? "Acepta los términos para continuar"
+                  : requiresReceipt && !receipt
+                    ? "⬆️ Primero sube el comprobante"
+                    : payment === "openpay_card"
+                      ? "Continuar al pago con tarjeta →"
+                      : "Confirmar pedido →"}
           </Button>
+
           <p className="text-xs text-muted-foreground text-center mt-3">
-            Pagos PSE y QR procesados de forma segura por Openpay.
+            La transacción será procesada mediante proveedores de pago autorizados. ALL FOR ALL no
+            almacena la información completa de tarjetas de crédito o débito.
+          </p>
+          <p className="text-xs text-muted-foreground text-center mt-1.5 flex items-center justify-center gap-1.5">
+            <Lock className="h-3 w-3" />
+            Toda la información transmitida se encuentra protegida mediante conexiones cifradas
+            (HTTPS/TLS).
           </p>
         </aside>
       </form>

@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, Mail, Phone, Truck, Clock, Instagram } from "lucide-react";
 import { CONTACT_EMAIL, WHATSAPP_NUMBER } from "@/lib/cart";
 import { Logo } from "@/components/layout/Logo";
+import { IP_NOTICE, LEGAL_NAV } from "@/lib/legal-versions";
+import { openCookiePreferences } from "@/lib/consent";
 
 const INSTAGRAM_URL = "https://www.instagram.com/all4all_col?igsh=MTNhN3cyNWU1czR3cw%3D%3D";
 const TIKTOK_URL = "https://www.tiktok.com/@allforallcol?_r=1&_t=ZS-94OG8Q9A7vN";
@@ -83,8 +85,8 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/legal" className="hover:text-white">
-                Legal
+              <Link to="/pqrs" className="hover:text-white">
+                PQRS
               </Link>
             </li>
             <li>
@@ -141,8 +143,45 @@ export function Footer() {
           </div>
         </div>
       </div>
+      {/* Documentos legales — accesibles desde cualquier página, sin iniciar sesión */}
+      <div className="border-t border-white/10 py-5">
+        <div className="container mx-auto px-4">
+          <p className="text-xs uppercase tracking-wide text-primary-foreground/60 font-semibold text-center mb-3">
+            Legal
+          </p>
+          <nav className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-primary-foreground/70">
+            {LEGAL_NAV.map((doc) => (
+              <Link
+                key={doc.slug}
+                to="/legal/$slug"
+                params={{ slug: doc.slug }}
+                className="hover:text-white transition-colors"
+              >
+                {doc.shortTitle}
+              </Link>
+            ))}
+            <Link to="/pqrs" className="hover:text-white transition-colors">
+              PQRS
+            </Link>
+            <Link to="/contacto" className="hover:text-white transition-colors">
+              Contáctanos
+            </Link>
+            <button
+              type="button"
+              onClick={() => openCookiePreferences()}
+              className="hover:text-white transition-colors underline underline-offset-2"
+            >
+              Preferencias de cookies
+            </button>
+          </nav>
+        </div>
+      </div>
+
       <div className="border-t border-white/10 py-4 text-center text-xs text-primary-foreground/60">
         <p>All For All S.A.S. — NIT 901.009.310-8</p>
+        <p className="mt-2 max-w-3xl mx-auto px-4 text-primary-foreground/45 leading-relaxed">
+          {IP_NOTICE}
+        </p>
         <p className="mt-1">
           © {new Date().getFullYear()} All For All. Todos los derechos reservados.
         </p>

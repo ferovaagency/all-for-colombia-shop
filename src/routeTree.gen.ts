@@ -14,6 +14,7 @@ import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResultadoPagoRouteImport } from './routes/resultado-pago'
 import { Route as ProductoDeLaSemanaRouteImport } from './routes/producto-de-la-semana'
+import { Route as PqrsRouteImport } from './routes/pqrs'
 import { Route as NosotrosRouteImport } from './routes/nosotros'
 import { Route as MiCuentaRouteImport } from './routes/mi-cuenta'
 import { Route as LegalRouteImport } from './routes/legal'
@@ -27,10 +28,12 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LegalIndexRouteImport } from './routes/legal.index'
 import { Route as DistribuidoresIndexRouteImport } from './routes/distribuidores.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
 import { Route as MarcasLogitechRouteImport } from './routes/marcas.logitech'
+import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
 import { Route as DistribuidoresRegistroRouteImport } from './routes/distribuidores.registro'
 import { Route as DistribuidoresPortalRouteImport } from './routes/distribuidores.portal'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -77,6 +80,11 @@ const ResultadoPagoRoute = ResultadoPagoRouteImport.update({
 const ProductoDeLaSemanaRoute = ProductoDeLaSemanaRouteImport.update({
   id: '/producto-de-la-semana',
   path: '/producto-de-la-semana',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PqrsRoute = PqrsRouteImport.update({
+  id: '/pqrs',
+  path: '/pqrs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NosotrosRoute = NosotrosRouteImport.update({
@@ -144,6 +152,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalIndexRoute = LegalIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LegalRoute,
+} as any)
 const DistribuidoresIndexRoute = DistribuidoresIndexRouteImport.update({
   id: '/distribuidores/',
   path: '/distribuidores/',
@@ -163,6 +176,11 @@ const MarcasLogitechRoute = MarcasLogitechRouteImport.update({
   id: '/marcas/logitech',
   path: '/marcas/logitech',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LegalSlugRoute = LegalSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => LegalRoute,
 } as any)
 const DistribuidoresRegistroRoute = DistribuidoresRegistroRouteImport.update({
   id: '/distribuidores/registro',
@@ -290,9 +308,10 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
   '/feed.xml': typeof FeedDotxmlRoute
-  '/legal': typeof LegalRoute
+  '/legal': typeof LegalRouteWithChildren
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
+  '/pqrs': typeof PqrsRoute
   '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
   '/resultado-pago': typeof ResultadoPagoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -304,10 +323,12 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
+  '/legal/$slug': typeof LegalSlugRoute
   '/marcas/logitech': typeof MarcasLogitechRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/legal/': typeof LegalIndexRoute
   '/api/addi/config': typeof ApiAddiConfigRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
@@ -335,9 +356,9 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
   '/feed.xml': typeof FeedDotxmlRoute
-  '/legal': typeof LegalRoute
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
+  '/pqrs': typeof PqrsRoute
   '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
   '/resultado-pago': typeof ResultadoPagoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -348,10 +369,12 @@ export interface FileRoutesByTo {
   '/admin/marcas': typeof AdminMarcasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
+  '/legal/$slug': typeof LegalSlugRoute
   '/marcas/logitech': typeof MarcasLogitechRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin': typeof AdminIndexRoute
   '/distribuidores': typeof DistribuidoresIndexRoute
+  '/legal': typeof LegalIndexRoute
   '/api/addi/config': typeof ApiAddiConfigRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
@@ -381,9 +404,10 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/contacto': typeof ContactoRoute
   '/feed.xml': typeof FeedDotxmlRoute
-  '/legal': typeof LegalRoute
+  '/legal': typeof LegalRouteWithChildren
   '/mi-cuenta': typeof MiCuentaRoute
   '/nosotros': typeof NosotrosRoute
+  '/pqrs': typeof PqrsRoute
   '/producto-de-la-semana': typeof ProductoDeLaSemanaRoute
   '/resultado-pago': typeof ResultadoPagoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -395,10 +419,12 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
+  '/legal/$slug': typeof LegalSlugRoute
   '/marcas/logitech': typeof MarcasLogitechRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/distribuidores/': typeof DistribuidoresIndexRoute
+  '/legal/': typeof LegalIndexRoute
   '/api/addi/config': typeof ApiAddiConfigRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
@@ -432,6 +458,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
+    | '/pqrs'
     | '/producto-de-la-semana'
     | '/resultado-pago'
     | '/sitemap.xml'
@@ -443,10 +470,12 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/distribuidores/portal'
     | '/distribuidores/registro'
+    | '/legal/$slug'
     | '/marcas/logitech'
     | '/producto/$slug'
     | '/admin/'
     | '/distribuidores/'
+    | '/legal/'
     | '/api/addi/config'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
@@ -474,9 +503,9 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/contacto'
     | '/feed.xml'
-    | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
+    | '/pqrs'
     | '/producto-de-la-semana'
     | '/resultado-pago'
     | '/sitemap.xml'
@@ -487,10 +516,12 @@ export interface FileRouteTypes {
     | '/admin/marcas'
     | '/blog/$slug'
     | '/distribuidores/registro'
+    | '/legal/$slug'
     | '/marcas/logitech'
     | '/producto/$slug'
     | '/admin'
     | '/distribuidores'
+    | '/legal'
     | '/api/addi/config'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
@@ -522,6 +553,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/mi-cuenta'
     | '/nosotros'
+    | '/pqrs'
     | '/producto-de-la-semana'
     | '/resultado-pago'
     | '/sitemap.xml'
@@ -533,10 +565,12 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/distribuidores/portal'
     | '/distribuidores/registro'
+    | '/legal/$slug'
     | '/marcas/logitech'
     | '/producto/$slug'
     | '/admin/'
     | '/distribuidores/'
+    | '/legal/'
     | '/api/addi/config'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
@@ -566,9 +600,10 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ContactoRoute: typeof ContactoRoute
   FeedDotxmlRoute: typeof FeedDotxmlRoute
-  LegalRoute: typeof LegalRoute
+  LegalRoute: typeof LegalRouteWithChildren
   MiCuentaRoute: typeof MiCuentaRoute
   NosotrosRoute: typeof NosotrosRoute
+  PqrsRoute: typeof PqrsRoute
   ProductoDeLaSemanaRoute: typeof ProductoDeLaSemanaRoute
   ResultadoPagoRoute: typeof ResultadoPagoRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -629,6 +664,13 @@ declare module '@tanstack/react-router' {
       path: '/producto-de-la-semana'
       fullPath: '/producto-de-la-semana'
       preLoaderRoute: typeof ProductoDeLaSemanaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pqrs': {
+      id: '/pqrs'
+      path: '/pqrs'
+      fullPath: '/pqrs'
+      preLoaderRoute: typeof PqrsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nosotros': {
@@ -722,6 +764,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/': {
+      id: '/legal/'
+      path: '/'
+      fullPath: '/legal/'
+      preLoaderRoute: typeof LegalIndexRouteImport
+      parentRoute: typeof LegalRoute
+    }
     '/distribuidores/': {
       id: '/distribuidores/'
       path: '/distribuidores'
@@ -749,6 +798,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/marcas/logitech'
       preLoaderRoute: typeof MarcasLogitechRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/legal/$slug': {
+      id: '/legal/$slug'
+      path: '/$slug'
+      fullPath: '/legal/$slug'
+      preLoaderRoute: typeof LegalSlugRouteImport
+      parentRoute: typeof LegalRoute
     }
     '/distribuidores/registro': {
       id: '/distribuidores/registro'
@@ -933,6 +989,18 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface LegalRouteChildren {
+  LegalSlugRoute: typeof LegalSlugRoute
+  LegalIndexRoute: typeof LegalIndexRoute
+}
+
+const LegalRouteChildren: LegalRouteChildren = {
+  LegalSlugRoute: LegalSlugRoute,
+  LegalIndexRoute: LegalIndexRoute,
+}
+
+const LegalRouteWithChildren = LegalRoute._addFileChildren(LegalRouteChildren)
+
 interface DistribuidoresPortalRouteChildren {
   DistribuidoresPortalCatalogoRoute: typeof DistribuidoresPortalCatalogoRoute
   DistribuidoresPortalPedidosRoute: typeof DistribuidoresPortalPedidosRoute
@@ -959,9 +1027,10 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ContactoRoute: ContactoRoute,
   FeedDotxmlRoute: FeedDotxmlRoute,
-  LegalRoute: LegalRoute,
+  LegalRoute: LegalRouteWithChildren,
   MiCuentaRoute: MiCuentaRoute,
   NosotrosRoute: NosotrosRoute,
+  PqrsRoute: PqrsRoute,
   ProductoDeLaSemanaRoute: ProductoDeLaSemanaRoute,
   ResultadoPagoRoute: ResultadoPagoRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

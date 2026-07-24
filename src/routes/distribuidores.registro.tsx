@@ -10,12 +10,17 @@ import { toast } from "sonner";
 import { syncToBrevo } from "@/lib/brevo";
 import { z } from "zod";
 import { CheckCircle2 } from "lucide-react";
+import { LegalLink, PrivacyNotice } from "@/components/legal/ConsentControls";
 
 export const Route = createFileRoute("/distribuidores/registro")({
   head: () => ({
     meta: [
       { title: "Solicitud de distribuidor — All For All" },
-      { name: "description", content: "Solicita ser distribuidor autorizado de All For All. Respuesta en máximo 2 días hábiles." },
+      {
+        name: "description",
+        content:
+          "Solicita ser distribuidor autorizado de All For All. Respuesta en máximo 2 días hábiles.",
+      },
     ],
   }),
   component: DistributorRegisterPage,
@@ -33,13 +38,7 @@ const schema = z.object({
   products_sold: z.string().max(500).optional(),
 });
 
-const BUSINESS_TYPES = [
-  "Tienda física",
-  "E-commerce",
-  "Mayorista",
-  "Distribuidor",
-  "Otro",
-];
+const BUSINESS_TYPES = ["Tienda física", "E-commerce", "Mayorista", "Distribuidor", "Otro"];
 
 function DistributorRegisterPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -139,31 +138,66 @@ function DistributorRegisterPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
             <Label>Nombre de la empresa *</Label>
-            <Input value={form.company_name} onChange={(e) => setField("company_name", e.target.value)} required maxLength={150} />
+            <Input
+              value={form.company_name}
+              onChange={(e) => setField("company_name", e.target.value)}
+              required
+              maxLength={150}
+            />
           </div>
           <div>
             <Label>NIT *</Label>
-            <Input value={form.nit} onChange={(e) => setField("nit", e.target.value)} required maxLength={30} />
+            <Input
+              value={form.nit}
+              onChange={(e) => setField("nit", e.target.value)}
+              required
+              maxLength={30}
+            />
           </div>
           <div>
             <Label>Nombre del representante *</Label>
-            <Input value={form.contact_name} onChange={(e) => setField("contact_name", e.target.value)} required maxLength={100} />
+            <Input
+              value={form.contact_name}
+              onChange={(e) => setField("contact_name", e.target.value)}
+              required
+              maxLength={100}
+            />
           </div>
           <div>
             <Label>Email corporativo *</Label>
-            <Input type="email" value={form.email} onChange={(e) => setField("email", e.target.value)} required maxLength={255} />
+            <Input
+              type="email"
+              value={form.email}
+              onChange={(e) => setField("email", e.target.value)}
+              required
+              maxLength={255}
+            />
           </div>
           <div>
             <Label>Teléfono *</Label>
-            <Input value={form.phone} onChange={(e) => setField("phone", e.target.value)} required maxLength={20} />
+            <Input
+              value={form.phone}
+              onChange={(e) => setField("phone", e.target.value)}
+              required
+              maxLength={20}
+            />
           </div>
           <div>
             <Label>Ciudad *</Label>
-            <Input value={form.city} onChange={(e) => setField("city", e.target.value)} required maxLength={80} />
+            <Input
+              value={form.city}
+              onChange={(e) => setField("city", e.target.value)}
+              required
+              maxLength={80}
+            />
           </div>
           <div>
             <Label>Dirección</Label>
-            <Input value={form.address} onChange={(e) => setField("address", e.target.value)} maxLength={200} />
+            <Input
+              value={form.address}
+              onChange={(e) => setField("address", e.target.value)}
+              maxLength={200}
+            />
           </div>
           <div className="sm:col-span-2">
             <Label>Tipo de negocio *</Label>
@@ -175,7 +209,9 @@ function DistributorRegisterPage() {
             >
               <option value="">Selecciona una opción</option>
               {BUSINESS_TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t}>
+                  {t}
+                </option>
               ))}
             </select>
           </div>
@@ -196,6 +232,11 @@ function DistributorRegisterPage() {
         <p className="text-xs text-muted-foreground text-center">
           Al enviar, también abriremos WhatsApp para confirmación inmediata.
         </p>
+        <PrivacyNotice>
+          Al enviar esta solicitud aceptas los <LegalLink doc="terminos" /> y autorizas el
+          tratamiento de tus datos personales conforme a la <LegalLink doc="privacidad" /> de ALL
+          FOR ALL S.A.S.
+        </PrivacyNotice>
       </form>
     </div>
   );

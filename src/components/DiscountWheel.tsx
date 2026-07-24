@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { syncToBrevo } from "@/lib/brevo";
+import { ConsentCheckbox, LegalLink } from "@/components/legal/ConsentControls";
+import { recordLegalAcceptance } from "@/lib/consent";
 
 const SEGMENTS = [
   { id: "discount_5", label: "5% OFF", code: "BIENVENIDA5", winnable: true },
@@ -13,7 +15,6 @@ const SEGMENTS = [
 ] as const;
 
 const SEGMENT_DEG = 360 / SEGMENTS.length;
-
 
 const getClientId = () => {
   if (typeof window === "undefined") return "";
@@ -33,6 +34,7 @@ export function DiscountWheel() {
   const [step, setStep] = useState<Step>("form");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
   const [winner, setWinner] = useState<(typeof SEGMENTS)[number] | null>(null);
@@ -65,9 +67,15 @@ export function DiscountWheel() {
   const onSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
+    if (!consent) return;
     syncToBrevo(email.trim().toLowerCase(), "newsletter", {
       NOMBRE: name.trim(),
       SOURCE: "ruleta",
+    }).catch(() => {});
+    recordLegalAcceptance({
+      keys: ["privacidad"],
+      origin: "ruleta-descuento",
+      reference: email.trim().toLowerCase(),
     }).catch(() => {});
     setStep("wheel");
   };
@@ -118,7 +126,6 @@ export function DiscountWheel() {
       /* ignore */
     }
   };
-
 
   if (!mounted || !open) return null;
 
@@ -178,12 +185,20 @@ export function DiscountWheel() {
                   className="mt-1"
                 />
               </div>
-              <Button type="submit" size="lg" className="w-full bg-secondary hover:bg-secondary/90">
+              {/* La autorización comercial debe ser expresa y nunca premarcada. */}
+              <ConsentCheckbox id="wheel-consent" required checked={consent} onChange={setConsent}>
+                Autorizo a ALL FOR ALL S.A.S. a tratar mis datos y enviarme promociones y novedades
+                conforme a la <LegalLink doc="privacidad" />. Podré cancelar la suscripción en
+                cualquier momento.
+              </ConsentCheckbox>
+              <Button
+                type="submit"
+                size="lg"
+                disabled={!consent}
+                className="w-full bg-secondary hover:bg-secondary/90"
+              >
                 Girar ruleta
               </Button>
-              <p className="text-[11px] text-muted-foreground text-center">
-                Al continuar aceptas recibir comunicaciones de All For All.
-              </p>
             </form>
           </div>
         )}
@@ -199,7 +214,14 @@ export function DiscountWheel() {
                 const RADIUS = 140;
                 const CENTER = 150;
                 const colors = ["#020f1e", "#568baf", "#3e4653", "#000e1e", "#568baf", "#cccfd5"];
-                const textColors = ["#ffffff", "#ffffff", "#ffffff", "#568baf", "#ffffff", "#020f1e"];
+                const textColors = [
+                  "#ffffff",
+                  "#ffffff",
+                  "#ffffff",
+                  "#568baf",
+                  "#ffffff",
+                  "#020f1e",
+                ];
                 const angle = (2 * Math.PI) / SEG_COUNT;
                 return (
                   <svg
@@ -246,8 +268,12 @@ export function DiscountWheel() {
                           >
                             {lines.length > 1 ? (
                               <>
-                                <tspan x={textX} dy="-0.4em">{lines[0].slice(0, 8)}</tspan>
-                                <tspan x={textX} dy="1.1em">{lines.slice(1).join(" ").slice(0, 8)}</tspan>
+                                <tspan x={textX} dy="-0.4em">
+                                  {lines[0].slice(0, 8)}
+                                </tspan>
+                                <tspan x={textX} dy="1.1em">
+                                  {lines.slice(1).join(" ").slice(0, 8)}
+                                </tspan>
                               </>
                             ) : (
                               seg.label.slice(0, 8)
@@ -256,8 +282,21 @@ export function DiscountWheel() {
                         </g>
                       );
                     })}
-                    <circle cx={CENTER} cy={CENTER} r="30" fill="#ffffff" stroke="#568baf" strokeWidth="3" />
-                    <text x={CENTER} y={CENTER} textAnchor="middle" dominantBaseline="middle" fontSize="22">
+                    <circle
+                      cx={CENTER}
+                      cy={CENTER}
+                      r="30"
+                      fill="#ffffff"
+                      stroke="#568baf"
+                      strokeWidth="3"
+                    />
+                    <text
+                      x={CENTER}
+                      y={CENTER}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize="22"
+                    >
                       🎯
                     </text>
                   </svg>
@@ -269,7 +308,12 @@ export function DiscountWheel() {
                 className="absolute inset-0 pointer-events-none"
                 style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}
               >
-                <polygon points="150,5 140,28 160,28" fill="#568baf" stroke="#ffffff" strokeWidth="2" />
+                <polygon
+                  points="150,5 140,28 160,28"
+                  fill="#568baf"
+                  stroke="#ffffff"
+                  strokeWidth="2"
+                />
               </svg>
             </div>
 
@@ -290,7 +334,9 @@ export function DiscountWheel() {
               {winner.winnable ? "🎉" : "🍀"}
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-1">
-              {winner.winnable ? `¡Felicitaciones, ${name.split(" ")[0]}!` : `¡Gracias por participar, ${name.split(" ")[0]}!`}
+              {winner.winnable
+                ? `¡Felicitaciones, ${name.split(" ")[0]}!`
+                : `¡Gracias por participar, ${name.split(" ")[0]}!`}
             </h2>
             <p className="text-sm text-muted-foreground mb-6">
               {winner.winnable ? "Ganaste:" : "Esta vez no fue, pero te esperamos en la tienda:"}
@@ -326,7 +372,6 @@ export function DiscountWheel() {
             </Button>
           </div>
         )}
-
       </div>
     </div>
   );

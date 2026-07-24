@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { X, Send, ExternalLink, Loader2, Bot, Sparkles, Mail, Check } from 'lucide-react';
-import { Link } from '@tanstack/react-router';
-import { syncToBrevo } from '@/lib/brevo';
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { X, Send, ExternalLink, Loader2, Bot, Sparkles, Mail, Check } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { syncToBrevo } from "@/lib/brevo";
+import { LegalLink } from "@/components/legal/ConsentControls";
+import { recordLegalAcceptance } from "@/lib/consent";
 
 interface SuggestedProduct {
   id: string;
@@ -20,7 +22,7 @@ interface SuggestedProduct {
 }
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   suggested_products?: SuggestedProduct[];
   escalate?: boolean;
@@ -28,11 +30,15 @@ interface Message {
 }
 
 const formatCOP = (n: number) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("es-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0,
+  }).format(n);
 
 function getOrCreateSessionId(): string {
-  if (typeof window === 'undefined') return 'srv';
-  const KEY = 'allforall_chat_session';
+  if (typeof window === "undefined") return "srv";
+  const KEY = "allforall_chat_session";
   let id = localStorage.getItem(KEY);
   if (!id) {
     id = `chat_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
@@ -46,37 +52,46 @@ export function AIAssistant() {
   const [showPopup, setShowPopup] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
-      role: 'assistant',
-      content: '👋 Hola, soy Ali, asesora de All For All. ¿Qué tipo de equipo o solución estás buscando hoy?',
+      role: "assistant",
+      content:
+        "👋 Hola, soy Ali, asesora de All For All. ¿Qué tipo de equipo o solución estás buscando hoy?",
     },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [emailInput, setEmailInput] = useState('');
+  const [emailInput, setEmailInput] = useState("");
+  const [emailConsent, setEmailConsent] = useState(false);
   const [emailSubscribed, setEmailSubscribed] = useState(false);
-  const sessionId = useRef<string>('');
+  const sessionId = useRef<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const submitEmail = (e: React.FormEvent) => {
     e.preventDefault();
     const email = emailInput.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
-    syncToBrevo(email, 'newsletter', { SOURCE: 'asesor-ia' }).catch(() => {});
+    // El envío de comunicaciones comerciales exige autorización expresa.
+    if (!emailConsent) return;
+    syncToBrevo(email, "newsletter", { SOURCE: "asesor-ia" }).catch(() => {});
+    recordLegalAcceptance({
+      keys: ["privacidad"],
+      origin: "chat-newsletter",
+      reference: email,
+    }).catch(() => {});
     try {
-      localStorage.setItem('afa_ai_email', email);
+      localStorage.setItem("afa_ai_email", email);
     } catch {}
     setEmailSubscribed(true);
   };
 
   useEffect(() => {
     try {
-      if (localStorage.getItem('afa_ai_email')) setEmailSubscribed(true);
+      if (localStorage.getItem("afa_ai_email")) setEmailSubscribed(true);
     } catch {}
   }, []);
 
   useEffect(() => {
     sessionId.current = getOrCreateSessionId();
-    const shown = localStorage.getItem('allforall_chat_shown');
+    const shown = localStorage.getItem("allforall_chat_shown");
     if (!shown) {
       setShowPopup(true);
     }
@@ -84,13 +99,13 @@ export function AIAssistant() {
 
   const closePopup = () => {
     setShowPopup(false);
-    localStorage.setItem('allforall_chat_shown', 'true');
+    localStorage.setItem("allforall_chat_shown", "true");
   };
 
   const openChat = () => {
     setShowPopup(false);
     setOpen(true);
-    localStorage.setItem('allforall_chat_shown', 'true');
+    localStorage.setItem("allforall_chat_shown", "true");
   };
 
   useEffect(() => {
@@ -101,14 +116,14 @@ export function AIAssistant() {
 
   const send = async () => {
     if (!input.trim() || loading) return;
-    const userMsg: Message = { role: 'user', content: input.trim() };
+    const userMsg: Message = { role: "user", content: input.trim() };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
-    setInput('');
+    setInput("");
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('sales-chat', {
+      const { data, error } = await supabase.functions.invoke("sales-chat", {
         body: {
           session_id: sessionId.current || getOrCreateSessionId(),
           message: userMsg.content,
@@ -118,25 +133,32 @@ export function AIAssistant() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      setMessages((prev) => [...prev, {
-        role: 'assistant',
-        content: data.reply,
-        suggested_products: data.suggested_products,
-        escalate: data.escalate,
-        whatsapp_url: data.whatsapp_url,
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: data.reply,
+          suggested_products: data.suggested_products,
+          escalate: data.escalate,
+          whatsapp_url: data.whatsapp_url,
+        },
+      ]);
     } catch {
-      setMessages((prev) => [...prev, {
-        role: 'assistant',
-        content: 'Tuve un problema técnico. ¿Quieres hablar directo con un asesor por WhatsApp? +57 321 828 0762',
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "Tuve un problema técnico. ¿Quieres hablar directo con un asesor por WhatsApp? +57 321 828 0762",
+        },
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       send();
     }
@@ -146,7 +168,11 @@ export function AIAssistant() {
     <>
       {showPopup && !open && (
         <div className="fixed bottom-24 right-6 z-50 bg-white border-2 border-primary rounded-2xl shadow-xl p-4 max-w-[260px]">
-          <button onClick={closePopup} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600" aria-label="Cerrar">
+          <button
+            onClick={closePopup}
+            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+            aria-label="Cerrar"
+          >
             <X className="w-4 h-4" />
           </button>
           <div className="flex items-center gap-3 mb-2">
@@ -164,7 +190,10 @@ export function AIAssistant() {
           <p className="text-sm text-foreground font-medium leading-relaxed">
             ¡Hola! Soy Ali 👋 Te ayudo a encontrar el equipo perfecto para lo que necesitas.
           </p>
-          <button onClick={openChat} className="w-full mt-3 bg-primary text-white py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
+          <button
+            onClick={openChat}
+            className="w-full mt-3 bg-primary text-white py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
+          >
             Chatear con Ali →
           </button>
         </div>
@@ -204,19 +233,51 @@ export function AIAssistant() {
             </button>
           </div>
 
+          {/* Aviso obligatorio de uso de IA (Política de IA, cláusulas 13 y 14) */}
+          <div className="px-3 py-2 border-b bg-amber-50 text-amber-900 text-[11px] leading-snug">
+            Este asistente utiliza <strong>Inteligencia Artificial</strong>. Las respuestas se
+            generan automáticamente y pueden contener errores; no sustituyen la información oficial
+            del fabricante ni constituyen asesoría técnica. Al continuar aceptas que la conversación
+            pueda almacenarse y ser revisada por personal autorizado para mejorar el servicio,
+            resolver solicitudes, prevenir fraude y cumplir obligaciones legales, conforme a la{" "}
+            <LegalLink doc="ia" className="font-semibold" /> y la{" "}
+            <LegalLink doc="privacidad" className="font-semibold" />. Si necesitas confirmar
+            información importante, puedes solicitar atención por un asesor humano.
+          </div>
+
           {!emailSubscribed ? (
-            <form onSubmit={submitEmail} className="flex items-center gap-2 px-3 py-2 border-b bg-muted/20">
-              <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-              <Input
-                type="email"
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                placeholder="Tu email para novedades (opcional)"
-                className="h-8 text-xs flex-1"
-              />
-              <Button type="submit" size="sm" variant="secondary" className="h-8 text-xs px-3">
-                OK
-              </Button>
+            <form onSubmit={submitEmail} className="px-3 py-2 border-b bg-muted/20 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                <Input
+                  type="email"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  placeholder="Tu email para novedades (opcional)"
+                  className="h-8 text-xs flex-1"
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant="secondary"
+                  className="h-8 text-xs px-3"
+                  disabled={!emailConsent}
+                >
+                  OK
+                </Button>
+              </div>
+              <label className="flex items-start gap-1.5 text-[10px] text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={emailConsent}
+                  onChange={(e) => setEmailConsent(e.target.checked)}
+                  className="mt-px h-3 w-3 shrink-0 accent-[var(--secondary)]"
+                />
+                <span>
+                  Autorizo recibir promociones y novedades. Podré cancelar la suscripción en
+                  cualquier momento.
+                </span>
+              </label>
             </form>
           ) : (
             <div className="flex items-center gap-2 px-3 py-1.5 border-b bg-green-50 text-green-700 text-xs">
@@ -225,14 +286,20 @@ export function AIAssistant() {
           )}
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30">
-
             {messages.map((m, i) => (
-              <div key={i} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start flex-col items-start gap-2'}>
+              <div
+                key={i}
+                className={
+                  m.role === "user"
+                    ? "flex justify-end"
+                    : "flex justify-start flex-col items-start gap-2"
+                }
+              >
                 <div
                   className={
-                    m.role === 'user'
-                      ? 'max-w-[85%] bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-3 py-2 text-sm whitespace-pre-wrap'
-                      : 'max-w-[85%] bg-card border rounded-2xl rounded-tl-sm px-3 py-2 text-sm whitespace-pre-wrap'
+                    m.role === "user"
+                      ? "max-w-[85%] bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-3 py-2 text-sm whitespace-pre-wrap"
+                      : "max-w-[85%] bg-card border rounded-2xl rounded-tl-sm px-3 py-2 text-sm whitespace-pre-wrap"
                   }
                 >
                   {m.content}
@@ -250,7 +317,11 @@ export function AIAssistant() {
                       >
                         <div className="w-16 h-16 bg-muted rounded-lg overflow-hidden flex-shrink-0">
                           {p.images?.[0] && (
-                            <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
+                            <img
+                              src={p.images[0]}
+                              alt={p.name}
+                              className="w-full h-full object-cover"
+                            />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -271,7 +342,7 @@ export function AIAssistant() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-success text-success-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-smooth"
-                    style={{ background: '#25D366', color: 'white' }}
+                    style={{ background: "#25D366", color: "white" }}
                   >
                     <ExternalLink className="w-4 h-4" />
                     Abrir WhatsApp con un asesor
@@ -300,7 +371,12 @@ export function AIAssistant() {
                 disabled={loading}
                 className="flex-1"
               />
-              <Button onClick={send} disabled={loading || !input.trim()} size="icon" aria-label="Enviar mensaje">
+              <Button
+                onClick={send}
+                disabled={loading || !input.trim()}
+                size="icon"
+                aria-label="Enviar mensaje"
+              >
                 <Send className="w-4 h-4" />
               </Button>
             </div>

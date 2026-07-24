@@ -145,16 +145,17 @@ export function DynamicCategoryGrid({
           </div>
         </div>
 
-        {/* ---- Grid ---- */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={tab}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mt-6 md:mt-8 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-3 md:gap-4"
-          >
+        {/* ---- Grid ----
+             Sin AnimatePresence: con mode="wait" el panel saliente bloqueaba
+             al entrante y el contenido se quedaba congelado al cambiar de
+             pestaña. La animación de entrada por `key` es suficiente. */}
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mt-6 md:mt-8 grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-3 md:gap-4"
+        >
             {tab === OFERTAS ? (
               <>
                 <WeeklyDealBigCard deal={deal} />
@@ -175,9 +176,8 @@ export function DynamicCategoryGrid({
                   {catProducts.length <= 1 && <EmptySlot text="Muy pronto más productos" />}
                 </div>
               </>
-            )}
-          </motion.div>
-        </AnimatePresence>
+          )}
+        </motion.div>
       </div>
     </section>
   );
@@ -224,9 +224,10 @@ function WeeklyDealBigCard({ deal }: { deal: Deal | null }) {
       to="/producto-de-la-semana"
       className="group rounded-2xl bg-neutral-950 text-white overflow-hidden flex flex-col hover:ring-2 hover:ring-neutral-950/20 transition-all"
     >
-      {/* Imagen sorpresa */}
-      <div className="relative aspect-[16/10] bg-neutral-900 overflow-hidden">
-        <AnimatePresence mode="wait">
+      {/* Imagen sorpresa — ocupa toda la altura disponible del contenedor */}
+      <div className="relative flex-1 min-h-[240px] bg-neutral-900 overflow-hidden">
+        {/* Sin mode="wait": las fotos se superponen para lograr un fundido real. */}
+        <AnimatePresence>
           {images[idx] ? (
             <motion.img
               key={images[idx]}
@@ -340,31 +341,36 @@ function CouponCard({ coupon }: { coupon: Coupon }) {
     <Link
       to="/producto/$slug"
       params={{ slug: product.slug }}
-      className="group relative rounded-2xl bg-neutral-950 text-white overflow-hidden flex flex-col p-4 md:p-5 min-h-[220px] hover:ring-2 hover:ring-neutral-950/20 transition-all"
+      className="group relative rounded-2xl bg-neutral-950 text-white overflow-hidden block min-h-[220px] aspect-[4/3] hover:ring-2 hover:ring-neutral-950/20 transition-all"
     >
-      <span className="self-start rounded-full bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 inline-flex items-center gap-1 z-10">
+      {/* La foto ocupa todo el contenedor; el texto va encima con degradado. */}
+      {img ? (
+        <img
+          src={img}
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            const t = e.target as HTMLImageElement;
+            if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+          }}
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Tag className="h-12 w-12 text-white/20" />
+        </div>
+      )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/45 to-neutral-950/10" />
+
+      <span className="absolute top-4 left-4 z-10 rounded-full bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 inline-flex items-center gap-1">
         <Tag className="h-3 w-3" /> Cupón {coupon.code}
       </span>
 
-      <div className="flex-1 flex items-center justify-center py-4">
-        {img ? (
-          <img
-            src={img}
-            alt={product.name}
-            loading="lazy"
-            decoding="async"
-            className="max-h-32 md:max-h-36 w-auto object-contain group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => {
-              const t = e.target as HTMLImageElement;
-              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-            }}
-          />
-        ) : (
-          <Tag className="h-12 w-12 text-white/20" />
-        )}
-      </div>
-
-      <p className="text-sm font-semibold text-center leading-snug line-clamp-2">{headline}</p>
+      <p className="absolute inset-x-0 bottom-0 z-10 p-4 text-sm font-semibold text-center leading-snug line-clamp-2 drop-shadow">
+        {headline}
+      </p>
     </Link>
   );
 }
@@ -376,27 +382,31 @@ function SmallProductCard({ product }: { product: Product }) {
     <Link
       to="/producto/$slug"
       params={{ slug: product.slug }}
-      className="group rounded-2xl bg-neutral-950 text-white overflow-hidden flex flex-col p-4 md:p-5 min-h-[220px] hover:ring-2 hover:ring-neutral-950/20 transition-all"
+      className="group relative rounded-2xl bg-neutral-950 text-white overflow-hidden block min-h-[220px] aspect-[4/3] hover:ring-2 hover:ring-neutral-950/20 transition-all"
     >
-      <div className="flex-1 flex items-center justify-center py-4">
-        {img ? (
-          <img
-            src={img}
-            alt={product.name}
-            loading="lazy"
-            decoding="async"
-            className="max-h-32 md:max-h-36 w-auto object-contain group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => {
-              const t = e.target as HTMLImageElement;
-              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-            }}
-          />
-        ) : null}
-      </div>
-      <p className="text-sm font-semibold text-center leading-snug line-clamp-2">{product.name}</p>
-      {price != null && (
-        <p className="text-sm text-white/70 text-center mt-1 font-bold">{formatCOP(price)}</p>
+      {/* La foto ocupa todo el contenedor; el texto va encima con degradado. */}
+      {img && (
+        <img
+          src={img}
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            const t = e.target as HTMLImageElement;
+            if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+          }}
+        />
       )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/45 to-neutral-950/10" />
+
+      <div className="absolute inset-x-0 bottom-0 z-10 p-4 text-center">
+        <p className="text-sm font-semibold leading-snug line-clamp-2 drop-shadow">
+          {product.name}
+        </p>
+        {price != null && <p className="text-sm font-bold mt-1 drop-shadow">{formatCOP(price)}</p>}
+      </div>
     </Link>
   );
 }
@@ -416,31 +426,32 @@ function CategoryBigCard({ product, catName }: { product?: Product; catName: str
     <Link
       to="/producto/$slug"
       params={{ slug: product.slug }}
-      className="group rounded-2xl bg-neutral-950 text-white overflow-hidden flex flex-col hover:ring-2 hover:ring-neutral-950/20 transition-all"
+      className="group relative rounded-2xl bg-neutral-950 text-white overflow-hidden block h-full min-h-[420px] hover:ring-2 hover:ring-neutral-950/20 transition-all"
     >
-      <div className="relative aspect-[16/10] bg-neutral-900 flex items-center justify-center overflow-hidden">
-        {img && (
-          <img
-            src={img}
-            alt={product.name}
-            className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-            onError={(e) => {
-              const t = e.target as HTMLImageElement;
-              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-            }}
-          />
-        )}
-        <span className="absolute top-4 left-4 rounded-full bg-white/15 backdrop-blur border border-white/20 text-white text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1.5">
-          {catName}
-        </span>
-      </div>
-      <div className="p-6 md:p-8 flex-1 flex flex-col items-center text-center">
-        <h3 style={SPACE} className="text-2xl md:text-3xl font-bold tracking-[-0.02em]">
+      {/* La foto ocupa todo el contenedor; el contenido va encima con degradado. */}
+      {img && (
+        <img
+          src={img}
+          alt={product.name}
+          className="absolute inset-0 h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+          onError={(e) => {
+            const t = e.target as HTMLImageElement;
+            if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+          }}
+        />
+      )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-neutral-950/10" />
+
+      <span className="absolute top-5 left-5 z-10 rounded-full bg-white/15 backdrop-blur border border-white/20 text-white text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1.5">
+        {catName}
+      </span>
+
+      <div className="absolute inset-x-0 bottom-0 z-10 p-6 md:p-8 flex flex-col items-center text-center">
+        <h3 style={SPACE} className="text-2xl md:text-3xl font-bold tracking-[-0.02em] drop-shadow">
           {product.name}
         </h3>
-        {price != null && (
-          <p className="mt-2 text-xl font-bold text-white/90">{formatCOP(price)}</p>
-        )}
+        {price != null && <p className="mt-2 text-xl font-bold drop-shadow">{formatCOP(price)}</p>}
         <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold group-hover:gap-2.5 transition-all">
           Ver producto <ArrowUpRight className="h-4 w-4" />
         </span>

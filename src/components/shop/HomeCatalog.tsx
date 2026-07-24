@@ -5,6 +5,7 @@ import { ChevronDown, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCOP, useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/analytics";
+import { OfferCountdownBadge } from "@/components/shop/OfferCountdown";
 import { cn } from "@/lib/utils";
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
@@ -219,6 +220,14 @@ export function WideProductCard({ product }: { product: Product }) {
                   </span>
                 )}
               </div>
+              {hasDiscount && (
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <span className="text-[10px] font-semibold text-destructive uppercase tracking-wide">
+                    Termina en
+                  </span>
+                  <OfferCountdownBadge />
+                </div>
+              )}
               <p className="text-xs text-neutral-500 mt-0.5">
                 Desde {formatCOP(Math.round(finalPrice / 12))} en 12 cuotas
               </p>
