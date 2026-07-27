@@ -26,6 +26,17 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
+function paymentErrorMessage(error: unknown) {
+  const message = String((error as any)?.data?.description || (error as any)?.message || error || "");
+  if (/\[?3004\]?|reported as stolen|sistema de robo/i.test(message)) {
+    return "No pudimos procesar esta tarjeta. Usa otra tarjeta o comunícate con tu banco.";
+  }
+  if (/\[?3005\]?|fraud risk|anti-fraud/i.test(message)) {
+    return "Tarjeta rechazada, favor comunicarse con su banco.";
+  }
+  return "No pudimos procesar el pago con esta tarjeta. Verifica los datos o intenta con otra tarjeta.";
+}
+
 export interface OpenpayCardCustomer {
   name: string;
   last_name: string;
@@ -164,9 +175,8 @@ export function OpenpayCardForm({ orderId, amount, customer, onSuccess, onBefore
       }
       throw new Error(data?.description ?? "El cargo no se completó");
     } catch (e: any) {
-      const desc = e?.data?.description || e?.message || "Error procesando el pago";
       console.error("DETALLE DEL ERROR DE OPENPAY (card, catch):", e);
-      setError(desc);
+      setError(paymentErrorMessage(e));
     } finally {
       setProcessing(false);
     }
