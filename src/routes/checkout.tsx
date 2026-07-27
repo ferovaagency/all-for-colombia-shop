@@ -83,7 +83,21 @@ const PAYMENT_OPTIONS: {
   label: string;
   description: string;
 }[] = [
-  // Openpay temporalmente oculto mientras se termina de configurar.
+  {
+    value: "openpay_card",
+    label: "Tarjeta de crédito o débito",
+    description: "Pago seguro procesado por OpenPay",
+  },
+  {
+    value: "openpay_pse",
+    label: "PSE",
+    description: "Paga desde tu cuenta bancaria con OpenPay",
+  },
+  {
+    value: "openpay_qr_breb",
+    label: "QR Bre-B",
+    description: "Genera un código QR para pagar desde tu app bancaria",
+  },
   {
     value: "addi",
     label: "🟣 Addi — Paga a cuotas sin tarjeta",
