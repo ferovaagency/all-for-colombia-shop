@@ -195,11 +195,6 @@ function CheckoutPage() {
   };
   useEffect(() => () => stopTimers(), []);
 
-  // Redirect empty carts back to tienda (broken funnel entry).
-  useEffect(() => {
-    if (count === 0) navigate({ to: "/tienda" });
-  }, [count]);
-
   // Fire begin_checkout once when the user reaches checkout with a non-empty cart.
   const beginCheckoutFiredRef = useRef(false);
   const purchaseItemsRef = useRef<
