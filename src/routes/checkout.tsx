@@ -272,7 +272,6 @@ function CheckoutPage() {
         if (data?.status === "completed") {
           stopTimers();
           setQrStatus("paid");
-          await supabase.from("orders").update({ status: "paid" }).eq("id", orderId);
           setTimeout(() => {
             setQrOpen(false);
             firePurchase(orderId, "openpay_qr_breb");
@@ -299,14 +298,7 @@ function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: subtotal,
-          description: `Pedido ${orderId.slice(0, 8)}`,
-          customer: {
-            name: first,
-            last_name: last,
-            email: form.email,
-            phone_number: form.phone,
-          },
+          order_id: orderId,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -445,17 +437,7 @@ function CheckoutPage() {
         const r = await fetch("/api/openpay/pse", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            firstName: first,
-            lastName: last,
-            email: form.email,
-            docType: mapDocType(form.customer_id_type),
-            docNumber: form.customer_id_number.replace(/-/g, ""),
-            bankCode,
-            amount: subtotal,
-            description: `Pedido ${orderId.slice(0, 8)}`,
-            redirectUrl: `${window.location.origin}/resultado-pago?id=${orderId}`,
-          }),
+          body: JSON.stringify({ order_id: orderId }),
         });
         const json = await r.json().catch(() => ({}));
         toast.dismiss(toastId);
@@ -466,7 +448,6 @@ function CheckoutPage() {
           );
           return;
         }
-        firePurchase(orderId, "openpay_pse");
         clear();
         window.location.href = json.redirectUrl;
         return;

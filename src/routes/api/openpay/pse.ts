@@ -1,92 +1,52 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { openpayFetch, passthroughOpenpayError } from "@/server/openpay.server";
+import { getPayableOrder, orderCustomer } from "@/server/openpay-order.server";
 
-const bodySchema = z.object({
-  firstName: z.string().trim().min(2).max(60),
-  lastName: z.string().trim().min(2).max(60),
-  email: z.string().trim().email().max(120),
-  docType: z.enum(["CC", "NIT", "CE"]),
-  docNumber: z.string().trim().regex(/^[\d-]+$/).min(5).max(20),
-  bankCode: z.string().min(1).max(10),
-  amount: z.number().positive().max(50_000_000),
-  description: z.string().trim().min(3).max(250).default("Pago en línea"),
-  redirectUrl: z.string().url().max(500),
-  orderId: z.string().optional(),
-});
+const bodySchema = z.object({ order_id: z.string().uuid() });
 
-/**
- * POST /api/openpay/pse
- * Creates a PSE charge and returns { redirectUrl }.
- * According to Openpay docs: POST https://sandbox-api.openpay.co/v1/{MERCHANT_ID}/pse
- */
+/** Starts the Openpay PSE redirect. Amount and customer data come from the order. */
 export const Route = createFileRoute("/api/openpay/pse")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         try {
-          const raw = await request.json();
-          const parsed = bodySchema.safeParse(raw);
+          const parsed = bodySchema.safeParse(await request.json());
           if (!parsed.success) {
-            return new Response(
-              JSON.stringify({
-                error_code: "invalid_input",
-                description: parsed.error.issues[0]?.message ?? "Invalid body",
-              }),
-              { status: 400, headers: { "Content-Type": "application/json" } },
-            );
+            return Response.json({ error_code: "invalid_input", description: "order_id inválido" }, { status: 400 });
           }
-          const d = parsed.data;
+          const payable = await getPayableOrder(parsed.data.order_id);
+          if (!payable) return Response.json({ error_code: "not_found", description: "Pedido no encontrado" }, { status: 404 });
+          if ("error" in payable) return Response.json({ error_code: payable.error, description: "El pedido ya fue pagado" }, { status: 409 });
 
-          // According to Openpay documentation, PSE uses /pse endpoint, not /charges/pse
-          const payload = {
-            country: "COL", // Required field for Colombia
-            amount: d.amount,
-            currency: "COP",
-            description: d.description,
-            iva: "0",
-            ...(d.orderId && { order_id: d.orderId }),
-            customer: {
-              name: d.firstName,
-              last_name: d.lastName,
-              email: d.email,
-              phone_number: "0000000000", // Required but can be generic
-              requires_account: false,
-              customer_address: {
-                department: "Bogota",
-                city: "Bogota",
-                additional: "N/A",
-              },
+          const response = await openpayFetch("/pse", {
+            method: "POST",
+            body: {
+              country: "COL",
+              amount: payable.amount,
+              currency: "COP",
+              iva: "0",
+              description: `Pedido ${payable.order.id}`,
+              order_id: payable.order.id,
+              customer: orderCustomer(payable.order),
             },
-          };
-
-          const res = await openpayFetch("/pse", { method: "POST", body: payload });
-          if (!res.ok) return passthroughOpenpayError(res);
-          const data = await res.json();
-
-          // According to docs, PSE returns redirect_url directly, not in payment_method.url
-          const redirectUrl: string | undefined = data?.redirect_url;
-          if (!redirectUrl) {
-            return new Response(
-              JSON.stringify({
-                error_code: "missing_redirect",
-                description: "Openpay no devolvió redirect_url para PSE",
-                debug: data,
-              }),
-              { status: 502, headers: { "Content-Type": "application/json" } },
-            );
-          }
-          return Response.json({
-            id: data?.orderId || data?.id,
-            redirectUrl,
-            fullResponse: data,
           });
-        } catch (e: any) {
-          if (e instanceof Response) return e;
-          return new Response(
-            JSON.stringify({ error_code: "server_error", description: e?.message ?? "Unexpected error" }),
-            { status: 500, headers: { "Content-Type": "application/json" } },
-          );
+          if (!response.ok) return passthroughOpenpayError(response);
+          const data = await response.json();
+          if (!data?.redirect_url) {
+            return Response.json({ error_code: "missing_redirect", description: "Openpay no devolvió redirect_url" }, { status: 502 });
+          }
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          await supabaseAdmin.from("payments").insert({
+            order_id: payable.order.id,
+            openpay_charge_id: data?.id ?? null,
+            status: data?.status ?? "in_progress",
+            raw: data,
+          });
+          return Response.json({ id: data?.id, redirectUrl: data.redirect_url });
+        } catch (error: any) {
+          if (error instanceof Response) return error;
+          return Response.json({ error_code: "server_error", description: error?.message ?? "Error inesperado" }, { status: 500 });
         }
       },
     },

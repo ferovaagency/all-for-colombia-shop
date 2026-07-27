@@ -101,9 +101,9 @@
 ### Variables de Entorno (.env)
 ```env
 # Openpay Configuration
-OPENPAY_MERCHANT_ID="m9nfdgr8ot7loqxt0uid"
-OPENPAY_PRIVATE_KEY="sk_2707043e93924abcab8854965930cc3c"
-OPENPAY_PUBLIC_KEY="pk_63f676ad0e2e42648ae0293af9699119"
+OPENPAY_MERCHANT_ID="tu_merchant_id"
+OPENPAY_PRIVATE_KEY="sk_tu_llave_privada"
+OPENPAY_PUBLIC_KEY="pk_tu_llave_publica"
 OPENPAY_SANDBOX="true"
 ```
 

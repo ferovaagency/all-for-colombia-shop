@@ -20,18 +20,15 @@ export const Route = createFileRoute("/api/openpay/diagnostico")({
         diagnostics.env_vars = {
           OPENPAY_MERCHANT_ID: process.env.OPENPAY_MERCHANT_ID ? {
             configured: true,
-            value: process.env.OPENPAY_MERCHANT_ID,
             is_placeholder: process.env.OPENPAY_MERCHANT_ID.includes("your_") || process.env.OPENPAY_MERCHANT_ID === "your_merchant_id_here"
           } : { configured: false },
           OPENPAY_PRIVATE_KEY: process.env.OPENPAY_PRIVATE_KEY ? {
             configured: true,
-            value: process.env.OPENPAY_PRIVATE_KEY,
             is_placeholder: process.env.OPENPAY_PRIVATE_KEY.includes("your_") || process.env.OPENPAY_PRIVATE_KEY === "sk_your_private_key_here",
             starts_with_sk: process.env.OPENPAY_PRIVATE_KEY.startsWith("sk_")
           } : { configured: false },
           OPENPAY_PUBLIC_KEY: process.env.OPENPAY_PUBLIC_KEY ? {
             configured: true,
-            value: process.env.OPENPAY_PUBLIC_KEY,
             is_placeholder: process.env.OPENPAY_PUBLIC_KEY.includes("your_") || process.env.OPENPAY_PUBLIC_KEY === "pk_your_public_key_here",
             starts_with_pk: process.env.OPENPAY_PUBLIC_KEY.startsWith("pk_")
           } : { configured: false },

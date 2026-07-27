@@ -1,77 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { openpayFetch, passthroughOpenpayError } from "@/server/openpay.server";
+import { getPayableOrder, orderCustomer } from "@/server/openpay-order.server";
 
-const bodySchema = z.object({
-  amount: z.number().positive().max(50_000_000),
-  description: z.string().trim().min(3).max(250).default("Pago QR Bre-B"),
-  customer: z
-    .object({
-      name: z.string().trim().min(2).max(60),
-      last_name: z.string().trim().min(2).max(60),
-      email: z.string().trim().email().max(120),
-      phone_number: z.string().trim().max(20).optional(),
-    })
-    .optional(),
-});
+const bodySchema = z.object({ order_id: z.string().uuid() });
 
-/**
- * POST /api/openpay/breb-qr
- * Creates a dynamic QR charge (Bre-B) and returns { id, qr_base64 }.
- */
+/** Creates a Bre-B QR using the persisted order, never browser-supplied totals. */
 export const Route = createFileRoute("/api/openpay/breb-qr")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         try {
-          const raw = await request.json().catch(() => ({}));
-          const parsed = bodySchema.safeParse(raw);
-          if (!parsed.success) {
-            return new Response(
-              JSON.stringify({
-                error_code: "invalid_input",
-                description: parsed.error.issues[0]?.message ?? "Invalid body",
-              }),
-              { status: 400, headers: { "Content-Type": "application/json" } },
-            );
-          }
-          const d = parsed.data;
+          const parsed = bodySchema.safeParse(await request.json());
+          if (!parsed.success) return Response.json({ error_code: "invalid_input", description: "order_id inválido" }, { status: 400 });
+          const payable = await getPayableOrder(parsed.data.order_id);
+          if (!payable) return Response.json({ error_code: "not_found", description: "Pedido no encontrado" }, { status: 404 });
+          if ("error" in payable) return Response.json({ error_code: payable.error, description: "El pedido ya fue pagado" }, { status: 409 });
 
-          const payload: Record<string, unknown> = {
-            method: "qr",
-            amount: d.amount,
-            currency: "COP",
-            description: d.description,
-          };
-          if (d.customer) payload.customer = d.customer;
-
-          const res = await openpayFetch("/charges", { method: "POST", body: payload });
-          if (!res.ok) return passthroughOpenpayError(res);
-          const data = await res.json();
-
-          const qrBase64: string | undefined =
-            data?.barcode_base64 ?? data?.payment_method?.barcode_base64;
-          if (!qrBase64) {
-            return new Response(
-              JSON.stringify({
-                error_code: "missing_qr",
-                description: "Openpay no devolvió barcode_base64",
-              }),
-              { status: 502, headers: { "Content-Type": "application/json" } },
-            );
-          }
-
-          return Response.json({
-            id: data?.id,
-            qr_base64: qrBase64,
-            status: data?.status,
+          const response = await openpayFetch("/charges", {
+            method: "POST",
+            body: {
+              method: "qr",
+              amount: payable.amount,
+              currency: "COP",
+              description: `Pedido ${payable.order.id}`,
+              order_id: payable.order.id,
+              customer: orderCustomer(payable.order),
+            },
           });
-        } catch (e: any) {
-          if (e instanceof Response) return e;
-          return new Response(
-            JSON.stringify({ error_code: "server_error", description: e?.message ?? "Unexpected error" }),
-            { status: 500, headers: { "Content-Type": "application/json" } },
-          );
+          if (!response.ok) return passthroughOpenpayError(response);
+          const data = await response.json();
+          const qrBase64 = data?.barcode_base64 ?? data?.payment_method?.barcode_base64;
+          if (!qrBase64) return Response.json({ error_code: "missing_qr", description: "Openpay no devolvió el QR" }, { status: 502 });
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          await supabaseAdmin.from("payments").insert({ order_id: payable.order.id, openpay_charge_id: data?.id ?? null, status: data?.status, raw: data });
+          return Response.json({ id: data?.id, qr_base64: qrBase64, status: data?.status });
+        } catch (error: any) {
+          if (error instanceof Response) return error;
+          return Response.json({ error_code: "server_error", description: error?.message ?? "Error inesperado" }, { status: 500 });
         }
       },
     },
