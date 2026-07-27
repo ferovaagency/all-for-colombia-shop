@@ -154,42 +154,6 @@ function CheckoutPage() {
   const [consent, setConsent] = useState<PurchaseConsentState>(EMPTY_PURCHASE_CONSENT);
   const consentComplete = consent.terms && consent.adult;
 
-  // ----- Openpay PSE bank list -----
-  const [banks, setBanks] = useState<{ bankCode: string; bankName: string }[]>([]);
-  const [bankCode, setBankCode] = useState<string>("");
-  const [loadingBanks, setLoadingBanks] = useState(false);
-
-  useEffect(() => {
-    if (payment !== "openpay_pse") return;
-    if (banks.length > 0) return;
-    let cancelled = false;
-    setLoadingBanks(true);
-    fetch("/api/openpay/banks")
-      .then(async (r) => {
-        if (!r.ok) {
-          const errorRes = await r.json().catch(() => ({ description: r.statusText }));
-          console.error("DETALLE DEL ERROR DE OPENPAY (banks):", errorRes);
-          throw new Error(
-            `[${errorRes.error_code ?? r.status}] ${errorRes.description ?? JSON.stringify(errorRes)}`,
-          );
-        }
-        return r.json();
-      })
-      .then((list: { bankCode: string; bankName: string }[]) => {
-        if (!cancelled) setBanks(list);
-      })
-      .catch((e) => {
-        console.error("DETALLE DEL ERROR DE OPENPAY (banks, catch):", e);
-        if (!cancelled) toast.error(e.message);
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingBanks(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [payment, banks.length]);
-
   // ----- Openpay QR Bre-B state -----
   const [qrOpen, setQrOpen] = useState(false);
   const [qrBase64, setQrBase64] = useState<string | null>(null);
@@ -344,10 +308,6 @@ function CheckoutPage() {
     const res = schema.safeParse(form);
     if (!res.success) {
       toast.error(res.error.issues[0]?.message || "Revisa los campos");
-      return;
-    }
-    if (payment === "openpay_pse" && !bankCode) {
-      toast.error("Selecciona tu banco PSE");
       return;
     }
     if (payment === "openpay_card" && cardOrderId) {
@@ -665,28 +625,12 @@ function CheckoutPage() {
               ))}
             </RadioGroup>
 
-            {/* Openpay PSE: selector de banco */}
+            {/* Openpay PSE: Openpay shows the bank and identification form after redirect. */}
             {payment === "openpay_pse" && (
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4 space-y-3">
-                <p className="font-semibold">Selecciona tu banco</p>
-                <select
-                  value={bankCode}
-                  onChange={(e) => setBankCode(e.target.value)}
-                  required
-                  disabled={loadingBanks || banks.length === 0}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="">
-                    {loadingBanks ? "Cargando bancos..." : "Selecciona tu banco"}
-                  </option>
-                  {banks.map((b) => (
-                    <option key={b.bankCode} value={b.bankCode}>
-                      {b.bankName}
-                    </option>
-                  ))}
-                </select>
+                <p className="font-semibold">Pago seguro por PSE</p>
                 <p className="text-xs text-muted-foreground">
-                  Te redirigiremos al portal seguro de tu banco para confirmar el pago.
+                  Al continuar, Openpay te mostrará los bancos y solicitará tus datos para completar el pago.
                 </p>
               </div>
             )}
