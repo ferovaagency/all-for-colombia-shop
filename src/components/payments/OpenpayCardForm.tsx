@@ -28,12 +28,15 @@ function loadScript(src: string): Promise<void> {
 
 function paymentErrorMessage(error: unknown) {
   const message = String((error as any)?.data?.description || (error as any)?.message || error || "");
-  if (/\[?3004\]?|reported as stolen|sistema de robo/i.test(message)) {
-    return "No pudimos procesar esta tarjeta. Usa otra tarjeta o comunícate con tu banco.";
-  }
-  if (/\[?3005\]?|fraud risk|anti-fraud/i.test(message)) {
-    return "Tarjeta rechazada, favor comunicarse con su banco.";
-  }
+  const openpayMessages: Array<[RegExp, string]> = [
+    [/\[?3001\]?|card was declined/i, "La tarjeta fue rechazada."],
+    [/\[?3002\]?|card has expired/i, "La tarjeta ha expirado."],
+    [/\[?3003\]?|insufficient funds/i, "La tarjeta no tiene fondos suficientes."],
+    [/\[?3004\]?|reported as stolen|sistema de robo/i, "La tarjeta ha sido identificada como una tarjeta robada."],
+    [/\[?3005\]?|fraud risk|anti-fraud/i, "Tarjeta rechazada, favor comunicarse con su banco."],
+  ];
+  const match = openpayMessages.find(([pattern]) => pattern.test(message));
+  if (match) return match[1];
   return "No pudimos procesar el pago con esta tarjeta. Verifica los datos o intenta con otra tarjeta.";
 }
 
