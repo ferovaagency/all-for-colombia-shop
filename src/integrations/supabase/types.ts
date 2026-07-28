@@ -302,6 +302,33 @@ export type Database = {
         }
         Relationships: []
       }
+      cookie_consents: {
+        Row: {
+          analytics: boolean | null
+          created_at: string | null
+          id: string
+          marketing: boolean | null
+          necessary: boolean | null
+          session_id: string
+        }
+        Insert: {
+          analytics?: boolean | null
+          created_at?: string | null
+          id?: string
+          marketing?: boolean | null
+          necessary?: boolean | null
+          session_id: string
+        }
+        Update: {
+          analytics?: boolean | null
+          created_at?: string | null
+          id?: string
+          marketing?: boolean | null
+          necessary?: boolean | null
+          session_id?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           company: string | null
@@ -502,6 +529,39 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_consents: {
+        Row: {
+          adult_confirmed: boolean | null
+          created_at: string | null
+          id: string
+          marketing_accepted: boolean | null
+          privacy_accepted: boolean | null
+          session_id: string
+          terms_accepted: boolean | null
+          user_email: string | null
+        }
+        Insert: {
+          adult_confirmed?: boolean | null
+          created_at?: string | null
+          id?: string
+          marketing_accepted?: boolean | null
+          privacy_accepted?: boolean | null
+          session_id: string
+          terms_accepted?: boolean | null
+          user_email?: string | null
+        }
+        Update: {
+          adult_confirmed?: boolean | null
+          created_at?: string | null
+          id?: string
+          marketing_accepted?: boolean | null
+          privacy_accepted?: boolean | null
+          session_id?: string
+          terms_accepted?: boolean | null
+          user_email?: string | null
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           brevo_synced: boolean | null
@@ -637,6 +697,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      privacy_requests: {
+        Row: {
+          created_at: string | null
+          details: string | null
+          id: string
+          status: string | null
+          type: string
+          user_email: string
+        }
+        Insert: {
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          status?: string | null
+          type: string
+          user_email: string
+        }
+        Update: {
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          status?: string | null
+          type?: string
+          user_email?: string
+        }
+        Relationships: []
       }
       product_reviews: {
         Row: {
@@ -818,6 +905,53 @@ export type Database = {
           },
         ]
       }
+      promo_coupons: {
+        Row: {
+          code: string
+          created_at: string | null
+          discount_percent: number | null
+          headline: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          product_id: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          discount_percent?: number | null
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          product_id: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          discount_percent?: number | null
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          product_id?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_coupons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -849,6 +983,7 @@ export type Database = {
           product_id: string
           reveal_at: string
           stock_limit: number | null
+          teaser_images: string[] | null
           updated_at: string
         }
         Insert: {
@@ -860,6 +995,7 @@ export type Database = {
           product_id: string
           reveal_at: string
           stock_limit?: number | null
+          teaser_images?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -871,6 +1007,7 @@ export type Database = {
           product_id?: string
           reveal_at?: string
           stock_limit?: number | null
+          teaser_images?: string[] | null
           updated_at?: string
         }
         Relationships: [
