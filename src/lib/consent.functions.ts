@@ -56,15 +56,12 @@ export const recordLegalConsent = createServerFn({ method: "POST" })
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const meta = clientMeta();
       const rows = data.consents.map((c) => ({
-        policy: c.policy,
-        version: c.version,
-        accepted: c.accepted,
-        origin: data.origin,
-        guest_id: data.guest_id ?? null,
-        user_id: data.user_id ?? null,
-        reference: data.reference ?? null,
-        accepted_at: new Date().toISOString(),
-        ...meta,
+        session_id: data.guest_id || "guest",
+        user_email: null,
+        terms_accepted: c.policy === "terms" ? c.accepted : false,
+        privacy_accepted: c.policy === "privacy" ? c.accepted : false,
+        marketing_accepted: c.policy === "marketing" ? c.accepted : false,
+        adult_confirmed: c.policy === "adult" ? c.accepted : false,
       }));
       const { error } = await supabaseAdmin.from("legal_consents").insert(rows);
       if (error) throw new Error(error.message);
@@ -94,17 +91,10 @@ export const recordCookieConsent = createServerFn({ method: "POST" })
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const meta = clientMeta();
       const { error } = await supabaseAdmin.from("cookie_consents").insert({
+        session_id: data.guest_id,
         necessary: true,
         analytics: data.analytics,
         marketing: data.marketing,
-        functional: data.functional,
-        policy_version: data.policy_version,
-        guest_id: data.guest_id,
-        user_id: data.user_id ?? null,
-        ip: meta.ip,
-        user_agent: meta.user_agent,
-        accepted_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       });
       if (error) throw new Error(error.message);
       return { ok: true };
@@ -145,13 +135,8 @@ export const submitPrivacyRequest = createServerFn({ method: "POST" })
         .from("privacy_requests")
         .insert({
           type: data.type,
-          full_name: data.full_name,
-          document_id: data.document_id,
-          email: data.email.toLowerCase(),
-          phone: data.phone || null,
-          description: data.description,
-          ip: meta.ip,
-          user_agent: meta.user_agent,
+          user_email: data.email.toLowerCase(),
+          details: data.description,
         })
         .select("id")
         .single();
