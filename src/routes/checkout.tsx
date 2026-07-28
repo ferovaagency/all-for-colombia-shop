@@ -86,12 +86,12 @@ const PAYMENT_OPTIONS: {
   {
     value: "openpay_card",
     label: "Tarjeta de crédito o débito",
-    description: "Pago seguro procesado por OpenPay",
+    description: "Pago seguro procesado por Openpay",
   },
   {
     value: "openpay_pse",
     label: "PSE",
-    description: "Paga desde tu cuenta bancaria con OpenPay",
+    description: "Paga desde tu cuenta bancaria con Openpay",
   },
   {
     value: "openpay_qr_breb",
