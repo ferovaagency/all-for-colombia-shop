@@ -818,206 +818,6 @@ export type Database = {
           },
         ]
       }
-      legal_consents: {
-        Row: {
-          accepted: boolean
-          accepted_at: string
-          created_at: string
-          guest_id: string | null
-          id: string
-          ip: string | null
-          language: string | null
-          origin: string
-          policy: string
-          reference: string | null
-          user_agent: string | null
-          user_id: string | null
-          version: string
-        }
-        Insert: {
-          accepted?: boolean
-          accepted_at?: string
-          created_at?: string
-          guest_id?: string | null
-          id?: string
-          ip?: string | null
-          language?: string | null
-          origin: string
-          policy: string
-          reference?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-          version: string
-        }
-        Update: {
-          accepted?: boolean
-          accepted_at?: string
-          created_at?: string
-          guest_id?: string | null
-          id?: string
-          ip?: string | null
-          language?: string | null
-          origin?: string
-          policy?: string
-          reference?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-          version?: string
-        }
-        Relationships: []
-      }
-      cookie_consents: {
-        Row: {
-          accepted_at: string
-          analytics: boolean
-          created_at: string
-          functional: boolean
-          guest_id: string | null
-          id: string
-          ip: string | null
-          marketing: boolean
-          necessary: boolean
-          policy_version: string
-          updated_at: string
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          accepted_at?: string
-          analytics?: boolean
-          created_at?: string
-          functional?: boolean
-          guest_id?: string | null
-          id?: string
-          ip?: string | null
-          marketing?: boolean
-          necessary?: boolean
-          policy_version: string
-          updated_at?: string
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          accepted_at?: string
-          analytics?: boolean
-          created_at?: string
-          functional?: boolean
-          guest_id?: string | null
-          id?: string
-          ip?: string | null
-          marketing?: boolean
-          necessary?: boolean
-          policy_version?: string
-          updated_at?: string
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      privacy_requests: {
-        Row: {
-          created_at: string
-          description: string
-          document_id: string
-          email: string
-          full_name: string
-          id: string
-          ip: string | null
-          phone: string | null
-          resolved_at: string | null
-          response: string | null
-          status: Database["public"]["Enums"]["privacy_request_status"]
-          type: Database["public"]["Enums"]["privacy_request_type"]
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          description: string
-          document_id: string
-          email: string
-          full_name: string
-          id?: string
-          ip?: string | null
-          phone?: string | null
-          resolved_at?: string | null
-          response?: string | null
-          status?: Database["public"]["Enums"]["privacy_request_status"]
-          type: Database["public"]["Enums"]["privacy_request_type"]
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          document_id?: string
-          email?: string
-          full_name?: string
-          id?: string
-          ip?: string | null
-          phone?: string | null
-          resolved_at?: string | null
-          response?: string | null
-          status?: Database["public"]["Enums"]["privacy_request_status"]
-          type?: Database["public"]["Enums"]["privacy_request_type"]
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      promo_coupons: {
-        Row: {
-          code: string
-          created_at: string
-          discount_percent: number | null
-          ends_at: string | null
-          headline: string | null
-          id: string
-          image_url: string | null
-          is_active: boolean
-          product_id: string
-          sort_order: number
-          starts_at: string | null
-          updated_at: string
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          discount_percent?: number | null
-          ends_at?: string | null
-          headline?: string | null
-          id?: string
-          image_url?: string | null
-          is_active?: boolean
-          product_id: string
-          sort_order?: number
-          starts_at?: string | null
-          updated_at?: string
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          discount_percent?: number | null
-          ends_at?: string | null
-          headline?: string | null
-          id?: string
-          image_url?: string | null
-          is_active?: boolean
-          product_id?: string
-          sort_order?: number
-          starts_at?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "promo_coupons_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           created_at: string
@@ -1049,7 +849,6 @@ export type Database = {
           product_id: string
           reveal_at: string
           stock_limit: number | null
-          teaser_images: string[]
           updated_at: string
         }
         Insert: {
@@ -1061,7 +860,6 @@ export type Database = {
           product_id: string
           reveal_at: string
           stock_limit?: number | null
-          teaser_images?: string[]
           updated_at?: string
         }
         Update: {
@@ -1073,7 +871,6 @@ export type Database = {
           product_id?: string
           reveal_at?: string
           stock_limit?: number | null
-          teaser_images?: string[]
           updated_at?: string
         }
         Relationships: [
@@ -1169,20 +966,6 @@ export type Database = {
     }
     Enums: {
       app_role: "admin"
-      privacy_request_status:
-        | "recibida"
-        | "en_tramite"
-        | "requiere_info"
-        | "resuelta"
-        | "rechazada"
-      privacy_request_type:
-        | "acceso"
-        | "actualizacion"
-        | "rectificacion"
-        | "supresion"
-        | "revocatoria"
-        | "consulta"
-        | "reclamo"
     }
     CompositeTypes: {
       [_ in never]: never
