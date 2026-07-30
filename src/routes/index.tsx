@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Search, Truck, ShieldCheck, Building2, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,9 +11,7 @@ import { HomeCatalog } from "@/components/shop/HomeCatalog";
 import { BrandShowcase } from "@/components/shop/BrandShowcase";
 import { Reveal } from "@/components/shop/Reveal";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
-import bannerA50 from "@/assets/banner-logitech-gol.jpg";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
-import monitorGamer from "@/assets/monitor-gamer.png";
 import { getHomeData } from "@/lib/ssr-data.functions";
 import {
   FREE_SHIPPING_CITIES_TEXT,
@@ -43,48 +41,16 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const CATEGORY_IMAGES: Record<string, string> = {
-  audio: "/categorias/audio.jpg",
-  gaming: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&q=80&auto=format",
-  computadores:
-    "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&q=80&auto=format",
-  "computadores-accesorios":
-    "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1200&q=80&auto=format",
-  "celulares-tablets":
-    "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1200&q=80&auto=format",
-  hogar: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80&auto=format",
-  "hogar-tech": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80&auto=format",
-  impresion: "/categorias/impresion.jpg",
-  accesorios: "/categorias/accesorios.jpg",
-  "ferreteria-hogar-inteligente": "/categorias/ferreteria.jpg",
-  "tv-y-video": "/categorias/tv-video.jpg",
-  monitores: monitorGamer,
-};
-
 const PROMO_BANNERS: PromoBannerItem[] = [
   {
     id: 1,
-    image: bannerPadre,
-    link: "/tienda",
-    alt: "Si es Logitech, es gol — Mundial Colombia",
-    aspectRatio: "1920/585",
-  },
-  {
-    id: 2,
-    image: bannerA50,
-    link: "/tienda",
-    alt: "Si es Logitech, es gol — Mundial Colombia",
-    aspectRatio: "1920/585",
-  },
-  {
-    id: 3,
     image: bannerMsi,
     link: "/tienda?marca=msi",
     alt: "MSI — Juega sin límites",
     aspectRatio: "1920/585",
   },
   {
-    id: 4,
+    id: 2,
     image: bannerMsi,
     video: videoJbl.url,
     link: "/tienda?marca=jbl",
@@ -111,47 +77,56 @@ function HomePage() {
     return () => clearInterval(t);
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const [cats, prods, brs, blog] = await Promise.all([
-        supabase.from("categories").select("*").order("sort_order"),
-        supabase
-          .from("products")
-          .select("*")
-          .eq("active", true)
-          .order("updated_at", { ascending: false })
-          .limit(60),
-        supabase
-          .from("brands")
-          .select("*")
-          .eq("show_in_home", true)
-          .order("display_order", { ascending: true })
-          .limit(20),
-        supabase
-          .from("blog_posts")
-          .select("*")
-          .eq("published", true)
-          .order("created_at", { ascending: false })
-          .limit(3),
-      ]);
-      setCategories(cats.data || []);
-      setProducts(prods.data || []);
-      setBrands(brs.data || []);
-      setPosts(blog.data || []);
-    })();
+  // Trae todo el catálogo activo (sin límite) para que el grid de Destacados
+  // y el catálogo con "Ver más" muestren todas las categorías y productos.
+  const loadData = useCallback(async () => {
+    const [cats, prods, brs, blog] = await Promise.all([
+      supabase.from("categories").select("*").order("sort_order"),
+      supabase
+        .from("products")
+        .select("*")
+        .eq("active", true)
+        .order("updated_at", { ascending: false }),
+      supabase
+        .from("brands")
+        .select("*")
+        .eq("show_in_home", true)
+        .order("display_order", { ascending: true })
+        .limit(20),
+      supabase
+        .from("blog_posts")
+        .select("*")
+        .eq("published", true)
+        .order("created_at", { ascending: false })
+        .limit(3),
+    ]);
+    setCategories(cats.data || []);
+    setProducts(prods.data || []);
+    setBrands(brs.data || []);
+    setPosts(blog.data || []);
   }, []);
 
-  const parentCategories = useMemo(() => categories.filter((c: any) => !c.parent_id), [categories]);
+  // Carga inicial + actualización EN VIVO: si en el admin se crea o edita un
+  // producto/categoría/marca, el home se refresca solo sin recargar la página.
+  useEffect(() => {
+    loadData();
+    const channel = supabase
+      .channel("home-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => loadData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "categories" }, () =>
+        loadData(),
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "brands" }, () => loadData())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadData]);
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
     navigate({ to: "/tienda", search: { q: q.trim() } as any });
   };
-
-  const getCategoryImage = (cat: any) =>
-    CATEGORY_IMAGES[cat.slug] ||
-    cat.image ||
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80";
 
   return (
     <div className="bg-white text-neutral-950" style={DM}>
@@ -241,50 +216,6 @@ function HomePage() {
 
       {/* ============ DESTACADOS — GRID DINÁMICO POR CATEGORÍA ============ */}
       <DynamicCategoryGrid categories={categories} products={products} />
-
-      {/* ============ CATEGORÍAS ============ */}
-      {parentCategories.length > 0 && (
-        <Reveal>
-          <section className="bg-neutral-950 text-white">
-            <div className="container mx-auto px-6 lg:px-10 py-12 md:py-16">
-              <div className="flex items-end justify-between gap-4 mb-6">
-                <div>
-                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-white/50">
-                    Colecciones
-                  </span>
-                  <h2
-                    style={SPACE}
-                    className="text-3xl md:text-5xl font-bold tracking-[-0.03em] mt-1"
-                  >
-                    Compra por categoría
-                  </h2>
-                </div>
-                <Link
-                  to="/tienda"
-                  className="group inline-flex items-center gap-2 text-sm font-bold text-white hover:text-white/70 transition-colors whitespace-nowrap"
-                >
-                  Ver toda la tienda
-                  <ArrowUpRight className="h-4 w-4 group-hover:rotate-45 transition-transform" />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                {parentCategories.map((c, i) => (
-                  <motion.div
-                    key={c.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.35, delay: (i % 6) * 0.04, ease: "easeOut" }}
-                  >
-                    <CategoryCard cat={c} img={getCategoryImage(c)} />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-        </Reveal>
-      )}
 
       {/* ============ CATÁLOGO (estilo Samsung, 4 por vista + Ver más) ============ */}
       <HomeCatalog
@@ -470,38 +401,5 @@ function TrustItem({ label, desc, icon }: { label: string; desc: string; icon: R
         <div className="text-xs text-white/55 leading-snug">{desc}</div>
       </div>
     </div>
-  );
-}
-
-function CategoryCard({ cat, img }: { cat: any; img: string }) {
-  return (
-    <Link
-      to="/tienda"
-      search={{ categoria: cat.slug } as any}
-      className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/5 aspect-square transition-all duration-300 hover:-translate-y-1 hover:border-white/30"
-    >
-      <div className="absolute inset-0">
-        <img
-          src={img}
-          alt={cat.name}
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
-          onError={(e) => {
-            const t = e.target as HTMLImageElement;
-            if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/30 to-transparent" />
-      </div>
-      <div className="relative z-10 h-full flex flex-col justify-end p-3">
-        <h3
-          style={SPACE}
-          className="font-bold tracking-[-0.02em] leading-tight text-white text-sm md:text-base line-clamp-2"
-        >
-          {cat.name}
-        </h3>
-      </div>
-    </Link>
   );
 }

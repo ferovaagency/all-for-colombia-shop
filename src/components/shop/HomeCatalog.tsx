@@ -41,10 +41,7 @@ export function HomeCatalog({
   const [tab, setTab] = useState<string>("todos");
   const [visible, setVisible] = useState(PAGE_SIZE);
 
-  const parentCats = useMemo(
-    () => categories.filter((c: any) => !c.parent_id).slice(0, 5),
-    [categories],
-  );
+  const parentCats = useMemo(() => categories.filter((c: any) => !c.parent_id), [categories]);
 
   const descendantIds = (catId: string) => {
     const ids = new Set<string>([catId]);
@@ -141,7 +138,7 @@ export function HomeCatalog({
           <div className="mt-8 flex justify-center">
             <button
               type="button"
-              onClick={() => setVisible((v) => v + PAGE_SIZE)}
+              onClick={() => setVisible(filtered.length)}
               className="inline-flex items-center gap-2 rounded-full border border-neutral-300 bg-white px-6 py-2.5 text-sm font-semibold text-neutral-900 hover:border-neutral-950 hover:shadow-sm transition-all"
             >
               Ver más <ChevronDown className="h-4 w-4" />

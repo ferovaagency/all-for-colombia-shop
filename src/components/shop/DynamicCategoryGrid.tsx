@@ -77,10 +77,7 @@ export function DynamicCategoryGrid({
     })();
   }, []);
 
-  const parentCats = useMemo(
-    () => categories.filter((c: any) => !c.parent_id).slice(0, 4),
-    [categories],
-  );
+  const parentCats = useMemo(() => categories.filter((c: any) => !c.parent_id), [categories]);
 
   /** Descendientes de una categoría, para agrupar productos de subcategorías. */
   const productsOf = (catId: string) => {
@@ -98,19 +95,26 @@ export function DynamicCategoryGrid({
     return products.filter((p) => p.category_id && ids.has(p.category_id));
   };
 
+  // Solo mostramos como pestaña las categorías que ya tienen productos.
+  const visibleCats = useMemo(
+    () => parentCats.filter((c: any) => productsOf(c.id).length > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [parentCats, products, categories],
+  );
+
   const tabs = [
     { key: OFERTAS, label: "Ofertas" },
-    ...parentCats.map((c: any) => ({ key: c.slug, label: c.name })),
+    ...visibleCats.map((c: any) => ({ key: c.slug, label: c.name })),
   ];
 
-  const activeCat = parentCats.find((c: any) => c.slug === tab);
+  const activeCat = visibleCats.find((c: any) => c.slug === tab);
   const catProducts = activeCat ? productsOf(activeCat.id) : [];
 
   const hasOfertas = !!deal?.product || coupons.length > 0;
   // Si aún no hay oferta configurada, arranca en la primera categoría.
   useEffect(() => {
-    if (!hasOfertas && tab === OFERTAS && parentCats.length > 0) setTab(parentCats[0].slug);
-  }, [hasOfertas, tab, parentCats]);
+    if (!hasOfertas && tab === OFERTAS && visibleCats.length > 0) setTab(visibleCats[0].slug);
+  }, [hasOfertas, tab, visibleCats]);
 
   if (tabs.length <= 1 && !hasOfertas) return null;
 
@@ -382,30 +386,33 @@ function SmallProductCard({ product }: { product: Product }) {
     <Link
       to="/producto/$slug"
       params={{ slug: product.slug }}
-      className="group relative rounded-2xl bg-neutral-950 text-white overflow-hidden block min-h-[220px] aspect-[4/3] hover:ring-2 hover:ring-neutral-950/20 transition-all"
+      className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-neutral-200 hover:shadow-lg hover:border-neutral-300 transition-all"
     >
-      {/* La foto ocupa todo el contenedor; el texto va encima con degradado. */}
-      {img && (
-        <img
-          src={img}
-          alt={product.name}
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={(e) => {
-            const t = e.target as HTMLImageElement;
-            if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-          }}
-        />
-      )}
+      {/* Imagen completa sobre fondo claro, sin recortes ni oscurecido. */}
+      <div className="relative aspect-[4/3] bg-[#fafafa] overflow-hidden">
+        {img ? (
+          <img
+            src={img}
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              const t = e.target as HTMLImageElement;
+              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-xs text-neutral-400">
+            Sin imagen
+          </div>
+        )}
+      </div>
 
-      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/45 to-neutral-950/10" />
-
-      <div className="absolute inset-x-0 bottom-0 z-10 p-4 text-center">
-        <p className="text-sm font-semibold leading-snug line-clamp-2 drop-shadow">
-          {product.name}
-        </p>
-        {price != null && <p className="text-sm font-bold mt-1 drop-shadow">{formatCOP(price)}</p>}
+      {/* Título en franja negra debajo de la imagen. */}
+      <div className="bg-neutral-950 text-white p-3 text-center">
+        <p className="text-sm font-semibold leading-snug line-clamp-2">{product.name}</p>
+        {price != null && <p className="text-sm font-bold mt-1">{formatCOP(price)}</p>}
       </div>
     </Link>
   );
@@ -426,32 +433,36 @@ function CategoryBigCard({ product, catName }: { product?: Product; catName: str
     <Link
       to="/producto/$slug"
       params={{ slug: product.slug }}
-      className="group relative rounded-2xl bg-neutral-950 text-white overflow-hidden block h-full min-h-[420px] hover:ring-2 hover:ring-neutral-950/20 transition-all"
+      className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-neutral-200 h-full min-h-[420px] hover:shadow-lg hover:border-neutral-300 transition-all"
     >
-      {/* La foto ocupa todo el contenedor; el contenido va encima con degradado. */}
-      {img && (
-        <img
-          src={img}
-          alt={product.name}
-          className="absolute inset-0 h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-          onError={(e) => {
-            const t = e.target as HTMLImageElement;
-            if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-          }}
-        />
-      )}
+      {/* Imagen completa sobre fondo claro, sin recortes ni oscurecido. */}
+      <div className="relative flex-1 bg-[#fafafa] overflow-hidden">
+        <span className="absolute top-5 left-5 z-10 rounded-full bg-neutral-950 text-white text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1.5">
+          {catName}
+        </span>
+        {img ? (
+          <img
+            src={img}
+            alt={product.name}
+            className="absolute inset-0 h-full w-full object-contain p-8 group-hover:scale-[1.03] transition-transform duration-700"
+            onError={(e) => {
+              const t = e.target as HTMLImageElement;
+              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-sm text-neutral-400">
+            Sin imagen
+          </div>
+        )}
+      </div>
 
-      <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/50 to-neutral-950/10" />
-
-      <span className="absolute top-5 left-5 z-10 rounded-full bg-white/15 backdrop-blur border border-white/20 text-white text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1.5">
-        {catName}
-      </span>
-
-      <div className="absolute inset-x-0 bottom-0 z-10 p-6 md:p-8 flex flex-col items-center text-center">
-        <h3 style={SPACE} className="text-2xl md:text-3xl font-bold tracking-[-0.02em] drop-shadow">
+      {/* Título + precio en franja negra debajo de la imagen. */}
+      <div className="bg-neutral-950 text-white p-6 md:p-8 flex flex-col items-center text-center">
+        <h3 style={SPACE} className="text-2xl md:text-3xl font-bold tracking-[-0.02em]">
           {product.name}
         </h3>
-        {price != null && <p className="mt-2 text-xl font-bold drop-shadow">{formatCOP(price)}</p>}
+        {price != null && <p className="mt-2 text-xl font-bold">{formatCOP(price)}</p>}
         <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold group-hover:gap-2.5 transition-all">
           Ver producto <ArrowUpRight className="h-4 w-4" />
         </span>

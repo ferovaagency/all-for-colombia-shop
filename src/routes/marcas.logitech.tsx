@@ -1,34 +1,41 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { WideProductCard } from "@/components/shop/HomeCatalog";
 import { Reveal } from "@/components/shop/Reveal";
-import { FreeShippingStrip } from "@/components/shop/ShippingNotice";
 import { LogitechColorViewer } from "@/components/shop/LogitechColorViewer";
 import { formatCOP, useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/analytics";
-import { ArrowRight, ArrowUpRight, ShoppingCart } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  ShoppingCart,
+  ChevronLeft,
+  ChevronRight,
+  Truck,
+  ShieldCheck,
+  PackageCheck,
+  RefreshCw,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import bannerMundial from "@/assets/banner-logitech-mundial.jpg";
-import bannerGol from "@/assets/banner-logitech-gol.jpg";
 
 export const Route = createFileRoute("/marcas/logitech")({
   head: () => ({
     meta: [
       {
-        title: "Tienda Logitech Colombia — Series MX, ERGO, Esencial, Lifestyle y G | All For All",
+        title: "Tienda Logitech Colombia — Logitech y Logitech G | All For All",
       },
       {
         name: "description",
         content:
-          "Microsite oficial Logitech en All For All: series MX, ERGO, Esencial, Lifestyle, Serie G, Racing y Gamer PRO. Envío gratis desde $200.000 en ciudades principales.",
+          "Tienda oficial Logitech y Logitech G en All For All: series MX, ERGO, Esencial, Lifestyle, Serie G, Racing y PRO. Envío gratis en productos seleccionados y garantía oficial.",
       },
       { property: "og:title", content: "Tienda Logitech — All For All" },
       {
         property: "og:description",
-        content: "Descubre tu serie ideal: MX, ERGO, Esencial, Lifestyle, G, Racing y Gamer PRO.",
+        content: "Descubre tu espacio de trabajo ideal y juega al máximo con Logitech G.",
       },
     ],
   }),
@@ -36,6 +43,18 @@ export const Route = createFileRoute("/marcas/logitech")({
 });
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
+
+// Acento de marca Logitech (teal/menta).
+const TEAL = "#00B8B0";
+
+// Degradados para los slides del hero (estilo tienda oficial).
+const HERO_GRADIENTS = [
+  "linear-gradient(115deg,#063b4a 0%,#0f8a8a 52%,#22c9c0 100%)",
+  "linear-gradient(115deg,#0a2f57 0%,#1f7fc4 55%,#43c6e8 100%)",
+  "linear-gradient(115deg,#101827 0%,#0f6f66 58%,#14b8a6 100%)",
+  "linear-gradient(115deg,#3a0f52 0%,#7b2ff7 55%,#22d3ee 100%)",
+  "linear-gradient(115deg,#0b1220 0%,#334155 55%,#00B8B0 100%)",
+];
 
 /**
  * Líneas oficiales de Logitech.
@@ -83,8 +102,8 @@ const SERIES: Serie[] = [
   },
   {
     key: "gamer-pro",
-    name: "GAMER PRO",
-    label: "Serie Gamer PRO",
+    name: "PRO",
+    label: "Serie PRO",
     tagline: "El equipo con el que compiten los profesionales",
     description:
       "Desarrollada junto a jugadores de esports: latencia mínima, peso ultraligero y fiabilidad de torneo.",
@@ -94,7 +113,7 @@ const SERIES: Serie[] = [
   {
     key: "racing",
     name: "RACING",
-    label: "Serie Racing",
+    label: "Sim Racing",
     tagline: "Simulación de conducción con retroalimentación real",
     description:
       "Volantes, pedales y palancas con force feedback para sentir cada curva como si estuvieras en la pista.",
@@ -117,19 +136,7 @@ const SERIES: Serie[] = [
     tagline: "Que nadie se interponga entre tú y la victoria",
     description:
       "Gaming para todos los niveles: sensores HERO, switches LIGHTFORCE e iluminación LIGHTSYNC RGB.",
-    keywords: [
-      "logitech g",
-      "g502",
-      "g305",
-      "g502",
-      "g733",
-      "g435",
-      "g213",
-      "g413",
-      "g203",
-      "g335",
-      "g ",
-    ],
+    keywords: ["logitech g", "g502", "g305", "g733", "g435", "g213", "g413", "g203", "g335", "g "],
     gaming: true,
   },
   {
@@ -167,6 +174,8 @@ const SERIES: Serie[] = [
   },
 ];
 
+const SERIE_BY_KEY = new Map(SERIES.map((s) => [s.key, s]));
+
 function classify(product: any): string | null {
   const haystack = `${product.name ?? ""} ${product.sku ?? ""}`.toLowerCase();
   for (const s of SERIES) {
@@ -174,6 +183,18 @@ function classify(product: any): string | null {
   }
   return null;
 }
+
+function isGaming(product: any): boolean {
+  const key = classify(product);
+  return !!(key && SERIE_BY_KEY.get(key)?.gaming);
+}
+
+const hasImg = (p: any) => Array.isArray(p.images) && p.images[0];
+
+// Producto apto para vitrina (hero, mosaicos, "más destacados"): tiene imagen,
+// precio real y no es un ítem de "caja dañada" / liquidación.
+const showcaseOk = (p: any) =>
+  hasImg(p) && Number(p.price ?? 0) > 0 && !/da[ñÃ]?ada|caja da/i.test(p.name ?? "");
 
 function LogitechMicrosite() {
   const [products, setProducts] = useState<any[]>([]);
@@ -193,6 +214,9 @@ function LogitechMicrosite() {
     })();
   }, []);
 
+  const office = useMemo(() => products.filter((p) => !isGaming(p)), [products]);
+  const gaming = useMemo(() => products.filter((p) => isGaming(p)), [products]);
+
   /** Productos agrupados por serie, con las series vacías descartadas. */
   const bySerie = useMemo(() => {
     const map = new Map<string, any[]>();
@@ -208,109 +232,173 @@ function LogitechMicrosite() {
   const activeSeries = SERIES.filter((s) => (bySerie.get(s.key)?.length ?? 0) > 0);
 
   const seriesImage = (s: Serie) =>
-    bySerie.get(s.key)?.find((p) => p.images?.[0])?.images?.[0] ??
-    (s.gaming ? bannerGol : bannerMundial);
+    bySerie.get(s.key)?.find(hasImg)?.images?.[0] ?? "/placeholder.svg";
+
+  // Slides del hero: destacados aptos para vitrina, mezclando gaming y oficina.
+  const heroSlides = useMemo(() => {
+    const pool0 = products.filter(showcaseOk);
+    const featured = pool0.filter((p) => p.featured);
+    // Intercala un gaming y un office para que el hero muestre ambas marcas.
+    const base = featured.length >= 3 ? featured : pool0;
+    const g = base.filter(isGaming);
+    const o = base.filter((p) => !isGaming(p));
+    const mixed: any[] = [];
+    for (let i = 0; i < 5 && (o[i] || g[i]); i++) {
+      if (o[i]) mixed.push(o[i]);
+      if (g[i]) mixed.push(g[i]);
+    }
+    return mixed.slice(0, 5).map((p, i) => ({
+      product: p,
+      gradient: HERO_GRADIENTS[i % HERO_GRADIENTS.length],
+      word: (SERIE_BY_KEY.get(classify(p) ?? "")?.label ?? "Logitech").toUpperCase(),
+    }));
+  }, [products]);
+
+  const featuredOffice = useMemo(
+    () => office.find((p) => classify(p) === "mx" && showcaseOk(p)) ?? office.find(showcaseOk),
+    [office],
+  );
+  const featuredGaming = useMemo(
+    () =>
+      gaming.find((p) => classify(p) === "gamer-pro" && showcaseOk(p)) ??
+      gaming.find((p) => classify(p) === "g" && showcaseOk(p)) ??
+      gaming.find(showcaseOk),
+    [gaming],
+  );
 
   const filtered = activeSerie === "todas" ? products : (bySerie.get(activeSerie) ?? []);
 
-  const hero = products.find((p) => p.images?.[0] && classify(p) === "ergo") ?? products[0];
-
   return (
     <div className="bg-white text-neutral-950">
-      {/* ============ HERO ============ */}
-      <section className="relative overflow-hidden bg-neutral-950 text-white">
-        <div className="relative aspect-[16/9] md:aspect-[21/9]">
-          <img
-            src={bannerMundial}
-            alt="Tienda Logitech oficial en All For All"
-            className="absolute inset-0 h-full w-full object-cover opacity-55"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="absolute inset-0 flex flex-col items-center justify-end text-center px-6 pb-10 md:pb-16"
+      {/* ============ BARRA DE MARCAS ============ */}
+      <div className="border-b border-neutral-200 bg-white">
+        <div className="container mx-auto px-6 lg:px-10 h-11 flex items-center justify-center gap-4 text-sm">
+          <span className="text-neutral-500">Nuestras marcas:</span>
+          <a href="#office" className="font-semibold hover:opacity-70 transition-opacity">
+            Logitech
+          </a>
+          <span className="text-neutral-300">|</span>
+          <a
+            href="#gaming"
+            className="font-semibold hover:opacity-70 transition-opacity"
+            style={{ color: TEAL }}
           >
-            <p className="text-[10px] md:text-xs uppercase tracking-[0.35em] text-white/60 mb-3">
-              Microsite oficial
-            </p>
-            <h1
-              style={SPACE}
-              className="text-4xl md:text-7xl font-bold tracking-[-0.04em] max-w-4xl leading-[1.02]"
-            >
+            Logitech G
+          </a>
+        </div>
+      </div>
+
+      {/* ============ HERO CARRUSEL ============ */}
+      {heroSlides.length > 0 ? (
+        <HeroCarousel slides={heroSlides} />
+      ) : (
+        <div
+          className="flex items-center justify-center text-white"
+          style={{ minHeight: 420, backgroundImage: HERO_GRADIENTS[0] }}
+        >
+          <div className="text-center px-6">
+            <h1 style={SPACE} className="text-4xl md:text-6xl font-bold tracking-[-0.03em]">
               Tienda Logitech
             </h1>
-            <p className="mt-4 text-white/70 max-w-xl">
-              Todas las líneas en un solo lugar, con garantía oficial y el respaldo de All For All.
-            </p>
-            <Button
-              asChild
-              size="lg"
-              className="mt-7 bg-white text-neutral-950 hover:bg-white/90 rounded-full font-bold"
-            >
-              <a href="#series">
-                Descubre tu serie ideal <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-          </motion.div>
+            <p className="mt-3 text-white/80">Muy pronto, todo el catálogo Logitech.</p>
+          </div>
         </div>
-      </section>
+      )}
 
-      <FreeShippingStrip />
+      {/* ============ BARRA DE CONFIANZA ============ */}
+      <TrustBar />
 
       {loading && (
-        <div className="container mx-auto px-6 py-20 text-center text-neutral-500">
+        <div className="container mx-auto px-6 py-16 text-center text-neutral-500">
           Cargando catálogo Logitech…
         </div>
       )}
 
-      {!loading && products.length === 0 && (
-        <div className="container mx-auto px-6 py-20 text-center text-neutral-500">
-          Muy pronto vas a encontrar aquí todo el catálogo Logitech.
-        </div>
+      {/* ============ MOSAICOS DE MARCA ============ */}
+      {!loading && products.length > 0 && (
+        <BrandTiles
+          officeImg={featuredOffice?.images?.[0]}
+          gamingImg={featuredGaming?.images?.[0]}
+        />
       )}
 
-      {/* ============ DESCUBRE TU SERIE IDEAL (imagen 3) ============ */}
+      {/* ============ MÁS DESTACADOS — LOGITECH (OFICINA) ============ */}
+      {office.length > 0 && (
+        <section id="office" className="scroll-mt-20 bg-white">
+          <div className="container mx-auto px-6 lg:px-10 py-14 md:py-20">
+            <SectionHeading eyebrow="Logitech" title="Conoce los más destacados" />
+            <DestacadosTabs products={office} />
+          </div>
+        </section>
+      )}
+
+      {/* ============ DESCUBRE TU SERIE IDEAL — OFICINA ============ */}
+      {featuredOffice && (
+        <SerieIdealFeatured
+          product={featuredOffice}
+          eyebrow="Descubre tu serie ideal"
+          gradient={HERO_GRADIENTS[0]}
+        />
+      )}
+
+      {/* ============ MÁS DESTACADOS — LOGITECH G (GAMING) ============ */}
+      {gaming.length > 0 && (
+        <section id="gaming" className="scroll-mt-20 bg-neutral-950 text-white">
+          <div className="container mx-auto px-6 lg:px-10 py-14 md:py-20">
+            <SectionHeading eyebrow="Logitech G" title="Juega al máximo" dark />
+            <DestacadosTabs products={gaming} dark />
+          </div>
+        </section>
+      )}
+
+      {/* ============ DESCUBRE TU SERIE IDEAL — GAMING ============ */}
+      {featuredGaming && (
+        <SerieIdealFeatured
+          product={featuredGaming}
+          eyebrow="Descubre tu serie ideal"
+          gradient={HERO_GRADIENTS[2]}
+        />
+      )}
+
+      {/* ============ SERIES ============ */}
       {activeSeries.length > 0 && (
         <Reveal>
-          <section id="series" className="bg-white scroll-mt-24">
-            <div className="container mx-auto px-6 lg:px-10 py-12 md:py-16">
-              <h2 style={SPACE} className="text-3xl md:text-5xl font-bold tracking-[-0.03em]">
-                Descubre tu serie ideal
-              </h2>
-              <p className="text-neutral-600 mt-2 max-w-2xl">
-                Cada línea de Logitech resuelve una necesidad distinta. Encuentra la tuya.
-              </p>
-
-              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+          <section className="bg-[#f5f5f7]">
+            <div className="container mx-auto px-6 lg:px-10 py-14 md:py-20">
+              <SectionHeading eyebrow="Colecciones" title="Descubre tu serie ideal" />
+              <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
                 {activeSeries.slice(0, 5).map((s, i) => (
-                  <motion.a
+                  <motion.button
                     key={s.key}
-                    href={`#serie-${s.key}`}
+                    type="button"
+                    onClick={() => {
+                      setActiveSerie(s.key);
+                      document
+                        .getElementById("catalogo")
+                        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
                     initial={{ opacity: 0, y: 14 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-40px" }}
                     transition={{ duration: 0.35, delay: i * 0.06 }}
-                    className="group relative block overflow-hidden rounded-2xl aspect-[3/4] bg-neutral-900"
+                    className="group relative block overflow-hidden rounded-2xl aspect-[3/4] bg-white border border-neutral-200 text-left"
                   >
                     <img
                       src={seriesImage(s)}
                       alt={s.label}
                       loading="lazy"
-                      className="absolute inset-0 h-full w-full object-cover opacity-75 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700"
+                      className="absolute inset-0 h-full w-full object-contain p-6 group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-950/25 to-transparent" />
-                    <div className="relative z-10 h-full flex flex-col justify-end p-5 text-white">
-                      <p className="text-lg font-medium">
+                    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-white via-white/85 to-transparent">
+                      <p className="text-base font-medium text-neutral-900">
                         Serie{" "}
                         <span className="font-bold" style={SPACE}>
                           {s.name}
                         </span>
                       </p>
-                      <p className="text-sm text-white/75 leading-snug mt-1">{s.tagline}</p>
+                      <p className="text-xs text-neutral-500 leading-snug mt-0.5">{s.tagline}</p>
                     </div>
-                  </motion.a>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -318,138 +406,17 @@ function LogitechMicrosite() {
         </Reveal>
       )}
 
-      {/* ============ TIRA DE SERIES (imagen 4) ============ */}
-      {activeSeries.length > 0 && (
-        <Reveal>
-          <section className="bg-[#f5f5f7]">
-            <div className="container mx-auto px-6 lg:px-10 py-10 md:py-14">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                {activeSeries.slice(0, 4).map((s) => (
-                  <a
-                    key={s.key}
-                    href={`#serie-${s.key}`}
-                    className="group relative block overflow-hidden rounded-2xl aspect-[16/9]"
-                  >
-                    <img
-                      src={seriesImage(s)}
-                      alt={s.label}
-                      loading="lazy"
-                      className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-neutral-950/85 to-transparent" />
-                    <p
-                      className="absolute inset-x-0 bottom-4 text-center text-white font-bold text-base md:text-lg"
-                      style={SPACE}
-                    >
-                      {s.label}
-                    </p>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </section>
-        </Reveal>
-      )}
-
-      {/* ============ VISOR DE COLORES (fotos oficiales del fabricante) ============ */}
+      {/* ============ VISOR DE COLORES (fotos oficiales) ============ */}
       <LogitechColorViewer />
-
-      {/* ============ PRODUCTO DESTACADO (imagen 5) ============ */}
-      {hero && <FeaturedShowcase product={hero} />}
-
-      {/* ============ BLOQUES POR SERIE ============ */}
-      {activeSeries.map((s, i) => {
-        const items = bySerie.get(s.key) ?? [];
-        const dark = i % 2 === 0;
-        return (
-          <Reveal key={s.key}>
-            <section
-              id={`serie-${s.key}`}
-              className={cn(
-                "scroll-mt-24",
-                dark ? "bg-neutral-950 text-white" : "bg-white text-neutral-950",
-              )}
-            >
-              <div className="container mx-auto px-6 lg:px-10 py-12 md:py-20">
-                <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mb-8">
-                  <div className={i % 2 === 1 ? "md:order-2" : ""}>
-                    <p
-                      className={cn(
-                        "text-[10px] uppercase tracking-[0.3em] font-bold mb-3",
-                        dark ? "text-white/50" : "text-neutral-400",
-                      )}
-                    >
-                      Logitech · {s.label}
-                    </p>
-                    <h2
-                      style={SPACE}
-                      className="text-3xl md:text-5xl font-bold tracking-[-0.03em] mb-3"
-                    >
-                      {s.tagline}
-                    </h2>
-                    <p
-                      className={cn(
-                        "text-base md:text-lg leading-relaxed",
-                        dark ? "text-white/60" : "text-neutral-600",
-                      )}
-                    >
-                      {s.description}
-                    </p>
-                    <Button
-                      asChild
-                      variant={dark ? "outline" : "default"}
-                      className={cn(
-                        "mt-6 rounded-full font-bold",
-                        dark
-                          ? "bg-white text-neutral-950 hover:bg-white/90 border-white"
-                          : "bg-neutral-950 text-white hover:bg-neutral-800",
-                      )}
-                    >
-                      <button type="button" onClick={() => setActiveSerie(s.key)}>
-                        Ver {s.label} ({items.length}) <ArrowRight className="ml-2 h-4 w-4" />
-                      </button>
-                    </Button>
-                  </div>
-                  <div
-                    className={cn(
-                      "group relative aspect-[4/3] rounded-2xl overflow-hidden",
-                      i % 2 === 1 ? "md:order-1" : "",
-                      dark ? "bg-white/5" : "bg-[#f5f5f7]",
-                    )}
-                  >
-                    <img
-                      src={seriesImage(s)}
-                      alt={s.label}
-                      loading="lazy"
-                      className="absolute inset-0 h-full w-full object-contain p-8 transition-transform duration-700 group-hover:scale-105"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                  {items.slice(0, 4).map((p) => (
-                    <MiniCard key={p.id} product={p} dark={dark} />
-                  ))}
-                </div>
-              </div>
-            </section>
-          </Reveal>
-        );
-      })}
 
       {/* ============ CATÁLOGO COMPLETO FILTRABLE ============ */}
       {products.length > 0 && (
-        <section className="bg-[#f5f5f7]">
-          <div className="container mx-auto px-6 lg:px-10 py-12 md:py-16">
-            <div className="text-center">
-              <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-neutral-500">
-                Catálogo
-              </span>
-              <h2 style={SPACE} className="mt-2 text-3xl md:text-5xl font-bold tracking-[-0.03em]">
-                Todo Logitech
-              </h2>
-              <p className="text-neutral-600 mt-2">{products.length} productos disponibles</p>
-            </div>
+        <section id="catalogo" className="scroll-mt-20 bg-white">
+          <div className="container mx-auto px-6 lg:px-10 py-14 md:py-20">
+            <SectionHeading eyebrow="Catálogo" title="Todo Logitech" />
+            <p className="text-center text-neutral-500 mt-2">
+              {products.length} productos disponibles
+            </p>
 
             <div className="mt-6 flex justify-center">
               <div className="flex items-center gap-1 overflow-x-auto max-w-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -464,9 +431,10 @@ function LogitechMicrosite() {
                     className={cn(
                       "shrink-0 px-4 md:px-5 py-2 text-sm whitespace-nowrap border-b-2 transition-colors",
                       activeSerie === t.key
-                        ? "border-neutral-950 text-neutral-950 font-bold"
+                        ? "text-neutral-950 font-bold"
                         : "border-transparent text-neutral-500 hover:text-neutral-900",
                     )}
+                    style={activeSerie === t.key ? { borderColor: TEAL } : undefined}
                   >
                     {t.label}
                   </button>
@@ -496,112 +464,517 @@ function LogitechMicrosite() {
   );
 }
 
-/** Bloque tipo "hotspot" de la imagen 5: foto de ambiente + ficha de compra al lado. */
-function FeaturedShowcase({ product }: { product: any }) {
-  const { add } = useCart();
-  const img = product.images?.[0];
-  const price = product.sale_price ?? product.price ?? 0;
-  const hasDiscount = product.sale_price && product.price && product.sale_price < product.price;
-  const pct = hasDiscount ? Math.round((1 - product.sale_price / product.price) * 100) : 0;
+/* ============================== HERO CARRUSEL ============================== */
+
+function HeroCarousel({ slides }: { slides: { product: any; gradient: string; word: string }[] }) {
+  const [idx, setIdx] = useState(0);
+  const n = slides.length;
+
+  useEffect(() => {
+    if (n < 2) return;
+    const t = setInterval(() => setIdx((p) => (p + 1) % n), 5500);
+    return () => clearInterval(t);
+  }, [n]);
+
+  const go = (d: number) => setIdx((p) => (p + d + n) % n);
+  const slide = slides[idx];
+  const p = slide.product;
+  const img = p.images?.[0];
 
   return (
-    <Reveal>
-      <section className="bg-white">
-        <div className="container mx-auto px-6 lg:px-10 py-12 md:py-16">
-          <div className="grid lg:grid-cols-[1.5fr_1fr] gap-4 md:gap-6 items-stretch">
-            <div className="relative rounded-2xl overflow-hidden bg-[#f5f5f7] aspect-[16/10]">
-              {img && (
-                <img
-                  src={img}
-                  alt={product.name}
-                  className="absolute inset-0 h-full w-full object-contain p-10"
-                />
-              )}
-              <span className="absolute top-5 left-5 rounded-xl bg-white/95 backdrop-blur px-4 py-2 text-sm font-bold text-secondary shadow-lg max-w-[60%]">
-                {product.name}
-              </span>
-            </div>
+    <section className="relative w-full overflow-hidden text-white" style={{ minHeight: 460 }}>
+      <AnimatePresence mode="popLayout">
+        <motion.div
+          key={idx}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.6 }}
+          className="absolute inset-0"
+          style={{ backgroundImage: slide.gradient }}
+        />
+      </AnimatePresence>
 
-            <div className="rounded-2xl bg-white border border-neutral-200 p-6 md:p-8 flex flex-col relative">
-              {hasDiscount && (
-                <span className="absolute top-5 right-5 h-14 w-14 rounded-full bg-secondary text-white text-xs font-bold flex items-center justify-center">
-                  {pct}% OFF
-                </span>
-              )}
-              <div className="flex-1 flex items-center justify-center py-6">
-                {img && <img src={img} alt="" className="max-h-52 w-auto object-contain" />}
-              </div>
-              <span className="self-start rounded-full bg-secondary text-white text-xs font-bold px-3 py-1.5 mb-3">
-                Envío Gratis
-              </span>
-              <h3 style={SPACE} className="text-xl md:text-2xl font-bold leading-snug">
-                {product.name}
-              </h3>
-              <div className="mt-3 flex items-baseline gap-3 flex-wrap">
-                {hasDiscount && (
-                  <span className="text-neutral-400 line-through">{formatCOP(product.price)}</span>
+      {/* Palabra gigante de fondo */}
+      <span
+        style={SPACE}
+        className="pointer-events-none absolute inset-0 flex items-center justify-center text-white/10 font-black tracking-tighter leading-none text-[22vw] md:text-[16vw] select-none"
+      >
+        {slide.word}
+      </span>
+
+      <div className="relative container mx-auto px-6 lg:px-10 grid md:grid-cols-2 items-center gap-6 min-h-[460px] md:min-h-[540px]">
+        <motion.div
+          key={`txt-${idx}`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="order-2 md:order-1 z-10"
+        >
+          <p className="text-[10px] md:text-xs uppercase tracking-[0.35em] text-white/70 mb-3">
+            Logitech
+          </p>
+          <h1
+            style={SPACE}
+            className="text-2xl md:text-5xl font-bold tracking-[-0.04em] leading-[1.05] max-w-xl line-clamp-3"
+          >
+            {p.name}
+          </h1>
+          {p.short_description && (
+            <p className="mt-4 text-white/80 max-w-md text-base md:text-lg">
+              {p.short_description}
+            </p>
+          )}
+          <Link
+            to="/producto/$slug"
+            params={{ slug: p.slug }}
+            className="mt-7 inline-flex items-center gap-2 rounded-full border-2 border-white/80 px-7 py-3 text-sm font-bold hover:bg-white hover:text-neutral-950 transition-colors"
+          >
+            VER MÁS <ArrowRight className="h-4 w-4" />
+          </Link>
+        </motion.div>
+
+        <motion.div
+          key={`img-${idx}`}
+          initial={{ opacity: 0, scale: 0.94, x: 20 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="order-1 md:order-2 z-10 flex items-center justify-center"
+        >
+          {img && (
+            <img
+              src={img}
+              alt={p.name}
+              className="max-h-[240px] md:max-h-[420px] w-auto object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.35)]"
+              onError={(e) => {
+                const t = e.target as HTMLImageElement;
+                if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+              }}
+            />
+          )}
+        </motion.div>
+      </div>
+
+      {/* Flechas */}
+      {n > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Anterior"
+            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur flex items-center justify-center transition-colors"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Siguiente"
+            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur flex items-center justify-center transition-colors"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          {/* Puntos */}
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIdx(i)}
+                aria-label={`Ir al slide ${i + 1}`}
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  i === idx ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/80",
                 )}
-                <span className="text-3xl font-bold">{formatCOP(price)}</span>
-              </div>
-              <Button
-                size="lg"
-                className="mt-5 w-full rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white font-bold"
-                onClick={() => {
-                  add({
-                    id: product.id,
-                    slug: product.slug,
-                    name: product.name,
-                    price,
-                    image: img,
-                    sku: product.sku ?? undefined,
-                  });
-                  trackAddToCart({
-                    item_id: product.sku || product.id,
-                    item_name: product.name,
-                    price,
-                    quantity: 1,
-                  });
-                }}
-              >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Agregar al carrito
-              </Button>
-            </div>
+              />
+            ))}
           </div>
-        </div>
-      </section>
-    </Reveal>
+        </>
+      )}
+    </section>
   );
 }
 
-function MiniCard({ product, dark }: { product: any; dark: boolean }) {
-  const img = product.images?.[0];
-  const price = product.sale_price ?? product.price;
+/* ============================== BARRA DE CONFIANZA ============================== */
+
+function TrustBar() {
+  const items = [
+    { icon: <Truck className="h-6 w-6" />, label: "Envío gratis en productos seleccionados" },
+    { icon: <ShieldCheck className="h-6 w-6" />, label: "Compra segura" },
+    { icon: <PackageCheck className="h-6 w-6" />, label: "Envíos nacionales" },
+    { icon: <RefreshCw className="h-6 w-6" />, label: "Garantía de devolución" },
+  ];
   return (
-    <Link
-      to="/producto/$slug"
-      params={{ slug: product.slug }}
+    <section className="border-b border-neutral-200 bg-white">
+      <div className="container mx-auto px-6 lg:px-10 py-6 grid grid-cols-2 md:grid-cols-4 gap-5">
+        {items.map((it) => (
+          <div key={it.label} className="flex items-center gap-3 justify-center md:justify-start">
+            <span style={{ color: TEAL }}>{it.icon}</span>
+            <span className="text-sm font-medium text-neutral-700 leading-snug">{it.label}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ============================== MOSAICOS DE MARCA ============================== */
+
+function BrandTiles({ officeImg, gamingImg }: { officeImg?: string; gamingImg?: string }) {
+  return (
+    <section className="bg-white">
+      <div className="container mx-auto px-6 lg:px-10 py-10 md:py-14 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <BrandTile
+          href="#office"
+          img={officeImg}
+          eyebrow="Logitech"
+          title="Descubre tu espacio de trabajo ideal"
+          gradient={HERO_GRADIENTS[1]}
+        />
+        <BrandTile
+          href="#gaming"
+          img={gamingImg}
+          eyebrow="Logitech G"
+          title="Juega al máximo con el mayor rendimiento"
+          gradient={HERO_GRADIENTS[2]}
+        />
+      </div>
+    </section>
+  );
+}
+
+function BrandTile({
+  href,
+  img,
+  eyebrow,
+  title,
+  gradient,
+}: {
+  href: string;
+  img?: string;
+  eyebrow: string;
+  title: string;
+  gradient: string;
+}) {
+  return (
+    <a
+      href={href}
+      className="group relative overflow-hidden rounded-3xl text-white min-h-[240px] md:min-h-[300px] flex"
+      style={{ backgroundImage: gradient }}
+    >
+      {img && (
+        <img
+          src={img}
+          alt={title}
+          loading="lazy"
+          className="absolute right-0 bottom-0 h-[80%] w-auto max-w-[55%] object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
+        />
+      )}
+      <div className="relative z-10 p-8 md:p-10 max-w-[70%]">
+        <p className="text-[10px] uppercase tracking-[0.3em] text-white/70">{eyebrow}</p>
+        <h3
+          style={SPACE}
+          className="mt-3 text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight"
+        >
+          {title}
+        </h3>
+        <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/95 text-neutral-950 px-5 py-2.5 text-sm font-bold group-hover:gap-3 transition-all">
+          Explorar <ArrowRight className="h-4 w-4" />
+        </span>
+      </div>
+    </a>
+  );
+}
+
+/* ============================== SECTION HEADING ============================== */
+
+function SectionHeading({
+  eyebrow,
+  title,
+  dark,
+}: {
+  eyebrow: string;
+  title: string;
+  dark?: boolean;
+}) {
+  return (
+    <div className="text-center">
+      <span className="text-[11px] font-bold uppercase tracking-[0.3em]" style={{ color: TEAL }}>
+        {eyebrow}
+      </span>
+      <h2
+        style={SPACE}
+        className={cn(
+          "mt-2 text-3xl md:text-5xl font-bold tracking-[-0.03em]",
+          dark ? "text-white" : "text-neutral-950",
+        )}
+      >
+        {title}
+      </h2>
+    </div>
+  );
+}
+
+/* ============================== DESTACADOS CON PESTAÑAS ============================== */
+
+const orderRecent = (a: any, b: any) =>
+  new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime();
+const hasOffer = (p: any) => p.sale_price && p.price && p.sale_price < p.price;
+
+function DestacadosTabs({ products, dark }: { products: any[]; dark?: boolean }) {
+  const withImg = useMemo(() => products.filter(showcaseOk), [products]);
+
+  const tabs = useMemo(() => {
+    const nuevos = [...withImg].sort(orderRecent).slice(0, 10);
+    const masVendidos = [
+      ...withImg.filter((p) => p.featured),
+      ...withImg
+        .filter((p) => !p.featured)
+        .sort((a, b) => Number(b.price ?? 0) - Number(a.price ?? 0)),
+    ].slice(0, 10);
+    const recomendados = [
+      ...withImg.filter(hasOffer),
+      ...withImg.filter((p) => !hasOffer(p)),
+    ].slice(0, 10);
+    return [
+      { key: "nuevos", label: "Nuevos", items: nuevos },
+      { key: "vendidos", label: "Más Vendidos", items: masVendidos },
+      { key: "recomendados", label: "Recomendados", items: recomendados },
+    ].filter((t) => t.items.length > 0);
+  }, [withImg]);
+
+  const [tab, setTab] = useState(0);
+  const items = tabs[tab]?.items ?? [];
+  const scroller = useRef<HTMLDivElement>(null);
+
+  const scrollBy = (d: number) => scroller.current?.scrollBy({ left: d * 280, behavior: "smooth" });
+
+  if (tabs.length === 0) return null;
+
+  return (
+    <div className="mt-8">
+      {/* Pestañas */}
+      <div className="flex justify-center">
+        <div className="flex items-center gap-1">
+          {tabs.map((t, i) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setTab(i)}
+              className={cn(
+                "px-4 md:px-5 py-2 text-sm whitespace-nowrap border-b-2 transition-colors",
+                tab === i
+                  ? "font-bold " + (dark ? "text-white" : "text-neutral-950")
+                  : "border-transparent " +
+                      (dark
+                        ? "text-white/50 hover:text-white"
+                        : "text-neutral-500 hover:text-neutral-900"),
+              )}
+              style={tab === i ? { borderColor: TEAL } : undefined}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Carrusel horizontal */}
+      <div className="relative mt-8">
+        <div
+          ref={scroller}
+          className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {items.map((p) => (
+            <LogiProductCard key={p.id} product={p} dark={dark} />
+          ))}
+        </div>
+
+        {items.length > 3 && (
+          <>
+            <button
+              type="button"
+              onClick={() => scrollBy(-1)}
+              aria-label="Anterior"
+              className={cn(
+                "hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full items-center justify-center shadow-lg transition-colors",
+                dark
+                  ? "bg-white text-neutral-950"
+                  : "bg-neutral-950 text-white hover:bg-neutral-800",
+              )}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollBy(1)}
+              aria-label="Siguiente"
+              className={cn(
+                "hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full items-center justify-center shadow-lg transition-colors",
+                dark
+                  ? "bg-white text-neutral-950"
+                  : "bg-neutral-950 text-white hover:bg-neutral-800",
+              )}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LogiProductCard({ product, dark }: { product: any; dark?: boolean }) {
+  const { add } = useCart();
+  const img = product.images?.[0];
+  const price = product.price ?? null;
+  const sale = product.sale_price ?? null;
+  const hasDiscount = !!sale && !!price && sale < price;
+  const final = sale ?? price ?? 0;
+  const pct = hasDiscount ? Math.round((1 - (sale as number) / (price as number)) * 100) : 0;
+
+  return (
+    <div
       className={cn(
-        "group block rounded-2xl overflow-hidden h-full transition-all hover:-translate-y-1",
-        dark
-          ? "bg-white/[0.04] border border-white/10 hover:border-white/25"
-          : "bg-[#f5f5f7] border border-transparent hover:border-neutral-300",
+        "group w-60 md:w-64 shrink-0 snap-start rounded-2xl overflow-hidden flex flex-col border",
+        dark ? "bg-white/[0.04] border-white/10" : "bg-white border-neutral-200",
       )}
     >
-      <div className="aspect-[4/3] relative overflow-hidden">
+      <Link
+        to="/producto/$slug"
+        params={{ slug: product.slug }}
+        className="relative block aspect-square bg-[#f7f7f7]"
+      >
+        {hasDiscount && (
+          <span
+            className="absolute top-3 left-3 z-10 rounded-full text-white text-[10px] font-bold px-2.5 py-1"
+            style={{ backgroundColor: TEAL }}
+          >
+            Ahorra {pct}%
+          </span>
+        )}
         {img && (
           <img
             src={img}
             alt={product.name}
             loading="lazy"
-            className="absolute inset-0 h-full w-full object-contain p-5 group-hover:scale-105 transition-transform duration-500"
+            className="absolute inset-0 h-full w-full object-contain p-6 group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              const t = e.target as HTMLImageElement;
+              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+            }}
           />
         )}
+      </Link>
+
+      <div className="p-4 flex flex-col flex-1">
+        <Link to="/producto/$slug" params={{ slug: product.slug }}>
+          <h3
+            className={cn(
+              "text-sm font-semibold leading-snug line-clamp-2 min-h-[2.5rem] group-hover:underline",
+              dark ? "text-white" : "text-neutral-900",
+            )}
+          >
+            {product.name}
+          </h3>
+        </Link>
+        <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+          <span className={cn("text-lg font-bold", dark ? "text-white" : "text-neutral-950")}>
+            {formatCOP(final)}
+          </span>
+          {hasDiscount && (
+            <span
+              className={cn("text-xs line-through", dark ? "text-white/40" : "text-neutral-400")}
+            >
+              {formatCOP(price as number)}
+            </span>
+          )}
+        </div>
+        <Button
+          className="mt-3 w-full rounded-full font-bold text-white hover:opacity-90"
+          style={{ backgroundColor: TEAL }}
+          onClick={() => {
+            add({
+              id: product.id,
+              slug: product.slug,
+              name: product.name,
+              price: final,
+              image: img,
+              sku: product.sku ?? undefined,
+            });
+            trackAddToCart({
+              item_id: product.sku || product.id,
+              item_name: product.name,
+              price: final,
+              quantity: 1,
+            });
+          }}
+        >
+          <ShoppingCart className="h-4 w-4 mr-1.5" />
+          Agregar al carrito
+        </Button>
       </div>
-      <div className="p-4">
-        <h3 className="text-sm font-semibold leading-snug line-clamp-2">{product.name}</h3>
-        {price != null && <p className="mt-1.5 font-bold">{formatCOP(price)}</p>}
-      </div>
-    </Link>
+    </div>
+  );
+}
+
+/* ============================== SERIE IDEAL — FEATURED ============================== */
+
+function SerieIdealFeatured({
+  product,
+  eyebrow,
+  gradient,
+}: {
+  product: any;
+  eyebrow: string;
+  gradient: string;
+}) {
+  const img = product.images?.[0];
+  return (
+    <Reveal>
+      <section className="bg-white">
+        <div className="container mx-auto px-6 lg:px-10 py-10 md:py-14">
+          <div
+            className="relative overflow-hidden rounded-3xl text-white grid md:grid-cols-2 items-center gap-6 min-h-[320px] md:min-h-[380px]"
+            style={{ backgroundImage: gradient }}
+          >
+            <div className="relative z-10 p-8 md:p-12">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-white/70">{eyebrow}</p>
+              <h2
+                style={SPACE}
+                className="mt-3 text-2xl md:text-4xl font-bold tracking-[-0.03em] leading-[1.05] line-clamp-3"
+              >
+                Descubre {product.name}
+              </h2>
+              {product.short_description && (
+                <p className="mt-4 text-white/80 max-w-md">{product.short_description}</p>
+              )}
+              <Link
+                to="/producto/$slug"
+                params={{ slug: product.slug }}
+                className="mt-7 inline-flex items-center gap-2 rounded-full bg-white text-neutral-950 px-7 py-3 text-sm font-bold hover:gap-3 transition-all"
+              >
+                VER MÁS <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="relative z-10 flex items-center justify-center p-6 md:p-10">
+              {img && (
+                <img
+                  src={img}
+                  alt={product.name}
+                  loading="lazy"
+                  className="max-h-[220px] md:max-h-[320px] w-auto object-contain drop-shadow-[0_25px_40px_rgba(0,0,0,0.35)]"
+                  onError={(e) => {
+                    const t = e.target as HTMLImageElement;
+                    if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+    </Reveal>
   );
 }
