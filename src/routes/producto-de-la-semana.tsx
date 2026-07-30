@@ -45,6 +45,62 @@ export const Route = createFileRoute("/producto-de-la-semana")({
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
 
+/** Próximo viernes a las 12:00 p.m. (hora local) en ISO, para el contador. */
+function nextFridayNoonISO(): string {
+  const now = new Date();
+  const d = new Date(now);
+  d.setHours(12, 0, 0, 0);
+  let add = (5 - d.getDay() + 7) % 7; // 5 = viernes
+  if (add === 0 && now.getTime() >= d.getTime()) add = 7; // viernes ya pasado el mediodía → siguiente
+  d.setDate(d.getDate() + add);
+  return d.toISOString();
+}
+
+// Palabras clave para detectar productos "gamer" / deseados para la franja.
+const GAMER_RE =
+  /gamer|gaming|\brtx\b|geforce|radeon|\bmsi\b|logitech ?g|razer|redragon|hyperx|corsair|asus rog|\brog\b|consola|playstation|\bps5\b|xbox|nintendo|switch|\d{3}\s?hz|144hz|165hz|240hz|mec[aá]nic|mouse gamer|teclado gamer|diadema|headset|aud[ií]fonos gamer|silla gamer|volante|joystick|control(ador)?|monitor/i;
+
+function gamerScore(p: any): number {
+  const hay = `${p.name ?? ""} ${p.categories?.name ?? ""} ${p.categories?.slug ?? ""} ${p.brands?.slug ?? ""}`;
+  let score = 0;
+  const m = hay.match(new RegExp(GAMER_RE, "gi"));
+  if (m) score += m.length;
+  return score;
+}
+
+/**
+ * Selecciona hasta `max` productos para la franja: primero los más "gamer" y
+ * deseados, con variedad de categorías (máx. 3 por categoría) para no llenarla
+ * solo de computadores.
+ */
+function pickPremium(list: any[], max = 14): any[] {
+  const withImg = list.filter((p) => Array.isArray(p.images) && p.images[0] && p.price);
+  const scored = withImg
+    .map((p) => ({ p, g: gamerScore(p) }))
+    .sort((a, b) => b.g - a.g || Number(b.p.price ?? 0) - Number(a.p.price ?? 0));
+
+  const perCat = new Map<string, number>();
+  const out: any[] = [];
+  const overflow: any[] = [];
+  for (const { p } of scored) {
+    const cat = p.categories?.slug ?? p.category_id ?? "sin";
+    const n = perCat.get(cat) ?? 0;
+    if (n < 3) {
+      perCat.set(cat, n + 1);
+      out.push(p);
+    } else {
+      overflow.push(p);
+    }
+    if (out.length >= max) break;
+  }
+  // Si no llegamos al máximo por el tope de categoría, rellena con el resto.
+  for (const p of overflow) {
+    if (out.length >= max) break;
+    out.push(p);
+  }
+  return out.slice(0, max);
+}
+
 type Deal = {
   id: string;
   product_id: string;
@@ -110,18 +166,18 @@ function WeeklyDealPage() {
             .maybeSingle(),
           supabase
             .from("products")
-            .select("id, slug, name, price, images")
+            .select(
+              "id, slug, name, price, images, category_id, categories(slug,name), brands(slug,name)",
+            )
             .eq("active", true)
             .not("price", "is", null)
             .not("images", "is", null)
             .order("price", { ascending: false, nullsFirst: false })
-            .limit(24),
+            .limit(150),
           getPastWeeklyDeals().catch(() => ({ past: [] as PastDeal[] })),
         ]);
 
-        const premium = ((premiumRes.data as unknown as Premium[]) ?? [])
-          .filter((p) => Array.isArray(p.images) && p.images[0] && p.price)
-          .slice(0, 14);
+        const premium = pickPremium((premiumRes.data as any[]) ?? [], 14) as Premium[];
 
         setData({
           current: (dealRes.data as unknown as Deal) ?? null,
@@ -199,23 +255,80 @@ function WeeklyDealView({
   );
 }
 
-/* ============================== HERO: EXPECTATIVA ============================== */
+/* ============================== MONEDA 3D GIRATORIA ============================== */
 
-function TeaserHero({ deal }: { deal: Deal }) {
-  const teasers = (deal.teaser_images ?? []).filter(Boolean);
+function Coin3D({ percent = 80 }: { percent?: number }) {
+  return (
+    <div className="relative" style={{ perspective: "900px" }}>
+      {/* Halo */}
+      <motion.div
+        aria-hidden
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-500/40 blur-3xl"
+        style={{ width: 260, height: 260 }}
+        animate={{ opacity: [0.5, 0.85, 0.5], scale: [1, 1.08, 1] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="relative mx-auto flex items-center justify-center rounded-full"
+        style={{
+          width: 176,
+          height: 176,
+          transformStyle: "preserve-3d",
+          background:
+            "radial-gradient(circle at 34% 28%, #ff7a4d 0%, #ef4444 45%, #b91c1c 78%, #7f1d1d 100%)",
+          boxShadow:
+            "inset 0 8px 22px rgba(255,255,255,0.35), inset 0 -14px 28px rgba(0,0,0,0.55), 0 30px 55px rgba(0,0,0,0.55)",
+        }}
+        animate={{ rotateY: [0, 360] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+      >
+        <div className="text-center" style={{ transform: "translateZ(24px)" }}>
+          <div
+            style={{ ...SPACE }}
+            className="text-white font-black leading-none text-5xl md:text-6xl"
+          >
+            −{percent}%
+          </div>
+          <div className="text-white/90 text-[10px] font-bold tracking-[0.4em] mt-1">OFF</div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ============================== HERO ESPECTACULAR (expectativa / sin oferta) ============================== */
+
+function SpectacularHero({
+  target,
+  discount,
+  teasers = [],
+}: {
+  target: string;
+  discount: number;
+  teasers?: string[];
+}) {
+  const clean = teasers.filter(Boolean);
   const [idx, setIdx] = useState(0);
-
   useEffect(() => {
-    if (teasers.length < 2) return;
-    const t = setInterval(() => setIdx((p) => (p + 1) % teasers.length), 3500);
+    if (clean.length < 2) return;
+    const t = setInterval(() => setIdx((p) => (p + 1) % clean.length), 3500);
     return () => clearInterval(t);
-  }, [teasers.length]);
+  }, [clean.length]);
 
   return (
     <section className="relative min-h-[92vh] flex flex-col items-center justify-center text-center px-6 py-20 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-60">
-        <div className="absolute -top-40 -left-40 h-[32rem] w-[32rem] rounded-full bg-secondary/25 blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-primary/40 blur-[120px]" />
+      {/* Glows de fondo animados */}
+      <div className="pointer-events-none absolute inset-0">
+        <motion.div
+          className="absolute -top-40 -left-40 h-[34rem] w-[34rem] rounded-full bg-secondary/30 blur-[130px]"
+          animate={{ opacity: [0.4, 0.7, 0.4] }}
+          transition={{ duration: 5, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -right-40 h-[34rem] w-[34rem] rounded-full bg-primary/40 blur-[130px]"
+          animate={{ opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 6, repeat: Infinity }}
+        />
       </div>
 
       <motion.div
@@ -228,47 +341,79 @@ function TeaserHero({ deal }: { deal: Deal }) {
           <Sparkles className="h-3 w-3" /> Producto de la Semana
         </span>
 
-        <h1
-          style={SPACE}
-          className="text-[clamp(2.5rem,9vw,7rem)] font-bold tracking-[-0.05em] leading-[0.92] max-w-5xl bg-gradient-to-b from-white via-white to-white/40 bg-clip-text text-transparent"
+        {/* Moneda 3D */}
+        <motion.div
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+          className="mb-4"
         >
-          Algo increíble
-          <br />
-          está por caer.
-        </h1>
+          <Coin3D percent={Math.round(discount)} />
+        </motion.div>
 
-        <p className="mt-8 text-lg md:text-2xl text-white/50 max-w-2xl font-light">
-          Este viernes revelamos un producto con hasta{" "}
-          <span className="text-white font-medium">{Math.round(deal.discount_percent)}% menos</span>
-          . Comprable solo de <span className="text-white font-medium">12:00 pm a 1:00 pm</span>.
+        {/* Titular animado HASTA X% OFF */}
+        <span className="text-xs md:text-sm uppercase tracking-[0.4em] text-white/60 mb-2">
+          Hasta
+        </span>
+        <motion.h1
+          style={{
+            ...SPACE,
+            backgroundImage:
+              "linear-gradient(100deg,#fff 0%,#f43f5e 25%,#fb923c 50%,#f43f5e 75%,#fff 100%)",
+            backgroundSize: "220% auto",
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+          }}
+          animate={{ backgroundPosition: ["0% 50%", "220% 50%"] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+          className="text-[clamp(3.5rem,15vw,11rem)] font-black tracking-[-0.05em] leading-[0.85]"
+        >
+          {Math.round(discount)}% OFF
+        </motion.h1>
+
+        <p className="mt-6 text-lg md:text-2xl text-white/70 max-w-2xl font-light">
+          Todos los <span className="text-white font-semibold">viernes</span>, un producto revelado
+          y comprable solo de{" "}
+          <span className="text-white font-semibold">12:00 p.m. a 1:00 p.m.</span>
+          <br className="hidden md:block" />
+          Una hora. Un precio irrepetible.
         </p>
 
-        <p className="mt-14 text-[10px] uppercase tracking-[0.35em] text-white/40 mb-4">
+        <p className="mt-12 text-[10px] uppercase tracking-[0.35em] text-white/40 mb-4">
           Se revela en
         </p>
-        <Countdown target={deal.reveal_at} />
+        <Countdown target={target} />
       </motion.div>
 
-      {/* Silueta o foto sorpresa */}
-      <div className="relative z-10 mt-16 w-full max-w-2xl aspect-square rounded-[2rem] border border-white/10 bg-white/[0.03] overflow-hidden flex items-center justify-center">
-        {teasers[idx] ? (
+      {/* Foto sorpresa (solo si hay teaser configurado) */}
+      {clean.length > 0 && (
+        <div className="relative z-10 mt-14 w-full max-w-xl aspect-square rounded-[2rem] border border-white/10 bg-white/[0.03] overflow-hidden flex items-center justify-center">
           <motion.img
-            key={teasers[idx]}
-            src={teasers[idx]}
+            key={clean[idx]}
+            src={clean[idx]}
             alt="Pista del Producto de la Semana"
             initial={{ opacity: 0, scale: 1.04 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9 }}
             className="h-full w-full object-cover"
           />
-        ) : (
-          <ShoppingBag className="h-40 w-40 text-white/10" strokeWidth={0.75} />
-        )}
-        <span className="absolute top-5 left-5 rounded-full bg-secondary text-white font-bold px-4 py-1.5 text-sm shadow-lg">
-          −{Math.round(deal.discount_percent)}%
-        </span>
-      </div>
+          <span className="absolute top-5 left-5 rounded-full bg-secondary text-white font-bold px-4 py-1.5 text-sm shadow-lg">
+            −{Math.round(discount)}%
+          </span>
+        </div>
+      )}
     </section>
+  );
+}
+
+function TeaserHero({ deal }: { deal: Deal }) {
+  return (
+    <SpectacularHero
+      target={deal.reveal_at}
+      discount={deal.discount_percent}
+      teasers={deal.teaser_images ?? []}
+    />
   );
 }
 
@@ -338,33 +483,9 @@ function ClosedHero({ deal }: { deal: Deal }) {
 /* ============================== HERO: SIN DEAL ============================== */
 
 function NoDealHero() {
-  return (
-    <section className="relative min-h-[80vh] flex flex-col items-center justify-center text-center px-6 py-20 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-50">
-        <div className="absolute -top-40 -left-40 h-[32rem] w-[32rem] rounded-full bg-secondary/25 blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-primary/40 blur-[120px]" />
-      </div>
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="relative z-10 flex flex-col items-center"
-      >
-        <Sparkles className="h-14 w-14 text-white/40 mb-6" />
-        <h1
-          style={SPACE}
-          className="text-[clamp(2.5rem,8vw,6rem)] font-bold tracking-[-0.05em] leading-[0.92] max-w-4xl bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent"
-        >
-          El próximo viernes
-          <br />a las 12:00 pm.
-        </h1>
-        <p className="mt-8 text-white/60 max-w-lg text-lg">
-          Cada semana revelamos un producto con hasta 80% de descuento, comprable durante una sola
-          hora. Déjanos tu correo y sé el primero en enterarte.
-        </p>
-      </motion.div>
-    </section>
-  );
+  // Sin oferta configurada: contamos hacia el próximo viernes al mediodía.
+  const target = useMemo(() => nextFridayNoonISO(), []);
+  return <SpectacularHero target={target} discount={80} />;
 }
 
 /* ============================== ESTADO EN VIVO: PODIO ============================== */

@@ -174,6 +174,19 @@ const SERIES: Serie[] = [
   },
 ];
 
+// Fotos ambiente oficiales por serie (estilo tienda oficial Logitech), para la
+// sección "Descubre tu serie ideal".
+const CDN = "https://www.logitechstore.com.co/cdn/shop/files";
+const SERIES_AMBIENT: Record<string, string> = {
+  mx: `${CDN}/Banner_Pilar_MX.jpg?width=800`,
+  ergo: `${CDN}/download.jpg?v=1750727197&width=800`,
+  lifestyle: `${CDN}/Serie-lifestyle-logi.png?v=1760473105&width=800`,
+  esencial: `${CDN}/download-2.jpg?v=1750727197&width=800`,
+  "gamer-pro": `${CDN}/download-3_1db57ad7-c227-426d-8562-948aa58094cd.jpg?v=1750728941&width=800`,
+  racing: `${CDN}/download-1_7a1956bf-17b3-45aa-b308-57eb5211447f.jpg?v=1750728941&width=800`,
+  g: `${CDN}/download_bd1b4a57-3792-48c0-b1c4-3eb344531b34.jpg?v=1750728941&width=800`,
+};
+
 const SERIE_BY_KEY = new Map(SERIES.map((s) => [s.key, s]));
 
 function classify(product: any): string | null {
@@ -360,47 +373,46 @@ function LogitechMicrosite() {
         />
       )}
 
-      {/* ============ SERIES ============ */}
+      {/* ============ DESCUBRE TU SERIE IDEAL (fotos ambiente, estilo oficial) ============ */}
       {activeSeries.length > 0 && (
         <Reveal>
-          <section className="bg-[#f5f5f7]">
+          <section className="bg-white">
             <div className="container mx-auto px-6 lg:px-10 py-14 md:py-20">
               <SectionHeading eyebrow="Colecciones" title="Descubre tu serie ideal" />
-              <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-                {activeSeries.slice(0, 5).map((s, i) => (
-                  <motion.button
+              <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+                {activeSeries.slice(0, 4).map((s, i) => (
+                  <SerieCard
                     key={s.key}
-                    type="button"
-                    onClick={() => {
+                    serie={s}
+                    index={i}
+                    image={SERIES_AMBIENT[s.key] ?? seriesImage(s)}
+                    onSelect={() => {
                       setActiveSerie(s.key);
                       document
                         .getElementById("catalogo")
                         ?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
-                    initial={{ opacity: 0, y: 14 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{ duration: 0.35, delay: i * 0.06 }}
-                    className="group relative block overflow-hidden rounded-2xl aspect-[3/4] bg-white border border-neutral-200 text-left"
-                  >
-                    <img
-                      src={seriesImage(s)}
-                      alt={s.label}
-                      loading="lazy"
-                      className="absolute inset-0 h-full w-full object-contain p-6 group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-white via-white/85 to-transparent">
-                      <p className="text-base font-medium text-neutral-900">
-                        Serie{" "}
-                        <span className="font-bold" style={SPACE}>
-                          {s.name}
-                        </span>
-                      </p>
-                      <p className="text-xs text-neutral-500 leading-snug mt-0.5">{s.tagline}</p>
-                    </div>
-                  </motion.button>
+                  />
                 ))}
               </div>
+              {activeSeries.length > 4 && (
+                <div className="mt-4 md:mt-5 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+                  {activeSeries.slice(4, 8).map((s, i) => (
+                    <SerieCard
+                      key={s.key}
+                      serie={s}
+                      index={i}
+                      image={SERIES_AMBIENT[s.key] ?? seriesImage(s)}
+                      onSelect={() => {
+                        setActiveSerie(s.key);
+                        document
+                          .getElementById("catalogo")
+                          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         </Reveal>
@@ -684,6 +696,60 @@ function BrandTile({
         </span>
       </div>
     </a>
+  );
+}
+
+/* ============================== TARJETA DE SERIE (foto ambiente) ============================== */
+
+function SerieCard({
+  serie,
+  index,
+  image,
+  onSelect,
+}: {
+  serie: Serie;
+  index: number;
+  image: string;
+  onSelect: () => void;
+}) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onSelect}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.4, delay: (index % 4) * 0.07 }}
+      className="group relative block overflow-hidden rounded-2xl aspect-[4/5] bg-neutral-200 text-left"
+    >
+      <img
+        src={image}
+        alt={serie.label}
+        loading="lazy"
+        className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-700"
+        onError={(e) => {
+          const t = e.target as HTMLImageElement;
+          if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
+        }}
+      />
+      {/* Degradado inferior para legibilidad del texto sobre cualquier foto. */}
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4 md:p-5">
+        <div className="text-white">
+          <p
+            style={SPACE}
+            className="text-lg md:text-xl font-bold tracking-[-0.02em] leading-tight"
+          >
+            {serie.label}
+          </p>
+          <p className="text-xs md:text-sm text-white/80 leading-snug mt-0.5">{serie.tagline}</p>
+        </div>
+        <span className="shrink-0 mb-1 text-white/90 group-hover:translate-x-1 transition-transform">
+          <ArrowRight className="h-5 w-5" />
+        </span>
+      </div>
+    </motion.button>
   );
 }
 
