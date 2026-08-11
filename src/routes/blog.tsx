@@ -66,6 +66,12 @@ export const Route = createFileRoute('/blog')({
     meta: [
       { title: 'Blog — All For All' },
       { name: 'description', content: 'Guías, comparativas y tendencias en tecnología.' },
+      { property: 'og:title', content: 'Blog de tecnología — All For All' },
+      {
+        property: 'og:description',
+        content: 'Guías de compra, comparativas y tendencias en tecnología, gaming y equipos para empresas.',
+      },
+      { property: 'og:type', content: 'website' },
     ],
   }),
   component: BlogIndex,

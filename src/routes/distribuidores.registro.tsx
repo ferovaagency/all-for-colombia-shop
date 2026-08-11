@@ -21,6 +21,13 @@ export const Route = createFileRoute("/distribuidores/registro")({
         content:
           "Solicita ser distribuidor autorizado de All For All. Respuesta en máximo 2 días hábiles.",
       },
+      { property: "og:title", content: "Sé distribuidor autorizado de All For All" },
+      {
+        property: "og:description",
+        content:
+          "Registra tu empresa y accede a precios mayoristas, catálogo B2B y soporte comercial. Respuesta en máximo 2 días hábiles.",
+      },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: DistributorRegisterPage,

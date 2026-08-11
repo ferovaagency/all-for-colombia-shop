@@ -37,6 +37,13 @@ export const Route = createFileRoute("/tienda")({
     meta: [
       { title: "Tienda — All For All" },
       { name: "description", content: "Catálogo completo de productos: tecnología, hogar, equipos corporativos y más." },
+      { property: "og:title", content: "Tienda online — Catálogo All For All" },
+      {
+        property: "og:description",
+        content:
+          "Explora el catálogo completo de All For All: tecnología, gaming, monitores, hogar y equipos corporativos con envío a toda Colombia.",
+      },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: ShopPage,

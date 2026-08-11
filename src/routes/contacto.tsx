@@ -26,6 +26,13 @@ export const Route = createFileRoute("/contacto")({
         content:
           "Contáctanos: WhatsApp, email y formulario. Estamos en Bogotá y atendemos toda Colombia.",
       },
+      { property: "og:title", content: "Contacto — All For All" },
+      {
+        property: "og:description",
+        content:
+          "Escríbenos por WhatsApp, email o formulario. Atendemos toda Colombia desde Bogotá.",
+      },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: ContactPage,

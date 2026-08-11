@@ -13,6 +13,13 @@ export const Route = createFileRoute("/legal/")({
         content:
           "Términos y Condiciones, Política de Privacidad, Cookies, Inteligencia Artificial, Envíos, Garantías y Retracto de All For All S.A.S.",
       },
+      { property: "og:title", content: "Centro Legal — All For All" },
+      {
+        property: "og:description",
+        content:
+          "Consulta términos, privacidad, cookies, envíos, garantías y política de retracto de All For All S.A.S.",
+      },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: LegalIndex,
