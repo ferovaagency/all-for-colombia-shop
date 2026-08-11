@@ -25,7 +25,7 @@ export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
   head: () => ({
     meta: [
-      { title: "All For All — Tecnología premium, hogar y soluciones empresariales en Colombia" },
+      { title: "All For All — Tecnología, hogar y equipos en Colombia" },
       {
         name: "description",
         content:
@@ -52,7 +52,7 @@ const PROMO_BANNERS: PromoBannerItem[] = [
   },
   {
     id: 2,
-    image: bannerMsi,
+    image: posterJbl,
     video: videoJbl.url,
     link: "/tienda?marca=jbl",
     alt: "JBL — Sonido premium",
