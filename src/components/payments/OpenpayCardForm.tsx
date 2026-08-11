@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, AlertTriangle, Lock } from "lucide-react";
+import { OpenpayLogo, AcceptedCardBrands } from "@/components/payments/PaymentBrands";
 
 declare global {
   interface Window {
@@ -26,13 +27,19 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
+// Generic decline text required by Openpay: sensitive reasons such as
+// "insufficient funds" or "card reported lost/stolen" must NOT be shown to the
+// buyer — they are surfaced as a neutral "tarjeta declinada".
+const CARD_DECLINED = "La tarjeta fue declinada.";
+
 function paymentErrorMessage(error: unknown) {
   const message = String((error as any)?.data?.description || (error as any)?.message || error || "");
   const openpayMessages: Array<[RegExp, string]> = [
-    [/\[?3001\]?|card was declined/i, "La tarjeta fue rechazada."],
-    [/\[?3002\]?|card has expired/i, "La tarjeta ha expirado."],
-    [/\[?3003\]?|insufficient funds/i, "La tarjeta no tiene fondos suficientes."],
-    [/\[?3004\]?|reported as stolen|sistema de robo/i, "La tarjeta ha sido identificada como una tarjeta robada."],
+    [/\[?3001\]?|card was declined|declinada/i, CARD_DECLINED],
+    [/\[?3002\]?|card has expired|expir/i, "La tarjeta ha expirado."],
+    // 3003 (insufficient funds) and 3004 (lost/stolen) -> neutral decline text.
+    [/\[?3003\]?|insufficient funds|fondos/i, CARD_DECLINED],
+    [/\[?3004\]?|reported as stolen|stolen|lost|robada|perdida|sistema de robo/i, CARD_DECLINED],
     [/\[?3005\]?|fraud risk|anti-fraud/i, "Tarjeta rechazada, favor comunicarse con su banco."],
   ];
   const match = openpayMessages.find(([pattern]) => pattern.test(message));
@@ -105,7 +112,8 @@ export function OpenpayCardForm({ orderId, amount, customer, onSuccess, onBefore
   }, []);
 
   function formatCardNumber(raw: string) {
-    const digits = raw.replace(/\D/g, "").slice(0, 19);
+    // Max 16 numeric digits, no letters (Openpay certification requirement).
+    const digits = raw.replace(/\D/g, "").slice(0, 16);
     return digits.replace(/(.{4})/g, "$1 ").trim();
   }
 
@@ -117,6 +125,9 @@ export function OpenpayCardForm({ orderId, amount, customer, onSuccess, onBefore
 
   async function handleSubmit() {
     setError(null);
+    // Guard against double submits (double charges) even if the button's
+    // disabled state is bypassed.
+    if (processing) return;
     if (!ready || !window.OpenPay) {
       setError("Openpay aún no está listo. Espera unos segundos.");
       return;
@@ -161,6 +172,8 @@ export function OpenpayCardForm({ orderId, amount, customer, onSuccess, onBefore
           token_id: tokenId,
           device_session_id: deviceSessionId,
           customer,
+          // Used by the backend for the 3-D Secure return URL.
+          redirect_url: `${window.location.origin}/resultado-pago?id=${orderId}`,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -197,9 +210,19 @@ export function OpenpayCardForm({ orderId, amount, customer, onSuccess, onBefore
 
   return (
     <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4 space-y-3">
-      <p className="font-semibold flex items-center gap-2">
-        <Lock className="h-4 w-4" /> Pago con tarjeta (Openpay)
-      </p>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <p className="font-semibold flex items-center gap-2">
+          <Lock className="h-4 w-4" /> Pago con tarjeta
+        </p>
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          Procesado por <OpenpayLogo />
+        </span>
+      </div>
+
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <span className="text-xs text-muted-foreground">Tarjetas aceptadas:</span>
+        <AcceptedCardBrands />
+      </div>
 
       {error && (
         <Alert variant="destructive">
@@ -227,6 +250,7 @@ export function OpenpayCardForm({ orderId, amount, customer, onSuccess, onBefore
           placeholder="0000 0000 0000 0000"
           inputMode="numeric"
           autoComplete="cc-number"
+          maxLength={19}
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -238,6 +262,7 @@ export function OpenpayCardForm({ orderId, amount, customer, onSuccess, onBefore
             placeholder="MM/YY"
             inputMode="numeric"
             autoComplete="cc-exp"
+            maxLength={5}
           />
         </div>
         <div>
@@ -248,6 +273,7 @@ export function OpenpayCardForm({ orderId, amount, customer, onSuccess, onBefore
             placeholder="123"
             inputMode="numeric"
             autoComplete="cc-csc"
+            maxLength={4}
           />
         </div>
       </div>

@@ -12,6 +12,8 @@ const bodySchema = z.object({
     phone_number: z.string().trim().min(5).max(30),
     email: z.string().trim().email().max(120),
   }),
+  // Return URL for the 3-D Secure challenge redirect.
+  redirect_url: z.string().url().max(400).optional(),
 });
 
 /**
@@ -90,6 +92,9 @@ export const Route = createFileRoute("/api/openpay/card-charge")({
             order_id: order.id,
             device_session_id: d.device_session_id,
             customer: d.customer,
+            // Enforce 3-D Secure authentication (Openpay certification req.).
+            use_3d_secure: true,
+            redirect_url: d.redirect_url,
           };
 
           const res = await openpayFetch("/charges", { method: "POST", body: payload });

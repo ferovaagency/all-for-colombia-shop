@@ -103,7 +103,7 @@ function ContactPage() {
             <div>
               <p className="font-semibold">Ubicación</p>
               <p className="text-sm text-muted-foreground">
-                Bogotá, Colombia · Envíos a todo el país
+                Cra. 13 #134a-16 Ofi 201, Bogotá, Colombia · Envíos a todo el país
               </p>
             </div>
           </div>

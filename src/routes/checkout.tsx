@@ -30,6 +30,7 @@ import {
   Lock,
 } from "lucide-react";
 import { OpenpayCardForm } from "@/components/payments/OpenpayCardForm";
+import { OpenpayLogo, AcceptedCardBrands } from "@/components/payments/PaymentBrands";
 import { startAddiCheckout } from "@/lib/addi.functions";
 import { syncToBrevo } from "@/lib/brevo";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
@@ -651,13 +652,22 @@ function CheckoutPage() {
             {/* Openpay Tarjeta */}
             {payment === "openpay_card" && !cardOrderId && (
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4">
-                <p className="font-semibold mb-1 flex items-center gap-2">
-                  <Lock className="h-4 w-4" /> Pago con tarjeta
-                </p>
-                <p className="text-sm text-muted-foreground">
+                <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                  <p className="font-semibold flex items-center gap-2">
+                    <Lock className="h-4 w-4" /> Pago con tarjeta
+                  </p>
+                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    Procesado por <OpenpayLogo />
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mb-3">
                   Al confirmar el pedido te pediremos los datos de tu tarjeta de forma segura
                   (tokenización Openpay).
                 </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-muted-foreground">Aceptamos:</span>
+                  <AcceptedCardBrands />
+                </div>
               </div>
             )}
             {payment === "openpay_card" && cardOrderId && (

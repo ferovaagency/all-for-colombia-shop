@@ -100,7 +100,7 @@ export function Footer() {
           <h4 className="font-semibold mb-3">Contacto</h4>
           <ul className="space-y-2 text-sm text-primary-foreground/75">
             <li className="flex items-start gap-2">
-              <MapPin className="h-4 w-4 mt-0.5" /> Bogotá, Colombia
+              <MapPin className="h-4 w-4 mt-0.5 shrink-0" /> Cra. 13 #134a-16 Ofi 201, Bogotá, Colombia
             </li>
             <li className="flex items-start gap-2">
               <Truck className="h-4 w-4 mt-0.5 shrink-0" />
