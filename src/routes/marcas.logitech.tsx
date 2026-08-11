@@ -1021,7 +1021,7 @@ function SerieIdealFeatured({
                 params={{ slug: product.slug }}
                 className="mt-7 inline-flex items-center gap-2 rounded-full bg-white text-neutral-950 px-7 py-3 text-sm font-bold hover:gap-3 transition-all"
               >
-                Ver {p.name} <ArrowRight className="h-4 w-4" />
+                Ver {product.name} <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
             <div className="relative z-10 flex items-center justify-center p-6 md:p-10">
