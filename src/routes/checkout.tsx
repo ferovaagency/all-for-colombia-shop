@@ -327,8 +327,8 @@ function CheckoutPage() {
 
     let receiptUrl: string | null = null;
     if (receipt) {
-      const ext = receipt.name.split(".").pop() || "bin";
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const ext = (receipt.name.split(".").pop() || "bin").replace(/[^A-Za-z0-9]/g, "").slice(0, 10) || "bin";
+      const path = `${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("payment-receipts")
         .upload(path, receipt, { contentType: receipt.type });
