@@ -12,6 +12,7 @@ import { BrandShowcase } from "@/components/shop/BrandShowcase";
 import { Reveal } from "@/components/shop/Reveal";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
+import posterJbl from "@/assets/poster-jbl.jpg";
 import { getHomeData } from "@/lib/ssr-data.functions";
 import {
   FREE_SHIPPING_CITIES_TEXT,
