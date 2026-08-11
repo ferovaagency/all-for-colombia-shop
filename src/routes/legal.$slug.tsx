@@ -16,6 +16,9 @@ export const Route = createFileRoute("/legal/$slug")({
       meta: [
         { title: `${doc.title} — All For All` },
         { name: "description", content: doc.description },
+        { property: "og:title", content: `${doc.title} — All For All` },
+        { property: "og:description", content: doc.description },
+        { property: "og:type", content: "article" },
         { name: "robots", content: "index, follow" },
       ],
     };
