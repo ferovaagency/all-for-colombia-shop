@@ -25,12 +25,12 @@ export const Route = createFileRoute("/marcas/logitech")({
   head: () => ({
     meta: [
       {
-        title: "Tienda Logitech Colombia — Logitech y Logitech G | All For All",
+        title: "Logitech y Logitech G en Colombia | All For All",
       },
       {
         name: "description",
         content:
-          "Tienda oficial Logitech y Logitech G en All For All: series MX, ERGO, Esencial, Lifestyle, Serie G, Racing y PRO. Envío gratis en productos seleccionados y garantía oficial.",
+          "Logitech y Logitech G en All For All: series MX, ERGO, Serie G, Racing y PRO. Envío gratis en productos seleccionados y garantía oficial.",
       },
       { property: "og:title", content: "Tienda Logitech — All For All" },
       {
@@ -542,7 +542,7 @@ function HeroCarousel({ slides }: { slides: { product: any; gradient: string; wo
             params={{ slug: p.slug }}
             className="mt-7 inline-flex items-center gap-2 rounded-full border-2 border-white/80 px-7 py-3 text-sm font-bold hover:bg-white hover:text-neutral-950 transition-colors"
           >
-            VER MÁS <ArrowRight className="h-4 w-4" />
+            Ver {p.name} <ArrowRight className="h-4 w-4" />
           </Link>
         </motion.div>
 
@@ -685,14 +685,14 @@ function BrandTile({
       )}
       <div className="relative z-10 p-8 md:p-10 max-w-[70%]">
         <p className="text-[10px] uppercase tracking-[0.3em] text-white/70">{eyebrow}</p>
-        <h3
+        <h2
           style={SPACE}
           className="mt-3 text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight"
         >
           {title}
-        </h3>
+        </h2>
         <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/95 text-neutral-950 px-5 py-2.5 text-sm font-bold group-hover:gap-3 transition-all">
-          Explorar <ArrowRight className="h-4 w-4" />
+          Explorar {title} <ArrowRight className="h-4 w-4" />
         </span>
       </div>
     </a>
@@ -1021,7 +1021,7 @@ function SerieIdealFeatured({
                 params={{ slug: product.slug }}
                 className="mt-7 inline-flex items-center gap-2 rounded-full bg-white text-neutral-950 px-7 py-3 text-sm font-bold hover:gap-3 transition-all"
               >
-                VER MÁS <ArrowRight className="h-4 w-4" />
+                Ver {product.name} <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
             <div className="relative z-10 flex items-center justify-center p-6 md:p-10">

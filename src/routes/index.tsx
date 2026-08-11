@@ -12,6 +12,7 @@ import { BrandShowcase } from "@/components/shop/BrandShowcase";
 import { Reveal } from "@/components/shop/Reveal";
 import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
+import posterJbl from "@/assets/poster-jbl.jpg";
 import { getHomeData } from "@/lib/ssr-data.functions";
 import {
   FREE_SHIPPING_CITIES_TEXT,
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
   head: () => ({
     meta: [
-      { title: "All For All — Tecnología premium, hogar y soluciones empresariales en Colombia" },
+      { title: "All For All — Tecnología, hogar y equipos en Colombia" },
       {
         name: "description",
         content:
@@ -51,7 +52,7 @@ const PROMO_BANNERS: PromoBannerItem[] = [
   },
   {
     id: 2,
-    image: bannerMsi,
+    image: posterJbl,
     video: videoJbl.url,
     link: "/tienda?marca=jbl",
     alt: "JBL — Sonido premium",

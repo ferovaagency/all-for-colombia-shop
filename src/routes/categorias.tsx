@@ -7,6 +7,13 @@ export const Route = createFileRoute("/categorias")({
     meta: [
       { title: "Categorías — All For All" },
       { name: "description", content: "Explora todas nuestras categorías de productos." },
+      { property: "og:title", content: "Categorías de productos — All For All" },
+      {
+        property: "og:description",
+        content:
+          "Navega por categorías: tecnología, gaming, monitores, hogar, aires acondicionados, plóters y equipos corporativos.",
+      },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: CategoriesPage,

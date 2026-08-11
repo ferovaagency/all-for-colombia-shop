@@ -20,6 +20,13 @@ export const Route = createFileRoute("/ventas-corporativas")({
         content:
           "Soluciones empresariales: equipos tecnológicos, aires, plóters y más con precios especiales por volumen.",
       },
+      { property: "og:title", content: "Ventas corporativas B2B — All For All" },
+      {
+        property: "og:description",
+        content:
+          "Cotiza equipos tecnológicos, aires acondicionados y plóters para tu empresa con precios por volumen y facturación electrónica.",
+      },
+      { property: "og:type", content: "website" },
     ],
   }),
   component: CorporatePage,
