@@ -83,37 +83,29 @@ Estos tiempos podrán variar por razones logísticas, condiciones climáticas, r
 
 ---
 
-# **7. ENVÍO GRATUITO**
+# **7. ENVÍO INCLUIDO EN EL PRECIO**
 
-ALL FOR ALL podrá ofrecer promociones de envío gratuito bajo determinadas condiciones.
+Salvo indicación expresa en contrario publicada en el Sitio Web, el precio de venta de cada producto **YA INCLUYE el costo de envío** a todo el territorio nacional donde ALL FOR ALL tiene cobertura.
 
-Salvo indicación diferente publicada en el Sitio Web:
+En consecuencia, el cliente **no pagará ningún valor adicional por concepto de flete** al finalizar su compra.
 
-El envío será gratuito para compras iguales o superiores a **DOSCIENTOS MIL PESOS ($200.000 COP)** con destino a:
+Las zonas rurales o de difícil acceso referidas en la sección 2 podrán presentar excepciones logísticas, las cuales serán informadas al cliente antes del despacho.
 
-* Bogotá  
-* Medellín  
-* Cali  
-* Barranquilla
-
-Para los demás destinos o pedidos que no cumplan las condiciones de la promoción, el costo del transporte será informado al cliente antes del despacho.
-
-ALL FOR ALL podrá modificar o finalizar esta promoción para futuras compras sin previo aviso.
+ALL FOR ALL podrá modificar esta condición para futuras compras sin previo aviso, publicando la versión vigente en el Sitio Web.
 
 ---
 
 # **8. COSTO DEL ENVÍO**
 
-Cuando el pedido no cumpla las condiciones para envío gratuito, el valor del transporte será determinado teniendo en cuenta factores como:
+Dado que el costo de envío se encuentra incluido en el precio del producto, el cliente **no asumirá cargos adicionales de transporte** para las entregas cubiertas por esta Política.
 
-* ciudad de destino;  
-* peso;  
-* dimensiones;  
-* volumen;  
-* tipo de producto;  
-* empresa transportadora.
+Únicamente podrán generarse costos de transporte adicionales en los casos excepcionales previstos en esta Política, tales como:
 
-El costo será informado al cliente antes del despacho del pedido.
+* zonas de difícil acceso o con restricciones logísticas (sección 2);  
+* reenvíos por direcciones incorrectas o incompletas (sección 12);  
+* nuevos intentos de entrega atribuibles al cliente (sección 15).
+
+Cualquier costo excepcional será informado al cliente antes del despacho del pedido.
 
 ---
 
@@ -242,7 +234,7 @@ Para consultas relacionadas con envíos, el cliente podrá comunicarse con:
 
 **WhatsApp:** +57 313 497 7955
 
-**Domicilio:** Bogotá D.C., Colombia
+**Domicilio:** Cra. 13 #134a-16 Ofi 201, Bogotá D.C., Colombia
 
 ---
 

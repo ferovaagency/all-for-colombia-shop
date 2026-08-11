@@ -471,8 +471,7 @@ function CheckoutPage() {
     const summary = items
       .map((i) => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`)
       .join("\n");
-    const envio = shippingStatus.kind === "free" ? "GRATIS ✅" : "Por cotizar al confirmar";
-    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0, 8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\nEnvío: ${envio}\n\n${summary}\n\n*Total (sin flete):* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
+    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0, 8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\nEnvío: Incluido en el precio ✅\n\n${summary}\n\n*Total (envío incluido):* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
     window.open(whatsappUrl(msg), "_blank");
     firePurchase(orderId, payment);
     clear();
@@ -572,10 +571,10 @@ function CheckoutPage() {
                   <option value="">Selecciona tu ciudad</option>
                   {MAIN_CITIES.map((c) => (
                     <option key={c.slug} value={c.name}>
-                      {c.name} — envío gratis desde $200.000
+                      {c.name}
                     </option>
                   ))}
-                  <option value={OTHER_CITY_VALUE}>Otra ciudad (flete se cotiza)</option>
+                  <option value={OTHER_CITY_VALUE}>Otra ciudad</option>
                 </select>
                 {!MAIN_CITIES.some((c) => c.name === form.city) && (
                   <Input
@@ -817,11 +816,9 @@ function CheckoutPage() {
               <span>Total</span>
               <span className="text-primary">{formatCOP(subtotal)}</span>
             </div>
-            {shippingStatus.kind !== "free" && (
-              <p className="text-xs text-muted-foreground mt-1">
-                No incluye flete. {shippingStatus.label}.
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              Envío incluido en el precio. No se cobra flete adicional.
+            </p>
           </div>
           {/* Consentimientos obligatorios antes de pagar (Ley 1581 / Ley 1480) */}
           <PurchaseConsent value={consent} onChange={setConsent} className="mb-4" />

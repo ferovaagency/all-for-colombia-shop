@@ -14,6 +14,7 @@ import {
   Package,
   Clock,
   MessageCircle,
+  Truck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trackViewItem, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
@@ -372,6 +373,10 @@ function ProductDetailPage() {
             )}
           </div>
 
+          <div className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+            <Truck className="h-3.5 w-3.5" /> Envío incluido en el precio · a todo el país
+          </div>
+
           {/* Urgencia: el precio de oferta sólo se mantiene mientras corra el reloj */}
           {hasDiscount && <OfferCountdownBanner className="mb-4" />}
 
@@ -425,9 +430,8 @@ function ProductDetailPage() {
           {/* Advertencias legales obligatorias en la ficha de producto */}
           <div className="mt-4 space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
             <p>
-              Los precios publicados incluyen los impuestos aplicables, salvo que se indique
-              expresamente lo contrario. Los costos de envío, cuando correspondan, se informarán
-              antes de finalizar la compra.
+              Los precios publicados incluyen los impuestos aplicables y el costo de envío a todo
+              el país, salvo que se indique expresamente lo contrario.
             </p>
             <p>
               Las imágenes son ilustrativas y pueden presentar ligeras variaciones respecto al

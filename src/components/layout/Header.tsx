@@ -60,14 +60,14 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full">
-      {/* Banda de envío gratis */}
+      {/* Banda de envío incluido */}
       <div className="bg-neutral-950 text-white text-center py-1.5 px-4">
         <p className="text-[11px] md:text-xs">
           <span className="font-bold">{FREE_SHIPPING_HEADLINE}</span>
           <span className="hidden sm:inline text-white/60"> · {FREE_SHIPPING_CITIES_TEXT}</span>
           <span className="hidden md:inline text-white/40">
             {" "}
-            · Resto del país se cotiza al confirmar
+            · Sin costo de envío adicional
           </span>
         </p>
       </div>

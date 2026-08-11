@@ -105,8 +105,8 @@ export function Footer() {
             <li className="flex items-start gap-2">
               <Truck className="h-4 w-4 mt-0.5 shrink-0" />
               <span>
-                Envío gratis desde $200.000 en Bogotá, Medellín, Cali y Barranquilla. Resto del
-                país: flete cotizado al confirmar.
+                El precio incluye el envío. Cobertura a todo Colombia, sin costo de envío
+                adicional.
               </span>
             </li>
             <li className="flex items-start gap-2">

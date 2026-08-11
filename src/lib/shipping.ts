@@ -1,7 +1,7 @@
 /**
  * Política de envíos All For All
- * - Envío GRATIS en pedidos ≥ $200.000 para las ciudades principales.
- * - Resto del país: el flete se cotiza al confirmar el pedido.
+ * - El precio de cada producto YA INCLUYE el costo de envío.
+ * - Cobertura a todo el país, sin flete adicional.
  */
 
 export const FREE_SHIPPING_THRESHOLD = 200000;
@@ -60,44 +60,13 @@ export type ShippingStatus =
  * Estado del envío para un subtotal y una ciudad.
  * `city` vacío ⇒ todavía no sabemos a dónde va el pedido.
  */
-export function getShippingStatus(subtotal: number, city?: string | null): ShippingStatus {
-  const main = city ? findMainCity(city) : null;
-  const missing = Math.max(0, FREE_SHIPPING_THRESHOLD - (subtotal || 0));
-
-  if (!city || !city.trim()) {
-    return {
-      kind: "unknown",
-      label: "Se calcula al indicar la ciudad",
-      note: `Envío gratis desde ${formatShort(FREE_SHIPPING_THRESHOLD)} en Bogotá, Medellín, Cali y Barranquilla.`,
-      missing,
-      cost: null,
-    };
-  }
-
-  if (!main) {
-    return {
-      kind: "quote",
-      label: "Se cotiza al confirmar el pedido",
-      note: "Para el resto del país coordinamos el flete contigo antes de despachar.",
-      missing: 0,
-      cost: null,
-    };
-  }
-
-  if (missing > 0) {
-    return {
-      kind: "below",
-      label: "Se cotiza al confirmar el pedido",
-      note: `Te faltan ${formatShort(missing)} para envío gratis a ${main.name}.`,
-      missing,
-      cost: null,
-    };
-  }
-
+export function getShippingStatus(_subtotal: number, _city?: string | null): ShippingStatus {
+  // El precio ya incluye el envío: siempre "incluido", sin flete adicional
+  // ni umbrales, para cualquier ciudad del país.
   return {
     kind: "free",
-    label: "GRATIS",
-    note: `Envío gratis a ${main.name} por superar ${formatShort(FREE_SHIPPING_THRESHOLD)}.`,
+    label: "INCLUIDO",
+    note: "El precio ya incluye el envío a todo el país.",
     missing: 0,
     cost: 0,
   };
@@ -111,6 +80,6 @@ function formatShort(value: number) {
   }).format(value);
 }
 
-export const FREE_SHIPPING_HEADLINE = `Envío GRATIS desde ${formatShort(FREE_SHIPPING_THRESHOLD)}`;
-export const FREE_SHIPPING_CITIES_TEXT = "Bogotá · Medellín · Cali · Barranquilla";
-export const FREE_SHIPPING_REST_TEXT = "Resto del país: flete cotizado al confirmar el pedido.";
+export const FREE_SHIPPING_HEADLINE = "Envío incluido en el precio";
+export const FREE_SHIPPING_CITIES_TEXT = "Envíos a todo Colombia";
+export const FREE_SHIPPING_REST_TEXT = "El precio ya incluye el costo de envío.";
