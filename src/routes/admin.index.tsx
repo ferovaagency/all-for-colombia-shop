@@ -335,6 +335,15 @@ function AdminPage() {
                           ))}
                         </select>
                       </TableCell>
+                      <TableCell>
+                        {payInfo ? (
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${payInfo.cls}`}>
+                            {payInfo.label}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
