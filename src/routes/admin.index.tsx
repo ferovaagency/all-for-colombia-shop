@@ -32,6 +32,22 @@ const ORDER_STATUSES = [
   { value: "cancelled", label: "Cancelado" },
 ];
 
+/** Traduce el estado de un pago Openpay a un badge legible. */
+function openpayStatusInfo(raw?: string | null) {
+  const s = String(raw ?? "").toLowerCase();
+  if (!s) return null;
+  if (s.includes("succeeded") || s === "completed" || s === "paid")
+    return { label: "Aprobado", cls: "bg-green-100 text-green-700" };
+  if (s.includes("failed") || s.includes("cancelled") || s === "rejected")
+    return { label: "Rechazado", cls: "bg-red-100 text-red-700" };
+  if (s.includes("refund")) return { label: "Reembolsado", cls: "bg-purple-100 text-purple-700" };
+  if (s === "in_progress" || s === "charge_pending" || s === "pending")
+    return { label: "Pendiente", cls: "bg-amber-100 text-amber-700" };
+  return { label: raw as string, cls: "bg-gray-100 text-gray-700" };
+}
+
+
+
 function AdminPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [ordersError, setOrdersError] = useState("");
@@ -47,10 +63,11 @@ function AdminPage() {
   const [credDist, setCredDist] = useState<any | null>(null);
   const [orderFilter, setOrderFilter] = useState<"all" | "retail" | "distributor">("all");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [payments, setPayments] = useState<Record<string, any>>({});
 
   const reload = async () => {
     const { adminListDistributors } = await import("@/lib/distributors.functions");
-    const [oRes, p, c, b, cu, po, conv, dist] = await Promise.all([
+    const [oRes, p, c, b, cu, po, conv, dist, payRes] = await Promise.all([
       supabase.from("orders").select("*, distributors(company_name)").neq("status", "cancelled").order("created_at", { ascending: false }).limit(500),
       supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
       supabase.from("categories").select("*").order("sort_order"),
@@ -59,7 +76,13 @@ function AdminPage() {
       supabase.from("blog_posts").select("*").order("created_at", { ascending: false }),
       supabase.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(100),
       adminListDistributors().catch(() => ({ distributors: [] })),
+      supabase.from("payments").select("*").order("created_at", { ascending: false }).limit(1000),
     ]);
+    const payMap: Record<string, any> = {};
+    for (const pay of payRes.data || []) {
+      if (pay.order_id && !payMap[pay.order_id]) payMap[pay.order_id] = pay;
+    }
+    setPayments(payMap);
     if (oRes.error) {
       setOrdersError(oRes.error.message);
       setOrders([]);
@@ -253,6 +276,7 @@ function AdminPage() {
                   <TableHead>Cliente</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>Pago Openpay</TableHead>
                   <TableHead>Fecha</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
@@ -261,6 +285,8 @@ function AdminPage() {
                 {filteredOrders.map((o) => {
                   const isDist = o.order_type === "distributor" || !!o.distributor_id;
                   const isOpen = expandedOrder === o.id;
+                  const pay = payments[o.id];
+                  const payInfo = openpayStatusInfo(pay?.status);
                   const items: any[] = Array.isArray(o.items) ? o.items : [];
                   const addr = o.shipping_address || {};
                   return (
@@ -312,6 +338,15 @@ function AdminPage() {
                           ))}
                         </select>
                       </TableCell>
+                      <TableCell>
+                        {payInfo ? (
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${payInfo.cls}`}>
+                            {payInfo.label}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -345,7 +380,7 @@ function AdminPage() {
                     </TableRow>
                     {isOpen && (
                       <TableRow key={o.id + "-detail"} className="bg-muted/30">
-                        <TableCell colSpan={7} className="p-4">
+                        <TableCell colSpan={8} className="p-4">
                           <div className="grid md:grid-cols-2 gap-4 text-sm">
                             <div>
                               <div className="font-semibold mb-2">Productos pedidos ({items.length})</div>
@@ -376,6 +411,23 @@ function AdminPage() {
                                 <div>Subtotal: <span className="font-medium">{formatCOP(Number(o.subtotal || 0))}</span></div>
                                 <div>Total: <span className="font-bold">{formatCOP(Number(o.total || 0))}</span></div>
                                 <div>Método de pago: <span className="font-medium">{o.payment_method || "—"}</span></div>
+                                {pay && (
+                                  <div className="pt-1 border-t mt-1 space-y-0.5">
+                                    <div>
+                                      Transacción Openpay:{" "}
+                                      <span className={`font-semibold px-2 py-0.5 rounded-full text-[10px] ${payInfo?.cls}`}>
+                                        {payInfo?.label}
+                                      </span>
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground">Estado técnico: {pay.status}</div>
+                                    {pay.openpay_charge_id && (
+                                      <div className="text-[10px] text-muted-foreground font-mono">ID cargo: {pay.openpay_charge_id}</div>
+                                    )}
+                                    <div className="text-[10px] text-muted-foreground">
+                                      Actualizado: {new Date(pay.created_at).toLocaleString("es-CO")}
+                                    </div>
+                                  </div>
+                                )}
                                 {o.addi_status && <div>Addi: {o.addi_status}</div>}
                               </div>
                             </div>
@@ -416,7 +468,7 @@ function AdminPage() {
                 })}
                 {filteredOrders.length === 0 && !ordersError && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                       Sin pedidos
                     </TableCell>
                   </TableRow>
@@ -474,7 +526,17 @@ function AdminPage() {
                               <div className="text-xs text-muted-foreground">{o.customer_email}</div>
                             </TableCell>
                             <TableCell className="font-bold">{formatCOP(Number(o.total))}</TableCell>
-                            <TableCell className="text-xs">{o.payment_method || "—"}</TableCell>
+                            <TableCell className="text-xs">
+                              <div>{o.payment_method || "—"}</div>
+                              {(() => {
+                                const info = openpayStatusInfo(payments[o.id]?.status);
+                                return info ? (
+                                  <span className={`inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${info.cls}`}>
+                                    {info.label}
+                                  </span>
+                                ) : null;
+                              })()}
+                            </TableCell>
                             <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
                           </TableRow>
                         ))}
