@@ -526,7 +526,17 @@ function AdminPage() {
                               <div className="text-xs text-muted-foreground">{o.customer_email}</div>
                             </TableCell>
                             <TableCell className="font-bold">{formatCOP(Number(o.total))}</TableCell>
-                            <TableCell className="text-xs">{o.payment_method || "—"}</TableCell>
+                            <TableCell className="text-xs">
+                              <div>{o.payment_method || "—"}</div>
+                              {(() => {
+                                const info = openpayStatusInfo(payments[o.id]?.status);
+                                return info ? (
+                                  <span className={`inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${info.cls}`}>
+                                    {info.label}
+                                  </span>
+                                ) : null;
+                              })()}
+                            </TableCell>
                             <TableCell className="text-xs">{new Date(o.created_at).toLocaleDateString("es-CO")}</TableCell>
                           </TableRow>
                         ))}
