@@ -368,7 +368,7 @@ function AdminPage() {
                     </TableRow>
                     {isOpen && (
                       <TableRow key={o.id + "-detail"} className="bg-muted/30">
-                        <TableCell colSpan={7} className="p-4">
+                        <TableCell colSpan={8} className="p-4">
                           <div className="grid md:grid-cols-2 gap-4 text-sm">
                             <div>
                               <div className="font-semibold mb-2">Productos pedidos ({items.length})</div>
