@@ -284,6 +284,8 @@ function AdminPage() {
                 {filteredOrders.map((o) => {
                   const isDist = o.order_type === "distributor" || !!o.distributor_id;
                   const isOpen = expandedOrder === o.id;
+                  const pay = payments[o.id];
+                  const payInfo = openpayStatusInfo(pay?.status);
                   const items: any[] = Array.isArray(o.items) ? o.items : [];
                   const addr = o.shipping_address || {};
                   return (
