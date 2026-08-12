@@ -399,6 +399,23 @@ function AdminPage() {
                                 <div>Subtotal: <span className="font-medium">{formatCOP(Number(o.subtotal || 0))}</span></div>
                                 <div>Total: <span className="font-bold">{formatCOP(Number(o.total || 0))}</span></div>
                                 <div>Método de pago: <span className="font-medium">{o.payment_method || "—"}</span></div>
+                                {pay && (
+                                  <div className="pt-1 border-t mt-1 space-y-0.5">
+                                    <div>
+                                      Transacción Openpay:{" "}
+                                      <span className={`font-semibold px-2 py-0.5 rounded-full text-[10px] ${payInfo?.cls}`}>
+                                        {payInfo?.label}
+                                      </span>
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground">Estado técnico: {pay.status}</div>
+                                    {pay.openpay_charge_id && (
+                                      <div className="text-[10px] text-muted-foreground font-mono">ID cargo: {pay.openpay_charge_id}</div>
+                                    )}
+                                    <div className="text-[10px] text-muted-foreground">
+                                      Actualizado: {new Date(pay.created_at).toLocaleString("es-CO")}
+                                    </div>
+                                  </div>
+                                )}
                                 {o.addi_status && <div>Addi: {o.addi_status}</div>}
                               </div>
                             </div>
