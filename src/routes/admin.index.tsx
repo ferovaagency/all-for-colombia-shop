@@ -51,7 +51,7 @@ function AdminPage() {
 
   const reload = async () => {
     const { adminListDistributors } = await import("@/lib/distributors.functions");
-    const [oRes, p, c, b, cu, po, conv, dist] = await Promise.all([
+    const [oRes, p, c, b, cu, po, conv, dist, payRes] = await Promise.all([
       supabase.from("orders").select("*, distributors(company_name)").neq("status", "cancelled").order("created_at", { ascending: false }).limit(500),
       supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
       supabase.from("categories").select("*").order("sort_order"),
@@ -60,7 +60,13 @@ function AdminPage() {
       supabase.from("blog_posts").select("*").order("created_at", { ascending: false }),
       supabase.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(100),
       adminListDistributors().catch(() => ({ distributors: [] })),
+      supabase.from("payments").select("*").order("created_at", { ascending: false }).limit(1000),
     ]);
+    const payMap: Record<string, any> = {};
+    for (const pay of payRes.data || []) {
+      if (pay.order_id && !payMap[pay.order_id]) payMap[pay.order_id] = pay;
+    }
+    setPayments(payMap);
     if (oRes.error) {
       setOrdersError(oRes.error.message);
       setOrders([]);
