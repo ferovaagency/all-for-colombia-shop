@@ -276,6 +276,7 @@ function AdminPage() {
                   <TableHead>Cliente</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>Pago Openpay</TableHead>
                   <TableHead>Fecha</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
