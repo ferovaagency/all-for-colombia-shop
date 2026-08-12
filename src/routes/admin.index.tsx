@@ -32,6 +32,22 @@ const ORDER_STATUSES = [
   { value: "cancelled", label: "Cancelado" },
 ];
 
+/** Traduce el estado de un pago Openpay a un badge legible. */
+function openpayStatusInfo(raw?: string | null) {
+  const s = String(raw ?? "").toLowerCase();
+  if (!s) return null;
+  if (s.includes("succeeded") || s === "completed" || s === "paid")
+    return { label: "Aprobado", cls: "bg-green-100 text-green-700" };
+  if (s.includes("failed") || s.includes("cancelled") || s === "rejected")
+    return { label: "Rechazado", cls: "bg-red-100 text-red-700" };
+  if (s.includes("refund")) return { label: "Reembolsado", cls: "bg-purple-100 text-purple-700" };
+  if (s === "in_progress" || s === "charge_pending" || s === "pending")
+    return { label: "Pendiente", cls: "bg-amber-100 text-amber-700" };
+  return { label: raw as string, cls: "bg-gray-100 text-gray-700" };
+}
+
+
+
 function AdminPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [ordersError, setOrdersError] = useState("");
