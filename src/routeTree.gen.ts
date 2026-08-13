@@ -9,137 +9,57 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as BlogRouteImport } from './routes/blog'
-import { Route as CarritoRouteImport } from './routes/carrito'
-import { Route as CatalogoAllforallDotpdfRouteImport } from './routes/catalogo-allforall[.]pdf'
-import { Route as CategoriasRouteImport } from './routes/categorias'
-import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as ContactoRouteImport } from './routes/contacto'
-import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
-import { Route as LegalRouteImport } from './routes/legal'
-import { Route as MiCuentaRouteImport } from './routes/mi-cuenta'
-import { Route as NosotrosRouteImport } from './routes/nosotros'
-import { Route as PqrsRouteImport } from './routes/pqrs'
-import { Route as ProductoDeLaSemanaRouteImport } from './routes/producto-de-la-semana'
-import { Route as ResultadoPagoRouteImport } from './routes/resultado-pago'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as VentasCorporativasRouteImport } from './routes/ventas-corporativas'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AdminBlogGeneratorRouteImport } from './routes/admin.blog-generator'
-import { Route as AdminGeneradorFichasRouteImport } from './routes/admin.generador-fichas'
-import { Route as AdminMarcasRouteImport } from './routes/admin.marcas'
-import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
-import { Route as DistribuidoresIndexRouteImport } from './routes/distribuidores.index'
-import { Route as DistribuidoresPortalRouteImport } from './routes/distribuidores.portal'
-import { Route as DistribuidoresRegistroRouteImport } from './routes/distribuidores.registro'
+import { Route as TiendaRouteImport } from './routes/tienda'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ResultadoPagoRouteImport } from './routes/resultado-pago'
+import { Route as ProductoDeLaSemanaRouteImport } from './routes/producto-de-la-semana'
+import { Route as PqrsRouteImport } from './routes/pqrs'
+import { Route as NosotrosRouteImport } from './routes/nosotros'
+import { Route as MiCuentaRouteImport } from './routes/mi-cuenta'
+import { Route as LegalRouteImport } from './routes/legal'
+import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
+import { Route as ContactoRouteImport } from './routes/contacto'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as CatalogoAllforallDotpdfRouteImport } from './routes/catalogo-allforall[.]pdf'
+import { Route as CarritoRouteImport } from './routes/carrito'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as LegalIndexRouteImport } from './routes/legal.index'
-import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
-import { Route as MarcasLogitechRouteImport } from './routes/marcas.logitech'
+import { Route as DistribuidoresIndexRouteImport } from './routes/distribuidores.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
-import { Route as ApiAddiConfigRouteImport } from './routes/api/addi/config'
-import { Route as ApiOpenpayBanksRouteImport } from './routes/api/openpay/banks'
-import { Route as ApiOpenpayBrebQrRouteImport } from './routes/api/openpay/breb-qr'
-import { Route as ApiOpenpayCardChargeRouteImport } from './routes/api/openpay/card-charge'
-import { Route as ApiOpenpayCardRedirectRouteImport } from './routes/api/openpay/card-redirect'
-import { Route as ApiOpenpayDiagnosticoRouteImport } from './routes/api/openpay/diagnostico'
-import { Route as ApiOpenpayPseRouteImport } from './routes/api/openpay/pse'
-import { Route as ApiOpenpayPublicConfigRouteImport } from './routes/api/openpay/public-config'
-import { Route as ApiOpenpayStatusRouteImport } from './routes/api/openpay/status'
-import { Route as ApiOpenpayStoreChargeRouteImport } from './routes/api/openpay/store-charge'
-import { Route as ApiPublicAddiWebhookRouteImport } from './routes/api/public/addi-webhook'
-import { Route as ApiPublicMercadopagoWebhookRouteImport } from './routes/api/public/mercadopago-webhook'
-import { Route as ApiPublicOpenpayWebhookRouteImport } from './routes/api/public/openpay-webhook'
+import { Route as MarcasLogitechRouteImport } from './routes/marcas.logitech'
+import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
+import { Route as DistribuidoresRegistroRouteImport } from './routes/distribuidores.registro'
+import { Route as DistribuidoresPortalRouteImport } from './routes/distribuidores.portal'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AdminMarcasRouteImport } from './routes/admin.marcas'
+import { Route as AdminGeneradorFichasRouteImport } from './routes/admin.generador-fichas'
+import { Route as AdminBlogGeneratorRouteImport } from './routes/admin.blog-generator'
 import { Route as DistribuidoresPortalIndexRouteImport } from './routes/distribuidores.portal.index'
-import { Route as DistribuidoresPortalCatalogoRouteImport } from './routes/distribuidores.portal.catalogo'
 import { Route as DistribuidoresPortalPedidosRouteImport } from './routes/distribuidores.portal.pedidos'
+import { Route as DistribuidoresPortalCatalogoRouteImport } from './routes/distribuidores.portal.catalogo'
+import { Route as ApiPublicOpenpayWebhookRouteImport } from './routes/api/public/openpay-webhook'
+import { Route as ApiPublicMercadopagoWebhookRouteImport } from './routes/api/public/mercadopago-webhook'
+import { Route as ApiPublicAddiWebhookRouteImport } from './routes/api/public/addi-webhook'
+import { Route as ApiOpenpayStoreChargeRouteImport } from './routes/api/openpay/store-charge'
+import { Route as ApiOpenpayStatusRouteImport } from './routes/api/openpay/status'
+import { Route as ApiOpenpayPublicConfigRouteImport } from './routes/api/openpay/public-config'
+import { Route as ApiOpenpayPseRouteImport } from './routes/api/openpay/pse'
+import { Route as ApiOpenpayDiagnosticoRouteImport } from './routes/api/openpay/diagnostico'
+import { Route as ApiOpenpayCardRedirectRouteImport } from './routes/api/openpay/card-redirect'
+import { Route as ApiOpenpayCardChargeRouteImport } from './routes/api/openpay/card-charge'
+import { Route as ApiOpenpayBrebQrRouteImport } from './routes/api/openpay/breb-qr'
+import { Route as ApiOpenpayBanksRouteImport } from './routes/api/openpay/banks'
+import { Route as ApiAddiConfigRouteImport } from './routes/api/addi/config'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CarritoRoute = CarritoRouteImport.update({
-  id: '/carrito',
-  path: '/carrito',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CatalogoAllforallDotpdfRoute = CatalogoAllforallDotpdfRouteImport.update({
-  id: '/catalogo-allforall.pdf',
-  path: '/catalogo-allforall.pdf',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CategoriasRoute = CategoriasRouteImport.update({
-  id: '/categorias',
-  path: '/categorias',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactoRoute = ContactoRouteImport.update({
-  id: '/contacto',
-  path: '/contacto',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
-  id: '/feed.xml',
-  path: '/feed.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LegalRoute = LegalRouteImport.update({
-  id: '/legal',
-  path: '/legal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MiCuentaRoute = MiCuentaRouteImport.update({
-  id: '/mi-cuenta',
-  path: '/mi-cuenta',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NosotrosRoute = NosotrosRouteImport.update({
-  id: '/nosotros',
-  path: '/nosotros',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PqrsRoute = PqrsRouteImport.update({
-  id: '/pqrs',
-  path: '/pqrs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProductoDeLaSemanaRoute = ProductoDeLaSemanaRouteImport.update({
-  id: '/producto-de-la-semana',
-  path: '/producto-de-la-semana',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResultadoPagoRoute = ResultadoPagoRouteImport.update({
-  id: '/resultado-pago',
-  path: '/resultado-pago',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
+  id: '/ventas-corporativas',
+  path: '/ventas-corporativas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TiendaRoute = TiendaRouteImport.update({
@@ -147,49 +67,89 @@ const TiendaRoute = TiendaRouteImport.update({
   path: '/tienda',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VentasCorporativasRoute = VentasCorporativasRouteImport.update({
-  id: '/ventas-corporativas',
-  path: '/ventas-corporativas',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
+const ResultadoPagoRoute = ResultadoPagoRouteImport.update({
+  id: '/resultado-pago',
+  path: '/resultado-pago',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductoDeLaSemanaRoute = ProductoDeLaSemanaRouteImport.update({
+  id: '/producto-de-la-semana',
+  path: '/producto-de-la-semana',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PqrsRoute = PqrsRouteImport.update({
+  id: '/pqrs',
+  path: '/pqrs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NosotrosRoute = NosotrosRouteImport.update({
+  id: '/nosotros',
+  path: '/nosotros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MiCuentaRoute = MiCuentaRouteImport.update({
+  id: '/mi-cuenta',
+  path: '/mi-cuenta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedDotxmlRoute = FeedDotxmlRouteImport.update({
+  id: '/feed.xml',
+  path: '/feed.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactoRoute = ContactoRouteImport.update({
+  id: '/contacto',
+  path: '/contacto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasRoute = CategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogoAllforallDotpdfRoute = CatalogoAllforallDotpdfRouteImport.update({
+  id: '/catalogo-allforall.pdf',
+  path: '/catalogo-allforall.pdf',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarritoRoute = CarritoRouteImport.update({
+  id: '/carrito',
+  path: '/carrito',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminBlogGeneratorRoute = AdminBlogGeneratorRouteImport.update({
-  id: '/blog-generator',
-  path: '/blog-generator',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminGeneradorFichasRoute = AdminGeneradorFichasRouteImport.update({
-  id: '/generador-fichas',
-  path: '/generador-fichas',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMarcasRoute = AdminMarcasRouteImport.update({
-  id: '/marcas',
-  path: '/marcas',
-  getParentRoute: () => AdminRoute,
-} as any)
-const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => BlogRoute,
-} as any)
-const DistribuidoresIndexRoute = DistribuidoresIndexRouteImport.update({
-  id: '/distribuidores/',
-  path: '/distribuidores/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DistribuidoresPortalRoute = DistribuidoresPortalRouteImport.update({
-  id: '/distribuidores/portal',
-  path: '/distribuidores/portal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DistribuidoresRegistroRoute = DistribuidoresRegistroRouteImport.update({
-  id: '/distribuidores/registro',
-  path: '/distribuidores/registro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LegalIndexRoute = LegalIndexRouteImport.update({
@@ -197,97 +157,65 @@ const LegalIndexRoute = LegalIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LegalRoute,
 } as any)
-const LegalSlugRoute = LegalSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => LegalRoute,
-} as any)
-const MarcasLogitechRoute = MarcasLogitechRouteImport.update({
-  id: '/marcas/logitech',
-  path: '/marcas/logitech',
+const DistribuidoresIndexRoute = DistribuidoresIndexRouteImport.update({
+  id: '/distribuidores/',
+  path: '/distribuidores/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ProductoSlugRoute = ProductoSlugRouteImport.update({
   id: '/producto/$slug',
   path: '/producto/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAddiConfigRoute = ApiAddiConfigRouteImport.update({
-  id: '/api/addi/config',
-  path: '/api/addi/config',
+const MarcasLogitechRoute = MarcasLogitechRouteImport.update({
+  id: '/marcas/logitech',
+  path: '/marcas/logitech',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiOpenpayBanksRoute = ApiOpenpayBanksRouteImport.update({
-  id: '/api/openpay/banks',
-  path: '/api/openpay/banks',
+const LegalSlugRoute = LegalSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => LegalRoute,
+} as any)
+const DistribuidoresRegistroRoute = DistribuidoresRegistroRouteImport.update({
+  id: '/distribuidores/registro',
+  path: '/distribuidores/registro',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiOpenpayBrebQrRoute = ApiOpenpayBrebQrRouteImport.update({
-  id: '/api/openpay/breb-qr',
-  path: '/api/openpay/breb-qr',
+const DistribuidoresPortalRoute = DistribuidoresPortalRouteImport.update({
+  id: '/distribuidores/portal',
+  path: '/distribuidores/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiOpenpayCardChargeRoute = ApiOpenpayCardChargeRouteImport.update({
-  id: '/api/openpay/card-charge',
-  path: '/api/openpay/card-charge',
-  getParentRoute: () => rootRouteImport,
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
 } as any)
-const ApiOpenpayCardRedirectRoute = ApiOpenpayCardRedirectRouteImport.update({
-  id: '/api/openpay/card-redirect',
-  path: '/api/openpay/card-redirect',
-  getParentRoute: () => rootRouteImport,
+const AdminMarcasRoute = AdminMarcasRouteImport.update({
+  id: '/marcas',
+  path: '/marcas',
+  getParentRoute: () => AdminRoute,
 } as any)
-const ApiOpenpayDiagnosticoRoute = ApiOpenpayDiagnosticoRouteImport.update({
-  id: '/api/openpay/diagnostico',
-  path: '/api/openpay/diagnostico',
-  getParentRoute: () => rootRouteImport,
+const AdminGeneradorFichasRoute = AdminGeneradorFichasRouteImport.update({
+  id: '/generador-fichas',
+  path: '/generador-fichas',
+  getParentRoute: () => AdminRoute,
 } as any)
-const ApiOpenpayPseRoute = ApiOpenpayPseRouteImport.update({
-  id: '/api/openpay/pse',
-  path: '/api/openpay/pse',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiOpenpayPublicConfigRoute = ApiOpenpayPublicConfigRouteImport.update({
-  id: '/api/openpay/public-config',
-  path: '/api/openpay/public-config',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiOpenpayStatusRoute = ApiOpenpayStatusRouteImport.update({
-  id: '/api/openpay/status',
-  path: '/api/openpay/status',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiOpenpayStoreChargeRoute = ApiOpenpayStoreChargeRouteImport.update({
-  id: '/api/openpay/store-charge',
-  path: '/api/openpay/store-charge',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicAddiWebhookRoute = ApiPublicAddiWebhookRouteImport.update({
-  id: '/api/public/addi-webhook',
-  path: '/api/public/addi-webhook',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicMercadopagoWebhookRoute =
-  ApiPublicMercadopagoWebhookRouteImport.update({
-    id: '/api/public/mercadopago-webhook',
-    path: '/api/public/mercadopago-webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicOpenpayWebhookRoute = ApiPublicOpenpayWebhookRouteImport.update({
-  id: '/api/public/openpay-webhook',
-  path: '/api/public/openpay-webhook',
-  getParentRoute: () => rootRouteImport,
+const AdminBlogGeneratorRoute = AdminBlogGeneratorRouteImport.update({
+  id: '/blog-generator',
+  path: '/blog-generator',
+  getParentRoute: () => AdminRoute,
 } as any)
 const DistribuidoresPortalIndexRoute =
   DistribuidoresPortalIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => DistribuidoresPortalRoute,
-  } as any)
-const DistribuidoresPortalCatalogoRoute =
-  DistribuidoresPortalCatalogoRouteImport.update({
-    id: '/catalogo',
-    path: '/catalogo',
     getParentRoute: () => DistribuidoresPortalRoute,
   } as any)
 const DistribuidoresPortalPedidosRoute =
@@ -296,6 +224,78 @@ const DistribuidoresPortalPedidosRoute =
     path: '/pedidos',
     getParentRoute: () => DistribuidoresPortalRoute,
   } as any)
+const DistribuidoresPortalCatalogoRoute =
+  DistribuidoresPortalCatalogoRouteImport.update({
+    id: '/catalogo',
+    path: '/catalogo',
+    getParentRoute: () => DistribuidoresPortalRoute,
+  } as any)
+const ApiPublicOpenpayWebhookRoute = ApiPublicOpenpayWebhookRouteImport.update({
+  id: '/api/public/openpay-webhook',
+  path: '/api/public/openpay-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicMercadopagoWebhookRoute =
+  ApiPublicMercadopagoWebhookRouteImport.update({
+    id: '/api/public/mercadopago-webhook',
+    path: '/api/public/mercadopago-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicAddiWebhookRoute = ApiPublicAddiWebhookRouteImport.update({
+  id: '/api/public/addi-webhook',
+  path: '/api/public/addi-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpenpayStoreChargeRoute = ApiOpenpayStoreChargeRouteImport.update({
+  id: '/api/openpay/store-charge',
+  path: '/api/openpay/store-charge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpenpayStatusRoute = ApiOpenpayStatusRouteImport.update({
+  id: '/api/openpay/status',
+  path: '/api/openpay/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpenpayPublicConfigRoute = ApiOpenpayPublicConfigRouteImport.update({
+  id: '/api/openpay/public-config',
+  path: '/api/openpay/public-config',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpenpayPseRoute = ApiOpenpayPseRouteImport.update({
+  id: '/api/openpay/pse',
+  path: '/api/openpay/pse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpenpayDiagnosticoRoute = ApiOpenpayDiagnosticoRouteImport.update({
+  id: '/api/openpay/diagnostico',
+  path: '/api/openpay/diagnostico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpenpayCardRedirectRoute = ApiOpenpayCardRedirectRouteImport.update({
+  id: '/api/openpay/card-redirect',
+  path: '/api/openpay/card-redirect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpenpayCardChargeRoute = ApiOpenpayCardChargeRouteImport.update({
+  id: '/api/openpay/card-charge',
+  path: '/api/openpay/card-charge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpenpayBrebQrRoute = ApiOpenpayBrebQrRouteImport.update({
+  id: '/api/openpay/breb-qr',
+  path: '/api/openpay/breb-qr',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOpenpayBanksRoute = ApiOpenpayBanksRouteImport.update({
+  id: '/api/openpay/banks',
+  path: '/api/openpay/banks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAddiConfigRoute = ApiAddiConfigRouteImport.update({
+  id: '/api/addi/config',
+  path: '/api/addi/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -631,123 +631,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/carrito': {
-      id: '/carrito'
-      path: '/carrito'
-      fullPath: '/carrito'
-      preLoaderRoute: typeof CarritoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/catalogo-allforall.pdf': {
-      id: '/catalogo-allforall.pdf'
-      path: '/catalogo-allforall.pdf'
-      fullPath: '/catalogo-allforall.pdf'
-      preLoaderRoute: typeof CatalogoAllforallDotpdfRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/categorias': {
-      id: '/categorias'
-      path: '/categorias'
-      fullPath: '/categorias'
-      preLoaderRoute: typeof CategoriasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contacto': {
-      id: '/contacto'
-      path: '/contacto'
-      fullPath: '/contacto'
-      preLoaderRoute: typeof ContactoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feed.xml': {
-      id: '/feed.xml'
-      path: '/feed.xml'
-      fullPath: '/feed.xml'
-      preLoaderRoute: typeof FeedDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/legal': {
-      id: '/legal'
-      path: '/legal'
-      fullPath: '/legal'
-      preLoaderRoute: typeof LegalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mi-cuenta': {
-      id: '/mi-cuenta'
-      path: '/mi-cuenta'
-      fullPath: '/mi-cuenta'
-      preLoaderRoute: typeof MiCuentaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/nosotros': {
-      id: '/nosotros'
-      path: '/nosotros'
-      fullPath: '/nosotros'
-      preLoaderRoute: typeof NosotrosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pqrs': {
-      id: '/pqrs'
-      path: '/pqrs'
-      fullPath: '/pqrs'
-      preLoaderRoute: typeof PqrsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/producto-de-la-semana': {
-      id: '/producto-de-la-semana'
-      path: '/producto-de-la-semana'
-      fullPath: '/producto-de-la-semana'
-      preLoaderRoute: typeof ProductoDeLaSemanaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/resultado-pago': {
-      id: '/resultado-pago'
-      path: '/resultado-pago'
-      fullPath: '/resultado-pago'
-      preLoaderRoute: typeof ResultadoPagoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
+    '/ventas-corporativas': {
+      id: '/ventas-corporativas'
+      path: '/ventas-corporativas'
+      fullPath: '/ventas-corporativas'
+      preLoaderRoute: typeof VentasCorporativasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tienda': {
@@ -757,67 +645,123 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TiendaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ventas-corporativas': {
-      id: '/ventas-corporativas'
-      path: '/ventas-corporativas'
-      fullPath: '/ventas-corporativas'
-      preLoaderRoute: typeof VentasCorporativasRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
+    '/resultado-pago': {
+      id: '/resultado-pago'
+      path: '/resultado-pago'
+      fullPath: '/resultado-pago'
+      preLoaderRoute: typeof ResultadoPagoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/producto-de-la-semana': {
+      id: '/producto-de-la-semana'
+      path: '/producto-de-la-semana'
+      fullPath: '/producto-de-la-semana'
+      preLoaderRoute: typeof ProductoDeLaSemanaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pqrs': {
+      id: '/pqrs'
+      path: '/pqrs'
+      fullPath: '/pqrs'
+      preLoaderRoute: typeof PqrsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nosotros': {
+      id: '/nosotros'
+      path: '/nosotros'
+      fullPath: '/nosotros'
+      preLoaderRoute: typeof NosotrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mi-cuenta': {
+      id: '/mi-cuenta'
+      path: '/mi-cuenta'
+      fullPath: '/mi-cuenta'
+      preLoaderRoute: typeof MiCuentaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed.xml': {
+      id: '/feed.xml'
+      path: '/feed.xml'
+      fullPath: '/feed.xml'
+      preLoaderRoute: typeof FeedDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contacto': {
+      id: '/contacto'
+      path: '/contacto'
+      fullPath: '/contacto'
+      preLoaderRoute: typeof ContactoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias': {
+      id: '/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof CategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catalogo-allforall.pdf': {
+      id: '/catalogo-allforall.pdf'
+      path: '/catalogo-allforall.pdf'
+      fullPath: '/catalogo-allforall.pdf'
+      preLoaderRoute: typeof CatalogoAllforallDotpdfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrito': {
+      id: '/carrito'
+      path: '/carrito'
+      fullPath: '/carrito'
+      preLoaderRoute: typeof CarritoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
       path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/blog-generator': {
-      id: '/admin/blog-generator'
-      path: '/blog-generator'
-      fullPath: '/admin/blog-generator'
-      preLoaderRoute: typeof AdminBlogGeneratorRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/generador-fichas': {
-      id: '/admin/generador-fichas'
-      path: '/generador-fichas'
-      fullPath: '/admin/generador-fichas'
-      preLoaderRoute: typeof AdminGeneradorFichasRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/marcas': {
-      id: '/admin/marcas'
-      path: '/marcas'
-      fullPath: '/admin/marcas'
-      preLoaderRoute: typeof AdminMarcasRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/blog/$slug': {
-      id: '/blog/$slug'
-      path: '/$slug'
-      fullPath: '/blog/$slug'
-      preLoaderRoute: typeof BlogSlugRouteImport
-      parentRoute: typeof BlogRoute
-    }
-    '/distribuidores/': {
-      id: '/distribuidores/'
-      path: '/distribuidores'
-      fullPath: '/distribuidores/'
-      preLoaderRoute: typeof DistribuidoresIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/distribuidores/portal': {
-      id: '/distribuidores/portal'
-      path: '/distribuidores/portal'
-      fullPath: '/distribuidores/portal'
-      preLoaderRoute: typeof DistribuidoresPortalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/distribuidores/registro': {
-      id: '/distribuidores/registro'
-      path: '/distribuidores/registro'
-      fullPath: '/distribuidores/registro'
-      preLoaderRoute: typeof DistribuidoresRegistroRouteImport
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/legal/': {
@@ -827,19 +771,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalIndexRouteImport
       parentRoute: typeof LegalRoute
     }
-    '/legal/$slug': {
-      id: '/legal/$slug'
-      path: '/$slug'
-      fullPath: '/legal/$slug'
-      preLoaderRoute: typeof LegalSlugRouteImport
-      parentRoute: typeof LegalRoute
-    }
-    '/marcas/logitech': {
-      id: '/marcas/logitech'
-      path: '/marcas/logitech'
-      fullPath: '/marcas/logitech'
-      preLoaderRoute: typeof MarcasLogitechRouteImport
+    '/distribuidores/': {
+      id: '/distribuidores/'
+      path: '/distribuidores'
+      fullPath: '/distribuidores/'
+      preLoaderRoute: typeof DistribuidoresIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/producto/$slug': {
       id: '/producto/$slug'
@@ -848,102 +792,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/addi/config': {
-      id: '/api/addi/config'
-      path: '/api/addi/config'
-      fullPath: '/api/addi/config'
-      preLoaderRoute: typeof ApiAddiConfigRouteImport
+    '/marcas/logitech': {
+      id: '/marcas/logitech'
+      path: '/marcas/logitech'
+      fullPath: '/marcas/logitech'
+      preLoaderRoute: typeof MarcasLogitechRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/openpay/banks': {
-      id: '/api/openpay/banks'
-      path: '/api/openpay/banks'
-      fullPath: '/api/openpay/banks'
-      preLoaderRoute: typeof ApiOpenpayBanksRouteImport
+    '/legal/$slug': {
+      id: '/legal/$slug'
+      path: '/$slug'
+      fullPath: '/legal/$slug'
+      preLoaderRoute: typeof LegalSlugRouteImport
+      parentRoute: typeof LegalRoute
+    }
+    '/distribuidores/registro': {
+      id: '/distribuidores/registro'
+      path: '/distribuidores/registro'
+      fullPath: '/distribuidores/registro'
+      preLoaderRoute: typeof DistribuidoresRegistroRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/openpay/breb-qr': {
-      id: '/api/openpay/breb-qr'
-      path: '/api/openpay/breb-qr'
-      fullPath: '/api/openpay/breb-qr'
-      preLoaderRoute: typeof ApiOpenpayBrebQrRouteImport
+    '/distribuidores/portal': {
+      id: '/distribuidores/portal'
+      path: '/distribuidores/portal'
+      fullPath: '/distribuidores/portal'
+      preLoaderRoute: typeof DistribuidoresPortalRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/openpay/card-charge': {
-      id: '/api/openpay/card-charge'
-      path: '/api/openpay/card-charge'
-      fullPath: '/api/openpay/card-charge'
-      preLoaderRoute: typeof ApiOpenpayCardChargeRouteImport
-      parentRoute: typeof rootRouteImport
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
     }
-    '/api/openpay/card-redirect': {
-      id: '/api/openpay/card-redirect'
-      path: '/api/openpay/card-redirect'
-      fullPath: '/api/openpay/card-redirect'
-      preLoaderRoute: typeof ApiOpenpayCardRedirectRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/marcas': {
+      id: '/admin/marcas'
+      path: '/marcas'
+      fullPath: '/admin/marcas'
+      preLoaderRoute: typeof AdminMarcasRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/api/openpay/diagnostico': {
-      id: '/api/openpay/diagnostico'
-      path: '/api/openpay/diagnostico'
-      fullPath: '/api/openpay/diagnostico'
-      preLoaderRoute: typeof ApiOpenpayDiagnosticoRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/generador-fichas': {
+      id: '/admin/generador-fichas'
+      path: '/generador-fichas'
+      fullPath: '/admin/generador-fichas'
+      preLoaderRoute: typeof AdminGeneradorFichasRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/api/openpay/pse': {
-      id: '/api/openpay/pse'
-      path: '/api/openpay/pse'
-      fullPath: '/api/openpay/pse'
-      preLoaderRoute: typeof ApiOpenpayPseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/openpay/public-config': {
-      id: '/api/openpay/public-config'
-      path: '/api/openpay/public-config'
-      fullPath: '/api/openpay/public-config'
-      preLoaderRoute: typeof ApiOpenpayPublicConfigRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/openpay/status': {
-      id: '/api/openpay/status'
-      path: '/api/openpay/status'
-      fullPath: '/api/openpay/status'
-      preLoaderRoute: typeof ApiOpenpayStatusRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/openpay/store-charge': {
-      id: '/api/openpay/store-charge'
-      path: '/api/openpay/store-charge'
-      fullPath: '/api/openpay/store-charge'
-      preLoaderRoute: typeof ApiOpenpayStoreChargeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/addi-webhook': {
-      id: '/api/public/addi-webhook'
-      path: '/api/public/addi-webhook'
-      fullPath: '/api/public/addi-webhook'
-      preLoaderRoute: typeof ApiPublicAddiWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/mercadopago-webhook': {
-      id: '/api/public/mercadopago-webhook'
-      path: '/api/public/mercadopago-webhook'
-      fullPath: '/api/public/mercadopago-webhook'
-      preLoaderRoute: typeof ApiPublicMercadopagoWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/openpay-webhook': {
-      id: '/api/public/openpay-webhook'
-      path: '/api/public/openpay-webhook'
-      fullPath: '/api/public/openpay-webhook'
-      preLoaderRoute: typeof ApiPublicOpenpayWebhookRouteImport
-      parentRoute: typeof rootRouteImport
+    '/admin/blog-generator': {
+      id: '/admin/blog-generator'
+      path: '/blog-generator'
+      fullPath: '/admin/blog-generator'
+      preLoaderRoute: typeof AdminBlogGeneratorRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/distribuidores/portal/': {
       id: '/distribuidores/portal/'
       path: '/'
       fullPath: '/distribuidores/portal/'
       preLoaderRoute: typeof DistribuidoresPortalIndexRouteImport
+      parentRoute: typeof DistribuidoresPortalRoute
+    }
+    '/distribuidores/portal/pedidos': {
+      id: '/distribuidores/portal/pedidos'
+      path: '/pedidos'
+      fullPath: '/distribuidores/portal/pedidos'
+      preLoaderRoute: typeof DistribuidoresPortalPedidosRouteImport
       parentRoute: typeof DistribuidoresPortalRoute
     }
     '/distribuidores/portal/catalogo': {
@@ -953,12 +869,96 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DistribuidoresPortalCatalogoRouteImport
       parentRoute: typeof DistribuidoresPortalRoute
     }
-    '/distribuidores/portal/pedidos': {
-      id: '/distribuidores/portal/pedidos'
-      path: '/pedidos'
-      fullPath: '/distribuidores/portal/pedidos'
-      preLoaderRoute: typeof DistribuidoresPortalPedidosRouteImport
-      parentRoute: typeof DistribuidoresPortalRoute
+    '/api/public/openpay-webhook': {
+      id: '/api/public/openpay-webhook'
+      path: '/api/public/openpay-webhook'
+      fullPath: '/api/public/openpay-webhook'
+      preLoaderRoute: typeof ApiPublicOpenpayWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/mercadopago-webhook': {
+      id: '/api/public/mercadopago-webhook'
+      path: '/api/public/mercadopago-webhook'
+      fullPath: '/api/public/mercadopago-webhook'
+      preLoaderRoute: typeof ApiPublicMercadopagoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/addi-webhook': {
+      id: '/api/public/addi-webhook'
+      path: '/api/public/addi-webhook'
+      fullPath: '/api/public/addi-webhook'
+      preLoaderRoute: typeof ApiPublicAddiWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/openpay/store-charge': {
+      id: '/api/openpay/store-charge'
+      path: '/api/openpay/store-charge'
+      fullPath: '/api/openpay/store-charge'
+      preLoaderRoute: typeof ApiOpenpayStoreChargeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/openpay/status': {
+      id: '/api/openpay/status'
+      path: '/api/openpay/status'
+      fullPath: '/api/openpay/status'
+      preLoaderRoute: typeof ApiOpenpayStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/openpay/public-config': {
+      id: '/api/openpay/public-config'
+      path: '/api/openpay/public-config'
+      fullPath: '/api/openpay/public-config'
+      preLoaderRoute: typeof ApiOpenpayPublicConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/openpay/pse': {
+      id: '/api/openpay/pse'
+      path: '/api/openpay/pse'
+      fullPath: '/api/openpay/pse'
+      preLoaderRoute: typeof ApiOpenpayPseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/openpay/diagnostico': {
+      id: '/api/openpay/diagnostico'
+      path: '/api/openpay/diagnostico'
+      fullPath: '/api/openpay/diagnostico'
+      preLoaderRoute: typeof ApiOpenpayDiagnosticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/openpay/card-redirect': {
+      id: '/api/openpay/card-redirect'
+      path: '/api/openpay/card-redirect'
+      fullPath: '/api/openpay/card-redirect'
+      preLoaderRoute: typeof ApiOpenpayCardRedirectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/openpay/card-charge': {
+      id: '/api/openpay/card-charge'
+      path: '/api/openpay/card-charge'
+      fullPath: '/api/openpay/card-charge'
+      preLoaderRoute: typeof ApiOpenpayCardChargeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/openpay/breb-qr': {
+      id: '/api/openpay/breb-qr'
+      path: '/api/openpay/breb-qr'
+      fullPath: '/api/openpay/breb-qr'
+      preLoaderRoute: typeof ApiOpenpayBrebQrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/openpay/banks': {
+      id: '/api/openpay/banks'
+      path: '/api/openpay/banks'
+      fullPath: '/api/openpay/banks'
+      preLoaderRoute: typeof ApiOpenpayBanksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/addi/config': {
+      id: '/api/addi/config'
+      path: '/api/addi/config'
+      fullPath: '/api/addi/config'
+      preLoaderRoute: typeof ApiAddiConfigRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }

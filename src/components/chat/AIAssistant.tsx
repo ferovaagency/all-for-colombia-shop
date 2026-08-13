@@ -9,6 +9,16 @@ import { syncToBrevo } from "@/lib/brevo";
 import { LegalLink } from "@/components/legal/ConsentControls";
 import { recordLegalAcceptance } from "@/lib/consent";
 
+const WHATSAPP_FALLBACK =
+  "https://wa.me/573134977955?text=" +
+  encodeURIComponent("Hola, vengo del chat con Ali y necesito ayuda para encontrar un producto.");
+
+const QUICK_STARTS = [
+  "Busco un portátil para trabajar",
+  "Quiero armar un PC gamer",
+  "Necesito un monitor según mi presupuesto",
+];
+
 interface SuggestedProduct {
   id: string;
   name: string;
@@ -114,9 +124,10 @@ export function AIAssistant() {
     }
   }, [messages, loading]);
 
-  const send = async () => {
-    if (!input.trim() || loading) return;
-    const userMsg: Message = { role: "user", content: input.trim() };
+  const send = async (preset?: string) => {
+    const outgoing = (preset ?? input).trim();
+    if (!outgoing || loading) return;
+    const userMsg: Message = { role: "user", content: outgoing };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput("");
@@ -149,7 +160,9 @@ export function AIAssistant() {
         {
           role: "assistant",
           content:
-            "Tuve un problema técnico. ¿Quieres hablar directo con un asesor por WhatsApp? +57 321 828 0762",
+            "No pude consultar el catálogo en este momento. Puedes continuar con un asesor por WhatsApp.",
+          escalate: true,
+          whatsapp_url: WHATSAPP_FALLBACK,
         },
       ]);
     } finally {
@@ -359,6 +372,21 @@ export function AIAssistant() {
                 </div>
               </div>
             )}
+
+            {messages.length === 1 && !loading && (
+              <div className="flex flex-wrap gap-2" aria-label="Ejemplos de consultas">
+                {QUICK_STARTS.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    onClick={() => send(prompt)}
+                    className="rounded-full border bg-card px-3 py-1.5 text-left text-xs text-foreground transition-colors hover:border-primary hover:text-primary"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="p-3 border-t bg-card">
@@ -372,7 +400,7 @@ export function AIAssistant() {
                 className="flex-1"
               />
               <Button
-                onClick={send}
+                onClick={() => send()}
                 disabled={loading || !input.trim()}
                 size="icon"
                 aria-label="Enviar mensaje"

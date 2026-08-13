@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { WideProductCard } from "@/components/shop/HomeCatalog";
 import { Reveal } from "@/components/shop/Reveal";
 import { LogitechColorViewer } from "@/components/shop/LogitechColorViewer";
+import { LogitechVideoHero } from "@/components/shop/LogitechVideoHero";
 import { formatCOP, useCart } from "@/lib/cart";
+import { LOGITECH_HERO_VIDEOS } from "@/lib/logitech-hero-videos";
 import { trackAddToCart } from "@/lib/analytics";
 import {
   ArrowRight,
@@ -280,6 +282,7 @@ function LogitechMicrosite() {
   );
 
   const filtered = activeSerie === "todas" ? products : (bySerie.get(activeSerie) ?? []);
+  const enabledHeroVideos = LOGITECH_HERO_VIDEOS.filter((video) => video.enabled);
 
   return (
     <div className="bg-white text-neutral-950">
@@ -302,7 +305,9 @@ function LogitechMicrosite() {
       </div>
 
       {/* ============ HERO CARRUSEL ============ */}
-      {heroSlides.length > 0 ? (
+      {enabledHeroVideos.length > 0 ? (
+        <LogitechVideoHero videos={enabledHeroVideos} />
+      ) : heroSlides.length > 0 ? (
         <HeroCarousel slides={heroSlides} />
       ) : (
         <div
