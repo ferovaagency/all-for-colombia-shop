@@ -179,7 +179,7 @@ function OffersBand({ items, dark }: { items: Product[]; dark: boolean }) {
 }
 
 function BrandBand({ brand, items, dark }: { brand: Brand; items: Product[]; dark: boolean }) {
-  const logo = brand.logo_url || brand.logo;
+  
   const isLogitech = brand.slug === "logitech";
 
   return (
