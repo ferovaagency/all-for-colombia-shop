@@ -187,19 +187,6 @@ function BrandBand({ brand, items, dark }: { brand: Brand; items: Product[]; dar
       <div className="container mx-auto px-6 lg:px-10 py-12 md:py-16">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            {logo ? (
-              <img
-                src={logo}
-                alt={brand.name}
-                loading="lazy"
-                className={cn("h-8 md:h-10 w-auto object-contain", dark && "brightness-0 invert")}
-              />
-            ) : (
-              <span style={SPACE} className="text-2xl font-bold">
-                {brand.name}
-              </span>
-            )}
-            <div className={cn("h-8 w-px", dark ? "bg-white/20" : "bg-neutral-200")} />
             <p
               style={SPACE}
               className="text-xl md:text-3xl font-bold tracking-[-0.03em] leading-none"
