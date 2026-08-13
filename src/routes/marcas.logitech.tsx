@@ -7,6 +7,7 @@ import { WideProductCard } from "@/components/shop/HomeCatalog";
 import { Reveal } from "@/components/shop/Reveal";
 import { LogitechColorViewer } from "@/components/shop/LogitechColorViewer";
 import { LogitechVideoHero } from "@/components/shop/LogitechVideoHero";
+import { ProductImage } from "@/components/shop/ProductImage";
 import { formatCOP, useCart } from "@/lib/cart";
 import { LOGITECH_HERO_VIDEOS } from "@/lib/logitech-hero-videos";
 import { trackAddToCart } from "@/lib/analytics";
@@ -333,12 +334,7 @@ function LogitechMicrosite() {
       )}
 
       {/* ============ MOSAICOS DE MARCA ============ */}
-      {!loading && products.length > 0 && (
-        <BrandTiles
-          officeImg={featuredOffice?.images?.[0]}
-          gamingImg={featuredGaming?.images?.[0]}
-        />
-      )}
+      {!loading && products.length > 0 && <BrandTiles />}
 
       {/* ============ MÁS DESTACADOS — LOGITECH (OFICINA) ============ */}
       {office.length > 0 && (
@@ -638,23 +634,25 @@ function TrustBar() {
 
 /* ============================== MOSAICOS DE MARCA ============================== */
 
-function BrandTiles({ officeImg, gamingImg }: { officeImg?: string; gamingImg?: string }) {
+function BrandTiles() {
   return (
     <section className="bg-white">
       <div className="container mx-auto px-6 lg:px-10 py-10 md:py-14 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <BrandTile
           href="#office"
-          img={officeImg}
-          eyebrow="Logitech"
-          title="Descubre tu espacio de trabajo ideal"
-          gradient={HERO_GRADIENTS[1]}
+          img="/logitech/brand-tiles/logitech-brio-705.webp"
+          width={1200}
+          height={627}
+          label="Explorar Logitech y conocer la cámara web MX Brio 705 for Business"
+          dark={false}
         />
         <BrandTile
           href="#gaming"
-          img={gamingImg}
-          eyebrow="Logitech G"
-          title="Juega al máximo con el mayor rendimiento"
-          gradient={HERO_GRADIENTS[2]}
+          img="/logitech/brand-tiles/logitech-g-rs-h-shifter.webp"
+          width={1920}
+          height={1080}
+          label="Explorar Logitech G y la palanca de cambios RS H-Shifter"
+          dark
         />
       </div>
     </section>
@@ -664,42 +662,35 @@ function BrandTiles({ officeImg, gamingImg }: { officeImg?: string; gamingImg?: 
 function BrandTile({
   href,
   img,
-  eyebrow,
-  title,
-  gradient,
+  width,
+  height,
+  label,
+  dark,
 }: {
   href: string;
-  img?: string;
-  eyebrow: string;
-  title: string;
-  gradient: string;
+  img: string;
+  width: number;
+  height: number;
+  label: string;
+  dark: boolean;
 }) {
   return (
     <a
       href={href}
-      className="group relative overflow-hidden rounded-3xl text-white min-h-[240px] md:min-h-[300px] flex"
-      style={{ backgroundImage: gradient }}
-    >
-      {img && (
-        <img
-          src={img}
-          alt={title}
-          loading="lazy"
-          className="absolute right-0 bottom-0 h-[80%] w-auto max-w-[55%] object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
-        />
+      aria-label={label}
+      className={cn(
+        "group relative block aspect-[1200/627] overflow-hidden rounded-3xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-neutral-950",
+        dark ? "bg-black" : "bg-neutral-100",
       )}
-      <div className="relative z-10 p-8 md:p-10 max-w-[70%]">
-        <p className="text-[10px] uppercase tracking-[0.3em] text-white/70">{eyebrow}</p>
-        <h2
-          style={SPACE}
-          className="mt-3 text-2xl md:text-3xl font-bold tracking-[-0.02em] leading-tight"
-        >
-          {title}
-        </h2>
-        <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/95 text-neutral-950 px-5 py-2.5 text-sm font-bold group-hover:gap-3 transition-all">
-          Explorar {title} <ArrowRight className="h-4 w-4" />
-        </span>
-      </div>
+    >
+      <img
+        src={img}
+        alt=""
+        width={width}
+        height={height}
+        loading="lazy"
+        className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.015]"
+      />
     </a>
   );
 }
@@ -926,15 +917,10 @@ function LogiProductCard({ product, dark }: { product: any; dark?: boolean }) {
           </span>
         )}
         {img && (
-          <img
+          <ProductImage
             src={img}
             alt={product.name}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-contain p-6 group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => {
-              const t = e.target as HTMLImageElement;
-              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-            }}
+            className="absolute inset-0 transition-transform duration-150 group-hover:scale-[1.03]"
           />
         )}
       </Link>

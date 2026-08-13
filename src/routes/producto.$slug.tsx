@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { getProductBySlug } from "@/lib/ssr-data.functions";
 import { LegalLink } from "@/components/legal/ConsentControls";
 import { OfferCountdownBadge, OfferCountdownBanner } from "@/components/shop/OfferCountdown";
+import { ProductImage } from "@/components/shop/ProductImage";
 
 export const Route = createFileRoute("/producto/$slug")({
   loader: ({ params }) => getProductBySlug({ data: { slug: params.slug } }),
@@ -275,16 +276,14 @@ function ProductDetailPage() {
       <div className="grid md:grid-cols-2 gap-10">
         {/* Gallery */}
         <div>
-          <div className="aspect-square max-w-md mx-auto md:mx-0 bg-white rounded-xl overflow-hidden border flex items-center justify-center p-6 md:p-10">
+          <div className="aspect-square max-w-md mx-auto md:mx-0 bg-white rounded-xl overflow-hidden border flex items-center justify-center">
             {images[imageIdx] ? (
-              <img
+              <ProductImage
                 src={images[imageIdx]}
                 alt={product.name}
-                className="max-w-full max-h-full object-contain"
-                onError={(e) => {
-                  const t = e.target as HTMLImageElement;
-                  if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-                }}
+                loading="eager"
+                fetchPriority="high"
+                className="p-4 md:p-6"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -305,15 +304,7 @@ function ProductDetailPage() {
                       : "border-transparent hover:border-muted-foreground/30",
                   )}
                 >
-                  <img
-                    src={img}
-                    alt=""
-                    className="max-w-full max-h-full object-contain"
-                    onError={(e) => {
-                      const t = e.target as HTMLImageElement;
-                      if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-                    }}
-                  />
+                  <ProductImage src={img} alt="" className="p-1" />
                 </button>
               ))}
             </div>
@@ -430,8 +421,8 @@ function ProductDetailPage() {
           {/* Advertencias legales obligatorias en la ficha de producto */}
           <div className="mt-4 space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
             <p>
-              Los precios publicados incluyen los impuestos aplicables y el costo de envío a todo
-              el país, salvo que se indique expresamente lo contrario.
+              Los precios publicados incluyen los impuestos aplicables y el costo de envío a todo el
+              país, salvo que se indique expresamente lo contrario.
             </p>
             <p>
               Las imágenes son ilustrativas y pueden presentar ligeras variaciones respecto al

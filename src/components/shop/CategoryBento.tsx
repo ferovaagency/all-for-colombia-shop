@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { formatCOP } from "@/lib/cart";
+import { ProductImage } from "@/components/shop/ProductImage";
 
 type Category = { id: string; slug: string; name: string; image?: string | null };
 type Product = {
@@ -182,15 +183,10 @@ function ProductTile({ product }: { product: Product }) {
       className="group relative block overflow-hidden rounded-xl aspect-square bg-white"
     >
       {img ? (
-        <img
+        <ProductImage
           src={img}
           alt={product.name}
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-contain p-3 transition-transform duration-500 group-hover:scale-105"
-          onError={(e) => {
-            const t = e.target as HTMLImageElement;
-            if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-          }}
+          className="absolute inset-0 transition-transform duration-150 group-hover:scale-[1.03]"
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-xs">

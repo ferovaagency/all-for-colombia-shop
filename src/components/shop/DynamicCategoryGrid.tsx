@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatCOP } from "@/lib/cart";
 import { useCountdown } from "@/components/WeeklyDealCountdown";
 import { cn } from "@/lib/utils";
+import { ProductImage } from "@/components/shop/ProductImage";
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
 
@@ -391,16 +392,10 @@ function SmallProductCard({ product }: { product: Product }) {
       {/* Imagen completa sobre fondo claro, sin recortes ni oscurecido. */}
       <div className="relative aspect-[4/3] bg-[#fafafa] overflow-hidden">
         {img ? (
-          <img
+          <ProductImage
             src={img}
             alt={product.name}
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => {
-              const t = e.target as HTMLImageElement;
-              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-            }}
+            className="absolute inset-0 transition-transform duration-150 group-hover:scale-[1.03]"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-xs text-neutral-400">
@@ -441,14 +436,10 @@ function CategoryBigCard({ product, catName }: { product?: Product; catName: str
           {catName}
         </span>
         {img ? (
-          <img
+          <ProductImage
             src={img}
             alt={product.name}
-            className="absolute inset-0 h-full w-full object-contain p-8 group-hover:scale-[1.03] transition-transform duration-700"
-            onError={(e) => {
-              const t = e.target as HTMLImageElement;
-              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-            }}
+            className="absolute inset-0 transition-transform duration-150 group-hover:scale-[1.03]"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-neutral-400">

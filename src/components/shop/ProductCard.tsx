@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
 import { OfferCountdownBadge } from "@/components/shop/OfferCountdown";
 import { trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
+import { ProductImage } from "@/components/shop/ProductImage";
 
 type Product = {
   id: string;
@@ -34,16 +35,10 @@ export function ProductCard({ product }: { product: Product }) {
         className="relative block aspect-square bg-muted overflow-hidden"
       >
         {img ? (
-          <img
+          <ProductImage
             src={img}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-smooth"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              const t = e.target as HTMLImageElement;
-              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-            }}
+            className="transition-transform duration-150 group-hover:scale-[1.03]"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">

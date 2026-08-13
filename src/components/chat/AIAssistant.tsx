@@ -3,11 +3,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Send, ExternalLink, Loader2, Bot, Sparkles, Mail, Check } from "lucide-react";
+import {
+  X,
+  Send,
+  ExternalLink,
+  Loader2,
+  Bot,
+  Sparkles,
+  Mail,
+  Check,
+  ChevronDown,
+} from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { syncToBrevo } from "@/lib/brevo";
 import { LegalLink } from "@/components/legal/ConsentControls";
-import { recordLegalAcceptance } from "@/lib/consent";
+import { COOKIE_PREFS_EVENT, readCookiePreferences, recordLegalAcceptance } from "@/lib/consent";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const WHATSAPP_FALLBACK =
   "https://wa.me/573134977955?text=" +
@@ -72,6 +83,7 @@ export function AIAssistant() {
   const [emailInput, setEmailInput] = useState("");
   const [emailConsent, setEmailConsent] = useState(false);
   const [emailSubscribed, setEmailSubscribed] = useState(false);
+  const [aiNoticeOpen, setAiNoticeOpen] = useState(true);
   const sessionId = useRef<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -89,22 +101,47 @@ export function AIAssistant() {
     }).catch(() => {});
     try {
       localStorage.setItem("afa_ai_email", email);
-    } catch {}
+    } catch {
+      // El almacenamiento local puede estar bloqueado; el chat sigue funcionando.
+    }
     setEmailSubscribed(true);
   };
 
   useEffect(() => {
     try {
       if (localStorage.getItem("afa_ai_email")) setEmailSubscribed(true);
-    } catch {}
+      setAiNoticeOpen(localStorage.getItem("afa_ai_notice_minimized") !== "true");
+    } catch {
+      // El almacenamiento local puede estar bloqueado; se usa el estado de esta sesión.
+    }
   }, []);
+
+  const setNoticeOpen = (nextOpen: boolean) => {
+    setAiNoticeOpen(nextOpen);
+    try {
+      localStorage.setItem("afa_ai_notice_minimized", String(!nextOpen));
+    } catch {
+      // La preferencia no persistirá, pero el aviso conserva su estado actual.
+    }
+  };
 
   useEffect(() => {
     sessionId.current = getOrCreateSessionId();
     const shown = localStorage.getItem("allforall_chat_shown");
-    if (!shown) {
-      setShowPopup(true);
-    }
+    if (shown) return;
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const scheduleInvitation = () => {
+      timer = setTimeout(() => setShowPopup(true), 3000);
+    };
+
+    if (readCookiePreferences()) scheduleInvitation();
+    else window.addEventListener(COOKIE_PREFS_EVENT, scheduleInvitation, { once: true });
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener(COOKIE_PREFS_EVENT, scheduleInvitation);
+    };
   }, []);
 
   const closePopup = () => {
@@ -180,13 +217,13 @@ export function AIAssistant() {
   return (
     <>
       {showPopup && !open && (
-        <div className="fixed bottom-24 right-6 z-50 bg-white border-2 border-primary rounded-2xl shadow-xl p-4 max-w-[260px]">
+        <div className="fixed bottom-24 right-3 z-50 max-w-[calc(100vw-1.5rem)] rounded-2xl border bg-white p-4 shadow-xl sm:right-6 sm:max-w-[260px]">
           <button
             onClick={closePopup}
-            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-            aria-label="Cerrar"
+            className="absolute right-1 top-1 grid size-11 place-items-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+            aria-label="Cerrar invitación de Ali"
           >
-            <X className="w-4 h-4" />
+            <X className="size-4" aria-hidden="true" />
           </button>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
@@ -205,7 +242,7 @@ export function AIAssistant() {
           </p>
           <button
             onClick={openChat}
-            className="w-full mt-3 bg-primary text-white py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors"
+            className="mt-3 min-h-11 w-full rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             Chatear con Ali →
           </button>
@@ -218,45 +255,68 @@ export function AIAssistant() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed bottom-6 right-24 z-50 flex flex-col items-end gap-2"
+            className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-24 z-50 flex flex-col items-end gap-2"
           >
             <button
               onClick={() => setOpen(true)}
-              className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+              className="relative grid size-14 place-items-center rounded-full bg-primary text-white shadow-lg transition-transform duration-150 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               aria-label="Chat con asesor IA"
             >
-              <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
-              <span className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" />
-              <Sparkles className="relative z-10 w-7 h-7" />
-              <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-green-500 border-2 border-white" />
+              <Sparkles className="size-6" aria-hidden="true" />
+              <span className="absolute right-0 top-0 size-3.5 rounded-full border-2 border-white bg-green-500" />
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
       {open && (
-        <div className="fixed bottom-6 right-6 z-50 w-[calc(100vw-3rem)] sm:w-[400px] h-[600px] max-h-[calc(100vh-3rem)] bg-card border rounded-2xl shadow-elevated flex flex-col overflow-hidden">
+        <div className="fixed bottom-[max(6rem,calc(env(safe-area-inset-bottom)+5rem))] right-3 z-50 flex h-[min(600px,calc(100dvh-7rem))] w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl border bg-card shadow-elevated sm:right-6 sm:w-[400px]">
           <div className="flex items-center justify-between p-4 bg-primary text-primary-foreground">
             <div>
               <p className="font-semibold text-sm">Ali · Asesora All For All</p>
               <p className="text-xs opacity-80">Respondemos al instante</p>
             </div>
-            <button onClick={() => setOpen(false)} aria-label="Cerrar" className="hover:opacity-80">
-              <X className="w-5 h-5" />
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Cerrar chat"
+              className="grid size-11 place-items-center rounded-full hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+            >
+              <X className="size-5" aria-hidden="true" />
             </button>
           </div>
 
           {/* Aviso obligatorio de uso de IA (Política de IA, cláusulas 13 y 14) */}
-          <div className="px-3 py-2 border-b bg-amber-50 text-amber-900 text-[11px] leading-snug">
-            Este asistente utiliza <strong>Inteligencia Artificial</strong>. Las respuestas se
-            generan automáticamente y pueden contener errores; no sustituyen la información oficial
-            del fabricante ni constituyen asesoría técnica. Al continuar aceptas que la conversación
-            pueda almacenarse y ser revisada por personal autorizado para mejorar el servicio,
-            resolver solicitudes, prevenir fraude y cumplir obligaciones legales, conforme a la{" "}
-            <LegalLink doc="ia" className="font-semibold" /> y la{" "}
-            <LegalLink doc="privacidad" className="font-semibold" />. Si necesitas confirmar
-            información importante, puedes solicitar atención por un asesor humano.
-          </div>
+          <Collapsible open={aiNoticeOpen} onOpenChange={setNoticeOpen}>
+            <div className="border-b bg-amber-50 text-amber-950">
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={aiNoticeOpen ? "Minimizar aviso sobre IA" : "Mostrar aviso sobre IA"}
+                  className="flex min-h-11 w-full items-center justify-between gap-3 px-3 text-left text-xs font-semibold hover:bg-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-amber-700"
+                >
+                  <span>Ali usa IA y puede cometer errores</span>
+                  <span className="flex shrink-0 items-center gap-1 text-[11px] font-medium">
+                    {aiNoticeOpen ? "Minimizar" : "Ver aviso"}
+                    <ChevronDown
+                      aria-hidden="true"
+                      className={`size-4 transition-transform duration-150 ${aiNoticeOpen ? "rotate-180" : ""}`}
+                    />
+                  </span>
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <p className="px-3 pb-3 text-pretty text-[11px] leading-relaxed">
+                  Las respuestas se generan automáticamente y pueden contener errores; no sustituyen
+                  la información oficial del fabricante ni constituyen asesoría técnica. La
+                  conversación puede almacenarse y ser revisada por personal autorizado para mejorar
+                  el servicio, resolver solicitudes, prevenir fraude y cumplir obligaciones legales,
+                  conforme a la <LegalLink doc="ia" className="font-semibold underline" /> y la{" "}
+                  <LegalLink doc="privacidad" className="font-semibold underline" />. Puedes pedir
+                  atención humana para confirmar información importante.
+                </p>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
 
           {!emailSubscribed ? (
             <form onSubmit={submitEmail} className="px-3 py-2 border-b bg-muted/20 space-y-1.5">
@@ -333,7 +393,7 @@ export function AIAssistant() {
                             <img
                               src={p.images[0]}
                               alt={p.name}
-                              className="w-full h-full object-cover"
+                              className="h-full w-full object-contain p-1.5"
                             />
                           )}
                         </div>

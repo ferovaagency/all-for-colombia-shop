@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ShippingSummary } from "@/components/shop/ShippingNotice";
+import { ProductImage } from "@/components/shop/ProductImage";
 
 export const Route = createFileRoute("/carrito")({
   head: () => ({ meta: [{ title: "Carrito — All For All" }] }),
@@ -38,9 +39,7 @@ function CartPage() {
                 params={{ slug: it.slug }}
                 className="h-20 w-20 bg-muted rounded-lg overflow-hidden shrink-0"
               >
-                {it.image ? (
-                  <img src={it.image} alt={it.name} className="w-full h-full object-cover" />
-                ) : null}
+                {it.image ? <ProductImage src={it.image} alt={it.name} className="p-2" /> : null}
               </Link>
               <div className="flex-1 min-w-0">
                 <Link

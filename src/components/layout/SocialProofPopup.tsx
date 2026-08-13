@@ -52,14 +52,14 @@ export function SocialProofPopup() {
   if (!item) return null;
 
   return (
-    <div className="fixed bottom-24 left-4 z-40 max-w-xs animate-in slide-in-from-bottom-4 fade-in duration-500">
+    <div className="fixed bottom-[calc(max(1.5rem,env(safe-area-inset-bottom))+4.5rem)] left-3 z-40 max-w-[calc(100vw-1.5rem)] animate-in slide-in-from-bottom-4 fade-in duration-150 sm:left-4 sm:max-w-xs">
       <div className="bg-card border shadow-lg rounded-xl p-3 pr-8 flex gap-3 items-start relative">
         <button
           onClick={() => setItem(null)}
-          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
-          aria-label="Cerrar"
+          className="absolute right-0 top-0 grid size-11 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+          aria-label="Cerrar aviso de compra reciente"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="size-4" aria-hidden="true" />
         </button>
         <div className="h-9 w-9 rounded-full bg-secondary/10 text-secondary flex items-center justify-center flex-shrink-0">
           <ShoppingBag className="h-4 w-4" />

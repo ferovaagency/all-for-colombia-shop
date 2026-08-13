@@ -8,6 +8,7 @@ import { fuzzyIncludes, fuzzyScore } from "@/lib/fuzzy";
 import { formatCOP } from "@/lib/cart";
 import { trackSearch, trackZeroResults } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { ProductImage } from "@/components/shop/ProductImage";
 
 type P = {
   id: string;
@@ -29,7 +30,12 @@ type Props = {
   onSubmitted?: () => void;
 };
 
-export function SearchAutocomplete({ className, inputClassName, placeholder = "Buscar productos, marcas, SKU...", onSubmitted }: Props) {
+export function SearchAutocomplete({
+  className,
+  inputClassName,
+  placeholder = "Buscar productos, marcas, SKU...",
+  onSubmitted,
+}: Props) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,7 +52,9 @@ export function SearchAutocomplete({ className, inputClassName, placeholder = "B
       const [p, c] = await Promise.all([
         supabase
           .from("products")
-          .select("id,slug,name,price,sale_price,sku,images,categories(slug,name),brands(slug,name)")
+          .select(
+            "id,slug,name,price,sale_price,sku,images,categories(slug,name),brands(slug,name)",
+          )
           .eq("active", true)
           .order("created_at", { ascending: false })
           .limit(500),
@@ -72,7 +80,8 @@ export function SearchAutocomplete({ className, inputClassName, placeholder = "B
   }, []);
 
   const { productMatches, catMatches } = useMemo(() => {
-    if (!debounced || debounced.length < 2) return { productMatches: [] as P[], catMatches: [] as Cat[] };
+    if (!debounced || debounced.length < 2)
+      return { productMatches: [] as P[], catMatches: [] as Cat[] };
     setLoading(true);
     const pm = products
       .filter((p) => fuzzyIncludes(`${p.name} ${p.sku ?? ""} ${p.brands?.name ?? ""}`, debounced))
@@ -80,9 +89,7 @@ export function SearchAutocomplete({ className, inputClassName, placeholder = "B
       .sort((a, b) => b.s - a.s)
       .slice(0, 6)
       .map(({ p }) => p);
-    const cm = cats
-      .filter((c) => fuzzyIncludes(c.name, debounced))
-      .slice(0, 3);
+    const cm = cats.filter((c) => fuzzyIncludes(c.name, debounced)).slice(0, 3);
     setLoading(false);
     return { productMatches: pm, catMatches: cm };
   }, [debounced, products, cats]);
@@ -196,14 +203,13 @@ export function SearchAutocomplete({ className, inputClassName, placeholder = "B
                         className="flex items-center gap-3 px-2 py-2 hover:bg-muted rounded-md"
                       >
                         <div className="h-12 w-12 bg-muted rounded-md overflow-hidden shrink-0">
-                          {img ? (
-                            <img src={img} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
-                          ) : null}
+                          {img ? <ProductImage src={img} alt={p.name} className="p-1.5" /> : null}
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium line-clamp-1">{p.name}</p>
                           <p className="text-[11px] text-muted-foreground line-clamp-1">
-                            {p.brands?.name}{p.sku ? ` · SKU ${p.sku}` : ""}
+                            {p.brands?.name}
+                            {p.sku ? ` · SKU ${p.sku}` : ""}
                           </p>
                         </div>
                         <div className="text-right shrink-0">

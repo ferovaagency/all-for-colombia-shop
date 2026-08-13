@@ -8,10 +8,10 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => trackWhatsAppClick("floating_button")}
-      className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[hsl(145,63%,42%)] text-[hsl(0,0%,100%)] flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+      className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-4 z-50 flex size-14 items-center justify-center rounded-full bg-[hsl(145,63%,42%)] text-[hsl(0,0%,100%)] shadow-lg transition-transform duration-150 hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(145,63%,32%)] sm:right-6"
       aria-label="Contactar por WhatsApp"
     >
-      <MessageCircle className="w-7 h-7" />
+      <MessageCircle className="size-7" aria-hidden="true" />
     </a>
   );
 }

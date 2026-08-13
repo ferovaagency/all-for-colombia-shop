@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { formatCOP, useCart } from "@/lib/cart";
 import { toast } from "sonner";
 import { ShoppingCart, Package } from "lucide-react";
+import { ProductImage } from "@/components/shop/ProductImage";
 
 export const Route = createFileRoute("/distribuidores/portal/catalogo")({
   component: DistributorCatalogPage,
@@ -44,8 +45,11 @@ function DistributorCatalogPage() {
     })();
   }, []);
 
-  const filtered = products.filter((p) =>
-    !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.sku?.toLowerCase().includes(search.toLowerCase()),
+  const filtered = products.filter(
+    (p) =>
+      !search ||
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleAdd = (p: DBProduct) => {
@@ -101,13 +105,17 @@ function DistributorCatalogPage() {
               <div key={p.id} className="bg-card border rounded-xl overflow-hidden flex flex-col">
                 <div className="aspect-square bg-muted">
                   {img ? (
-                    <img src={img} alt={p.name} className="w-full h-full object-cover" />
+                    <ProductImage src={img} alt={p.name} />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">Sin imagen</div>
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                      Sin imagen
+                    </div>
                   )}
                 </div>
                 <div className="p-4 flex-1 flex flex-col">
-                  {p.brands?.name && <p className="text-xs text-secondary font-medium">{p.brands.name}</p>}
+                  {p.brands?.name && (
+                    <p className="text-xs text-secondary font-medium">{p.brands.name}</p>
+                  )}
                   <h3 className="font-semibold line-clamp-2 mb-1">{p.name}</h3>
                   {p.sku && <p className="text-xs text-muted-foreground mb-3">SKU: {p.sku}</p>}
 
@@ -130,7 +138,10 @@ function DistributorCatalogPage() {
                         min={1}
                         value={qty}
                         onChange={(e) =>
-                          setQtyMap((m) => ({ ...m, [p.id]: Math.max(1, Number(e.target.value) || 1) }))
+                          setQtyMap((m) => ({
+                            ...m,
+                            [p.id]: Math.max(1, Number(e.target.value) || 1),
+                          }))
                         }
                         className="w-16 h-9"
                       />

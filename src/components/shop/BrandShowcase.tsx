@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { formatCOP } from "@/lib/cart";
 import { cn } from "@/lib/utils";
+import { ProductImage } from "@/components/shop/ProductImage";
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
 
@@ -140,16 +141,10 @@ function OffersBand({ items, dark }: { items: Product[]; dark: boolean }) {
                     <span className="absolute top-3 left-3 z-10 rounded-full bg-red-600 text-white text-[10px] font-bold px-2.5 py-1">
                       −{pct}%
                     </span>
-                    <img
+                    <ProductImage
                       src={p.images![0]}
                       alt={p.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="absolute inset-0 h-full w-full object-contain p-5 group-hover:scale-[1.06] transition-transform duration-500"
-                      onError={(e) => {
-                        const t = e.target as HTMLImageElement;
-                        if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-                      }}
+                      className="absolute inset-0 transition-transform duration-150 group-hover:scale-[1.03]"
                     />
                   </div>
                   <div className="p-4">
@@ -179,7 +174,6 @@ function OffersBand({ items, dark }: { items: Product[]; dark: boolean }) {
 }
 
 function BrandBand({ brand, items, dark }: { brand: Brand; items: Product[]; dark: boolean }) {
-  
   const isLogitech = brand.slug === "logitech";
 
   return (
@@ -228,16 +222,10 @@ function BrandBand({ brand, items, dark }: { brand: Brand; items: Product[]; dar
                 )}
               >
                 <div className="aspect-[4/3] relative overflow-hidden">
-                  <img
+                  <ProductImage
                     src={p.images![0]}
                     alt={p.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="absolute inset-0 h-full w-full object-contain p-5 group-hover:scale-[1.06] transition-transform duration-500"
-                    onError={(e) => {
-                      const t = e.target as HTMLImageElement;
-                      if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-                    }}
+                    className="absolute inset-0 transition-transform duration-150 group-hover:scale-[1.03]"
                   />
                 </div>
                 <div className="p-4">

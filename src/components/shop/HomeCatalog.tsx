@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { formatCOP, useCart } from "@/lib/cart";
 import { trackAddToCart } from "@/lib/analytics";
 import { OfferCountdownBadge } from "@/components/shop/OfferCountdown";
+import { ProductImage } from "@/components/shop/ProductImage";
 import { cn } from "@/lib/utils";
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
@@ -177,16 +178,10 @@ export function WideProductCard({ product }: { product: Product }) {
         className="block bg-[#fafafa] aspect-[4/3] relative overflow-hidden"
       >
         {img ? (
-          <img
+          <ProductImage
             src={img}
             alt={product.name}
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-contain p-5 group-hover:scale-[1.04] transition-transform duration-500"
-            onError={(e) => {
-              const t = e.target as HTMLImageElement;
-              if (!t.src.endsWith("/placeholder.svg")) t.src = "/placeholder.svg";
-            }}
+            className="absolute inset-0 transition-transform duration-150 group-hover:scale-[1.03]"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-neutral-400">

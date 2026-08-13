@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { syncToBrevo } from "@/lib/brevo";
 import { ConsentCheckbox, LegalLink } from "@/components/legal/ConsentControls";
-import { recordLegalAcceptance } from "@/lib/consent";
+import { COOKIE_PREFS_EVENT, readCookiePreferences, recordLegalAcceptance } from "@/lib/consent";
 
 const SEGMENTS = [
   { id: "discount_5", label: "5% OFF", code: "BIENVENIDA5", winnable: true },
@@ -50,8 +50,19 @@ export function DiscountWheel() {
     if (typeof window === "undefined") return;
     const clientId = getClientId();
     if (localStorage.getItem(`afa_wheel_${clientId}`)) return;
-    const t = setTimeout(() => setOpen(true), 2000);
-    return () => clearTimeout(t);
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const scheduleWheel = () => {
+      timer = setTimeout(() => setOpen(true), 30000);
+    };
+
+    if (readCookiePreferences()) scheduleWheel();
+    else window.addEventListener(COOKIE_PREFS_EVENT, scheduleWheel, { once: true });
+
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener(COOKIE_PREFS_EVENT, scheduleWheel);
+    };
   }, [mounted]);
 
   const close = () => {
@@ -140,8 +151,8 @@ export function DiscountWheel() {
         <button
           type="button"
           onClick={close}
-          aria-label="Cerrar"
-          className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground"
+          aria-label="Cerrar ruleta de descuento"
+          className="absolute right-2 top-2 z-10 flex size-11 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
         >
           <X className="h-4 w-4" />
         </button>
