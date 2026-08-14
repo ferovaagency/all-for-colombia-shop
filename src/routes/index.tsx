@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Search, Truck, ShieldCheck, Building2, Zap } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PromoBannerSlider, type PromoBannerItem } from "@/components/shop/PromoBanner";
@@ -10,9 +9,8 @@ import { DynamicCategoryGrid } from "@/components/shop/DynamicCategoryGrid";
 import { HomeCatalog } from "@/components/shop/HomeCatalog";
 import { BrandShowcase } from "@/components/shop/BrandShowcase";
 import { Reveal } from "@/components/shop/Reveal";
-import bannerPadre from "@/assets/banner-logitech-mundial.jpg";
-import bannerMsi from "@/assets/banner-msi-juega-sin-limites.jpg";
-import posterJbl from "@/assets/poster-jbl.jpg";
+import bannerMsi from "@/assets/banner-msi-juega-sin-limites.webp";
+import posterJbl from "@/assets/poster-jbl.webp";
 import { getHomeData } from "@/lib/ssr-data.functions";
 import {
   FREE_SHIPPING_CITIES_TEXT,
@@ -67,62 +65,16 @@ function HomePage() {
   const initial = Route.useLoaderData();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
-  const [categories, setCategories] = useState<any[]>(initial.categories ?? []);
-  const [products, setProducts] = useState<any[]>(initial.products ?? []);
-  const [brands, setBrands] = useState<any[]>(initial.brands ?? []);
-  const [posts, setPosts] = useState<any[]>(initial.posts ?? []);
+  const categories = initial.categories ?? [];
+  const products = initial.products ?? [];
+  const brands = initial.brands ?? [];
+  const posts = initial.posts ?? [];
 
   const [bannerIndex, setBannerIndex] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setBannerIndex((p) => (p + 1) % PROMO_BANNERS.length), 4500);
     return () => clearInterval(t);
   }, []);
-
-  // Trae todo el catálogo activo (sin límite) para que el grid de Destacados
-  // y el catálogo con "Ver más" muestren todas las categorías y productos.
-  const loadData = useCallback(async () => {
-    const [cats, prods, brs, blog] = await Promise.all([
-      supabase.from("categories").select("*").order("sort_order"),
-      supabase
-        .from("products")
-        .select("*")
-        .eq("active", true)
-        .order("updated_at", { ascending: false }),
-      supabase
-        .from("brands")
-        .select("*")
-        .eq("show_in_home", true)
-        .order("display_order", { ascending: true })
-        .limit(20),
-      supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("published", true)
-        .order("created_at", { ascending: false })
-        .limit(3),
-    ]);
-    setCategories(cats.data || []);
-    setProducts(prods.data || []);
-    setBrands(brs.data || []);
-    setPosts(blog.data || []);
-  }, []);
-
-  // Carga inicial + actualización EN VIVO: si en el admin se crea o edita un
-  // producto/categoría/marca, el home se refresca solo sin recargar la página.
-  useEffect(() => {
-    loadData();
-    const channel = supabase
-      .channel("home-live")
-      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => loadData())
-      .on("postgres_changes", { event: "*", schema: "public", table: "categories" }, () =>
-        loadData(),
-      )
-      .on("postgres_changes", { event: "*", schema: "public", table: "brands" }, () => loadData())
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [loadData]);
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -247,25 +199,37 @@ function HomePage() {
           <div className="container mx-auto px-6 lg:px-10 py-12 md:py-16">
             <Link
               to="/marcas/logitech"
-              className="group block relative overflow-hidden rounded-3xl bg-neutral-950 text-white"
+              className="group relative block overflow-hidden rounded-3xl bg-neutral-950 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-neutral-950"
             >
-              <img
-                src={bannerPadre}
-                alt="Tienda Logitech"
-                loading="lazy"
-                className="absolute inset-0 h-full w-full object-cover opacity-45 group-hover:opacity-55 group-hover:scale-[1.02] transition-all duration-700"
+              <div aria-hidden="true" className="absolute inset-y-0 right-0 w-2/5 bg-[#00b8a9]" />
+              <div
+                aria-hidden="true"
+                className="absolute -right-16 -top-24 size-72 rounded-full border-[42px] border-white/20"
               />
-              <div className="relative z-10 px-8 md:px-14 py-14 md:py-20 max-w-2xl">
+              <div
+                aria-hidden="true"
+                className="absolute -bottom-24 right-[18%] size-56 rounded-full border-[34px] border-neutral-950/25"
+              />
+              <div
+                aria-hidden="true"
+                className="absolute right-[9%] top-1/2 hidden -translate-y-1/2 md:block"
+              >
+                <span className="text-7xl font-bold text-neutral-950/80" style={SPACE}>
+                  logi
+                </span>
+              </div>
+
+              <div className="relative z-10 max-w-2xl px-8 py-14 md:px-14 md:py-20">
                 <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/70">
                   Microsite oficial
                 </span>
                 <h2
                   style={SPACE}
-                  className="mt-3 text-3xl md:text-5xl font-bold tracking-[-0.03em] leading-[1.05]"
+                  className="mt-3 max-w-md text-balance text-3xl font-bold leading-[1.05] md:text-5xl"
                 >
                   Tienda Logitech
                 </h2>
-                <p className="mt-3 text-white/75 max-w-lg">
+                <p className="mt-3 max-w-lg text-pretty text-white/75">
                   Todas las líneas: MX, ERGO, Esencial, Lifestyle, Serie G, Racing y Gamer PRO.
                   Encuentra la serie que se ajusta a cómo trabajas o juegas.
                 </p>

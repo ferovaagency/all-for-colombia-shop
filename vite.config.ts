@@ -9,14 +9,12 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   vite: {
     build: {
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 600,
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
-            if (id.includes('node_modules')) {
-              return 'vendor';
-            }
-          },
+          // Deja que Rollup preserve los límites de importación dinámica.
+          // Un único chunk "vendor" obligaba a descargar ~1,46 MB en cada ruta.
+          manualChunks: undefined,
         },
       },
     },

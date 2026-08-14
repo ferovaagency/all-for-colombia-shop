@@ -6,18 +6,28 @@ import {
   Scripts,
   useLocation,
 } from "@tanstack/react-router";
+import { lazy, Suspense, useEffect, useState } from "react";
 import appCss from "../styles.css?url";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { AIAssistant } from "@/components/chat/AIAssistant";
 import { CookieBanner } from "@/components/layout/CookieBanner";
-import { SocialProofPopup } from "@/components/layout/SocialProofPopup";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
-import { DiscountWheel } from "@/components/DiscountWheel";
 import { Toaster } from "@/components/ui/sonner";
 import { Canonical } from "@/components/seo/Canonical";
 import { COOKIE_PREFS_KEY, LEGAL_VERSIONS } from "@/lib/legal-versions";
+
+const AIAssistant = lazy(() =>
+  import("@/components/chat/AIAssistant").then((module) => ({ default: module.AIAssistant })),
+);
+const SocialProofPopup = lazy(() =>
+  import("@/components/layout/SocialProofPopup").then((module) => ({
+    default: module.SocialProofPopup,
+  })),
+);
+const DiscountWheel = lazy(() =>
+  import("@/components/DiscountWheel").then((module) => ({ default: module.DiscountWheel })),
+);
 
 /**
  * Google Consent Mode v2 en estado denegado por defecto.
@@ -146,21 +156,10 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "dns-prefetch", href: "https://fonts.gstatic.com" },
-      {
-        rel: "preload",
-        as: "style",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-      },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap",
       },
     ],
     scripts: [
@@ -216,8 +215,23 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const location = useLocation();
+  const [loadEngagementTools, setLoadEngagementTools] = useState(false);
   const hiddenRoutes = ["/checkout", "/admin", "/distribuidores/portal"];
   const showChat = !hiddenRoutes.some((r) => location.pathname.startsWith(r));
+
+  useEffect(() => {
+    const win = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const id = win.requestIdleCallback
+      ? win.requestIdleCallback(() => setLoadEngagementTools(true), { timeout: 2500 })
+      : window.setTimeout(() => setLoadEngagementTools(true), 1500);
+    return () => {
+      if (win.cancelIdleCallback) win.cancelIdleCallback(id);
+      else window.clearTimeout(id);
+    };
+  }, []);
 
   return (
     <>
@@ -231,9 +245,13 @@ function RootComponent() {
         <Footer />
       </div>
       <WhatsAppButton />
-      {showChat && <AIAssistant />}
-      <SocialProofPopup />
-      <DiscountWheel />
+      {loadEngagementTools && (
+        <Suspense fallback={null}>
+          {showChat && <AIAssistant />}
+          <SocialProofPopup />
+          <DiscountWheel />
+        </Suspense>
+      )}
       <CookieBanner />
       <Toaster richColors position="top-right" />
     </>

@@ -18,26 +18,31 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async () =>
       supabaseAdmin.from("categories").select("*").order("sort_order"),
       supabaseAdmin
         .from("products")
-        .select("*")
+        .select(
+          "id,slug,name,price,sale_price,sku,images,stock,category_id,brand_id,featured,updated_at",
+        )
         .eq("active", true)
         .order("updated_at", { ascending: false })
         .limit(60),
       supabaseAdmin
         .from("brands")
-        .select("*")
+        .select("id,slug,name,logo,logo_url,show_in_home,display_order")
         .eq("show_in_home", true)
         .order("display_order", { ascending: true })
         .limit(20),
       supabaseAdmin
         .from("blog_posts")
-        .select("id, slug, title, excerpt, cover_image, created_at")
+        .select("id, slug, title, excerpt, cover_image, category, created_at")
         .eq("published", true)
         .order("created_at", { ascending: false })
         .limit(3),
     ]);
     return {
       categories: cats.data ?? [],
-      products: prods.data ?? [],
+      products: (prods.data ?? []).map((product) => ({
+        ...product,
+        images: product.images?.slice(0, 1) ?? [],
+      })),
       brands: brs.data ?? [],
       posts: blog.data ?? [],
     };
@@ -53,13 +58,22 @@ export const getShopData = createServerFn({ method: "GET" }).handler(async () =>
     const [p, c, b] = await Promise.all([
       supabaseAdmin
         .from("products")
-        .select("*, categories(slug,name), brands(slug,name)")
-        .eq("active", true),
-      supabaseAdmin.from("categories").select("*").order("sort_order"),
-      supabaseAdmin.from("brands").select("*"),
+        .select(
+          "id,slug,name,price,sale_price,sku,images,stock,category_id,created_at,categories(slug,name),brands(slug,name)",
+        )
+        .eq("active", true)
+        .order("created_at", { ascending: false }),
+      supabaseAdmin
+        .from("categories")
+        .select("id,slug,name,parent_id,sort_order")
+        .order("sort_order"),
+      supabaseAdmin.from("brands").select("id,slug,name").order("name"),
     ]);
     return {
-      products: p.data ?? [],
+      products: (p.data ?? []).map((product) => ({
+        ...product,
+        images: product.images?.slice(0, 1) ?? [],
+      })),
       categories: c.data ?? [],
       brands: b.data ?? [],
     };
