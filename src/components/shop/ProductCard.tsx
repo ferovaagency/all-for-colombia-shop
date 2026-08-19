@@ -25,6 +25,8 @@ export function ProductCard({ product }: { product: Product }) {
     ? Math.round((1 - (product.sale_price as number) / (product.price as number)) * 100)
     : 0;
   const hasStock = product.stock !== null && product.stock !== undefined && product.stock > 0;
+  const isLowStock = hasStock && (product.stock as number) <= 3;
+
   const img = product.images?.[0];
 
   return (
