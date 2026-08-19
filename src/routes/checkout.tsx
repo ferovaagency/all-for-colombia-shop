@@ -35,6 +35,7 @@ import { startAddiCheckout } from "@/lib/addi.functions";
 import { syncToBrevo } from "@/lib/brevo";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 import { ShippingSummary } from "@/components/shop/ShippingNotice";
+import { useCartStock } from "@/hooks/use-cart-stock";
 import { MAIN_CITIES, OTHER_CITY_VALUE, getShippingStatus } from "@/lib/shipping";
 import {
   EMPTY_PURCHASE_CONSENT,
@@ -135,6 +136,7 @@ function mapDocType(t: string): "CC" | "NIT" | "CE" {
 
 function CheckoutPage() {
   const { items, subtotal, clear, count } = useCart();
+  const { stockById, hasIssues: hasStockIssues } = useCartStock(items);
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -327,7 +329,8 @@ function CheckoutPage() {
 
     let receiptUrl: string | null = null;
     if (receipt) {
-      const ext = (receipt.name.split(".").pop() || "bin").replace(/[^A-Za-z0-9]/g, "").slice(0, 10) || "bin";
+      const ext =
+        (receipt.name.split(".").pop() || "bin").replace(/[^A-Za-z0-9]/g, "").slice(0, 10) || "bin";
       const path = `${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("payment-receipts")
@@ -630,7 +633,8 @@ function CheckoutPage() {
               <div className="mt-4 bg-secondary/5 border border-secondary/20 rounded-lg p-4 space-y-3">
                 <p className="font-semibold">Pago seguro por PSE</p>
                 <p className="text-xs text-muted-foreground">
-                  Al continuar, Openpay te mostrará los bancos y solicitará tus datos para completar el pago.
+                  Al continuar, Openpay te mostrará los bancos y solicitará tus datos para completar
+                  el pago.
                 </p>
               </div>
             )}
@@ -800,13 +804,22 @@ function CheckoutPage() {
           <h2 className="font-semibold text-lg mb-4">Tu pedido</h2>
           <div className="space-y-2 text-sm mb-4 max-h-64 overflow-y-auto">
             {items.map((it) => (
-              <div key={it.id} className="flex justify-between gap-2">
-                <span className="text-muted-foreground line-clamp-1">
-                  {it.name} ×{it.quantity}
-                </span>
-                <span className="font-medium whitespace-nowrap">
-                  {formatCOP(it.price * it.quantity)}
-                </span>
+              <div key={it.id} className="space-y-0.5">
+                <div className="flex justify-between gap-2">
+                  <span className="text-muted-foreground line-clamp-1">
+                    {it.name} ×{it.quantity}
+                  </span>
+                  <span className="font-medium whitespace-nowrap">
+                    {formatCOP(it.price * it.quantity)}
+                  </span>
+                </div>
+                {stockById[it.id] !== undefined && stockById[it.id] < it.quantity && (
+                  <p className="text-xs text-destructive font-medium">
+                    {stockById[it.id] === 0
+                      ? "Agotado — elimínalo del carrito para continuar."
+                      : `Solo quedan ${stockById[it.id]} unidades. Ajusta la cantidad en el carrito.`}
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -827,6 +840,7 @@ function CheckoutPage() {
             type="submit"
             disabled={
               submitting ||
+              hasStockIssues ||
               !consentComplete ||
               (requiresReceipt && !receipt) ||
               (payment === "openpay_card" && !!cardOrderId)
@@ -834,17 +848,19 @@ function CheckoutPage() {
             size="lg"
             className="w-full bg-primary"
           >
-            {submitting
-              ? "Procesando..."
-              : payment === "openpay_card" && cardOrderId
-                ? "Ingresa los datos de tu tarjeta ↓"
-                : !consentComplete
-                  ? "Acepta los términos para continuar"
-                  : requiresReceipt && !receipt
-                    ? "⬆️ Primero sube el comprobante"
-                    : payment === "openpay_card"
-                      ? "Continuar al pago con tarjeta →"
-                      : "Confirmar pedido →"}
+            {hasStockIssues
+              ? "Ajusta las cantidades en el carrito"
+              : submitting
+                ? "Procesando..."
+                : payment === "openpay_card" && cardOrderId
+                  ? "Ingresa los datos de tu tarjeta ↓"
+                  : !consentComplete
+                    ? "Acepta los términos para continuar"
+                    : requiresReceipt && !receipt
+                      ? "⬆️ Primero sube el comprobante"
+                      : payment === "openpay_card"
+                        ? "Continuar al pago con tarjeta →"
+                        : "Confirmar pedido →"}
           </Button>
 
           <p className="text-xs text-muted-foreground text-center mt-3">

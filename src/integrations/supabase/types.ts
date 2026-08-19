@@ -602,6 +602,7 @@ export type Database = {
           customer_phone: string | null
           distributor_id: string | null
           id: string
+          inv_registrado: boolean | null
           items: Json | null
           order_type: string | null
           payment_method: string | null
@@ -623,6 +624,7 @@ export type Database = {
           customer_phone?: string | null
           distributor_id?: string | null
           id?: string
+          inv_registrado?: boolean | null
           items?: Json | null
           order_type?: string | null
           payment_method?: string | null
@@ -644,6 +646,7 @@ export type Database = {
           customer_phone?: string | null
           distributor_id?: string | null
           id?: string
+          inv_registrado?: boolean | null
           items?: Json | null
           order_type?: string | null
           payment_method?: string | null
@@ -790,6 +793,9 @@ export type Database = {
           id: string
           images: string[] | null
           info_fabricante: string | null
+          inv_estado: string | null
+          inv_sku: string | null
+          inv_synced_at: string | null
           meta_description: string | null
           meta_title: string | null
           name: string
@@ -827,6 +833,9 @@ export type Database = {
           id?: string
           images?: string[] | null
           info_fabricante?: string | null
+          inv_estado?: string | null
+          inv_sku?: string | null
+          inv_synced_at?: string | null
           meta_description?: string | null
           meta_title?: string | null
           name: string
@@ -864,6 +873,9 @@ export type Database = {
           id?: string
           images?: string[] | null
           info_fabricante?: string | null
+          inv_estado?: string | null
+          inv_sku?: string | null
+          inv_synced_at?: string | null
           meta_description?: string | null
           meta_title?: string | null
           name?: string
@@ -1068,6 +1080,7 @@ export type Database = {
           customer_phone: string | null
           distributor_id: string | null
           id: string
+          inv_registrado: boolean | null
           items: Json | null
           order_type: string | null
           payment_method: string | null
@@ -1091,6 +1104,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      marcar_ventas_registradas: { Args: { ids: string[] }; Returns: number }
       set_order_addi_refs: {
         Args: {
           _application_id: string
@@ -1099,6 +1113,21 @@ export type Database = {
           _status: string
         }
         Returns: undefined
+      }
+      sync_inventario: { Args: { payload: Json }; Returns: Json }
+      ventas_pendientes: {
+        Args: never
+        Returns: {
+          cantidad: number
+          cliente: string
+          estado: string
+          fecha: string
+          inv_sku: string
+          order_id: string
+          producto: string
+          stock_web: number
+          sugerido: number
+        }[]
       }
     }
     Enums: {

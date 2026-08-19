@@ -25,6 +25,8 @@ export function ProductCard({ product }: { product: Product }) {
     ? Math.round((1 - (product.sale_price as number) / (product.price as number)) * 100)
     : 0;
   const hasStock = product.stock !== null && product.stock !== undefined && product.stock > 0;
+  const isLowStock = hasStock && (product.stock as number) <= 3;
+
   const img = product.images?.[0];
 
   return (
@@ -95,6 +97,11 @@ export function ProductCard({ product }: { product: Product }) {
                   <p className="text-lg font-bold text-primary">{formatCOP(product.price)}</p>
                 )
               )}
+              {isLowStock && (
+                <span className="inline-block text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+                  Últimas unidades
+                </span>
+              )}
               <Button
                 size="sm"
                 className="w-full bg-primary"
@@ -121,30 +128,37 @@ export function ProductCard({ product }: { product: Product }) {
             </div>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground italic">
-                Consulte disponibilidad y precio
-              </p>
+              {product.price != null && (
+                <p className="text-lg font-bold text-muted-foreground">
+                  {formatCOP(product.price)}
+                </p>
+              )}
+              <Button size="sm" className="w-full" disabled>
+                <ShoppingCart className="h-4 w-4 mr-1" />
+                Agotado
+              </Button>
               <Button size="sm" variant="outline" className="w-full" asChild>
                 <a
                   href={whatsappUrl(
-                    `Hola, quisiera cotizar: ${product.name} (SKU: ${product.sku || "N/A"})`,
+                    `Hola, quisiera consultar la disponibilidad de: ${product.name} (SKU: ${product.sku || "N/A"})`,
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() =>
-                    trackWhatsAppClick("product_card_quote", {
+                    trackWhatsAppClick("product_card_availability", {
                       sku: product.sku,
                       product_id: product.id,
                     })
                   }
                 >
                   <MessageCircle className="h-4 w-4 mr-1" />
-                  Cotizar por WhatsApp
+                  Consultar disponibilidad
                 </a>
               </Button>
             </div>
           )}
         </div>
+
       </div>
     </article>
   );
