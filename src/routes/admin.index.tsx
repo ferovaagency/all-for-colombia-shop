@@ -16,6 +16,7 @@ import { formatCOP, whatsappUrl } from "@/lib/cart";
 import { toast } from "sonner";
 import { WeeklyDealsAdmin } from "@/components/admin/WeeklyDealsAdmin";
 import { BulkInventoryUpload } from "@/components/admin/BulkInventoryUpload";
+import { InventoryPanel } from "@/components/admin/InventoryPanel";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin — All For All" }, { name: "robots", content: "noindex" }] }),
@@ -231,6 +232,7 @@ function AdminPage() {
           <TabsTrigger value="bulk-inventory">
             <UploadCloud className="h-3.5 w-3.5 mr-1" /> Inventario masivo
           </TabsTrigger>
+          <TabsTrigger value="inventory">Inventario</TabsTrigger>
           <TabsTrigger value="categories">Categorías ({categories.length})</TabsTrigger>
           <TabsTrigger value="brands">Marcas ({brands.length})</TabsTrigger>
           <TabsTrigger value="customers">Clientes ({customers.length})</TabsTrigger>
@@ -612,6 +614,10 @@ function AdminPage() {
         </TabsContent>
 
 
+
+        <TabsContent value="inventory" className="mt-6">
+          <InventoryPanel />
+        </TabsContent>
 
         <TabsContent value="categories" className="mt-6">
           <SimpleList items={categories} cols={["name", "slug", "sort_order"]} />
