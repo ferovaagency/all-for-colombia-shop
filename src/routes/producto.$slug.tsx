@@ -174,11 +174,15 @@ function ProductDetailPage() {
     product.sale_price < product.price
   );
   const inStock = (product?.stock ?? 0) > 0;
+  const isLowStock = inStock && (product?.stock ?? 0) <= 3;
   const images = useMemo(() => product?.images ?? [], [product?.images]);
 
   const productUrl = typeof window !== "undefined" ? window.location.href : "";
   const whatsappLink = product
     ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, me interesa el producto ${product.name}: ${productUrl}`)}`
+    : "#";
+  const availabilityLink = product
+    ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hola, quisiera consultar la disponibilidad de ${product.name}: ${productUrl}`)}`
     : "#";
 
   if (loading) return <div className="container mx-auto px-4 py-12">Cargando...</div>;
@@ -376,9 +380,11 @@ function ProductDetailPage() {
           )}
 
           {inStock ? (
-            <div className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-              <Clock className="h-3 w-3" /> Solo quedan {product.stock} unidades
-            </div>
+            isLowStock && (
+              <div className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+                <Clock className="h-3 w-3" /> Últimas unidades
+              </div>
+            )
           ) : (
             <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
               Agotado temporalmente
@@ -387,10 +393,10 @@ function ProductDetailPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
             <Button onClick={handleAdd} size="lg" className="w-full h-12" disabled={!inStock}>
-              <ShoppingCart className="h-4 w-4 mr-2" /> Agregar al carrito
+              <ShoppingCart className="h-4 w-4 mr-2" /> {inStock ? "Agregar al carrito" : "Agotado"}
             </Button>
             <a
-              href={whatsappLink}
+              href={inStock ? whatsappLink : availabilityLink}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() =>
@@ -399,7 +405,8 @@ function ProductDetailPage() {
               className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-md font-medium text-white shadow transition-colors"
               style={{ backgroundColor: "#25D366" }}
             >
-              <MessageCircle className="h-4 w-4" /> Consultar por WhatsApp
+              <MessageCircle className="h-4 w-4" />{" "}
+              {inStock ? "Consultar por WhatsApp" : "Consultar disponibilidad"}
             </a>
           </div>
 
@@ -467,10 +474,10 @@ function ProductDetailPage() {
             {hasDiscount && <OfferCountdownBadge className="mt-1" />}
           </div>
           <a
-            href={whatsappLink}
+            href={inStock ? whatsappLink : availabilityLink}
             target="_blank"
             rel="noopener noreferrer"
-            aria-label="Consultar por WhatsApp"
+            aria-label={inStock ? "Consultar por WhatsApp" : "Consultar disponibilidad"}
             onClick={() =>
               trackWhatsAppClick("product_sticky", { sku: product.sku, product_id: product.id })
             }
