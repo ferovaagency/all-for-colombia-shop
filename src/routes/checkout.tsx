@@ -35,6 +35,7 @@ import { startAddiCheckout } from "@/lib/addi.functions";
 import { syncToBrevo } from "@/lib/brevo";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
 import { ShippingSummary } from "@/components/shop/ShippingNotice";
+import { useCartStock } from "@/hooks/use-cart-stock";
 import { MAIN_CITIES, OTHER_CITY_VALUE, getShippingStatus } from "@/lib/shipping";
 import {
   EMPTY_PURCHASE_CONSENT,

@@ -5,6 +5,8 @@ import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ShippingSummary } from "@/components/shop/ShippingNotice";
 import { ProductImage } from "@/components/shop/ProductImage";
+import { useCartStock } from "@/hooks/use-cart-stock";
+import { AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/carrito")({
   head: () => ({ meta: [{ title: "Carrito — All For All" }] }),
@@ -13,6 +15,7 @@ export const Route = createFileRoute("/carrito")({
 
 function CartPage() {
   const { items, setQty, remove, subtotal, count } = useCart();
+  const { stockById, hasIssues } = useCartStock(items);
 
   if (count === 0) {
     return (
@@ -51,6 +54,14 @@ function CartPage() {
                 </Link>
                 {it.sku && <p className="text-xs text-muted-foreground">SKU: {it.sku}</p>}
                 <p className="text-sm text-primary font-bold mt-1">{formatCOP(it.price)}</p>
+                {stockById[it.id] !== undefined && stockById[it.id] < it.quantity && (
+                  <p className="text-xs text-destructive font-medium mt-1 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    {stockById[it.id] === 0
+                      ? "Producto agotado. Elimínalo para continuar."
+                      : `Solo quedan ${stockById[it.id]} unidades. Ajusta la cantidad.`}
+                  </p>
+                )}
               </div>
               <div className="flex items-center border rounded-md">
                 <button
@@ -61,12 +72,22 @@ function CartPage() {
                 </button>
                 <Input
                   value={it.quantity}
-                  onChange={(e) => setQty(it.id, Number(e.target.value) || 1)}
+                  onChange={(e) =>
+                    setQty(
+                      it.id,
+                      Math.min(Number(e.target.value) || 1, stockById[it.id] ?? it.quantity),
+                    )
+                  }
                   className="w-12 h-8 border-0 text-center p-0"
                 />
                 <button
-                  onClick={() => setQty(it.id, it.quantity + 1)}
-                  className="p-2 hover:bg-muted"
+                  onClick={() =>
+                    setQty(it.id, Math.min(it.quantity + 1, stockById[it.id] ?? it.quantity + 1))
+                  }
+                  disabled={
+                    stockById[it.id] !== undefined && it.quantity >= (stockById[it.id] as number)
+                  }
+                  className="p-2 hover:bg-muted disabled:opacity-40"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
@@ -99,9 +120,21 @@ function CartPage() {
               <span className="text-primary">{formatCOP(subtotal)}</span>
             </div>
           </div>
-          <Button asChild size="lg" className="w-full bg-primary">
-            <Link to="/checkout">Finalizar compra</Link>
-          </Button>
+          {hasIssues && (
+            <p className="text-xs text-destructive font-medium mb-3 flex items-start gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+              Hay productos sin stock suficiente. Ajusta las cantidades para continuar.
+            </p>
+          )}
+          {hasIssues ? (
+            <Button size="lg" className="w-full bg-primary" disabled>
+              Ajusta las cantidades
+            </Button>
+          ) : (
+            <Button asChild size="lg" className="w-full bg-primary">
+              <Link to="/checkout">Finalizar compra</Link>
+            </Button>
+          )}
           <Button asChild variant="ghost" className="w-full mt-2">
             <Link to="/tienda">Seguir comprando</Link>
           </Button>
