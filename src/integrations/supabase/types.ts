@@ -80,6 +80,33 @@ export type Database = {
         }
         Relationships: []
       }
+      backup_sku_20260819: {
+        Row: {
+          active: boolean | null
+          id: string | null
+          price: number | null
+          respaldado_en: string | null
+          sku: string | null
+          stock: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          id?: string | null
+          price?: number | null
+          respaldado_en?: string | null
+          sku?: string | null
+          stock?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          id?: string | null
+          price?: number | null
+          respaldado_en?: string | null
+          sku?: string | null
+          stock?: number | null
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           category: string | null
@@ -804,6 +831,7 @@ export type Database = {
           sale_price: number | null
           short_description: string | null
           sku: string | null
+          sku_fabricante: string | null
           slug: string
           specs: Json | null
           specs_contexto: Json | null
@@ -844,6 +872,7 @@ export type Database = {
           sale_price?: number | null
           short_description?: string | null
           sku?: string | null
+          sku_fabricante?: string | null
           slug: string
           specs?: Json | null
           specs_contexto?: Json | null
@@ -884,6 +913,7 @@ export type Database = {
           sale_price?: number | null
           short_description?: string | null
           sku?: string | null
+          sku_fabricante?: string | null
           slug?: string
           specs?: Json | null
           specs_contexto?: Json | null
@@ -963,6 +993,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sync_inventario: {
+        Row: {
+          activo: boolean
+          actualizado_en: string | null
+          cantidad: number
+          descripcion: string
+          match_tipo: string | null
+          precio: number
+          product_id: string | null
+          sku: string
+        }
+        Insert: {
+          activo?: boolean
+          actualizado_en?: string | null
+          cantidad?: number
+          descripcion: string
+          match_tipo?: string | null
+          precio?: number
+          product_id?: string | null
+          sku: string
+        }
+        Update: {
+          activo?: boolean
+          actualizado_en?: string | null
+          cantidad?: number
+          descripcion?: string
+          match_tipo?: string | null
+          precio?: number
+          product_id?: string | null
+          sku?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -1114,6 +1177,8 @@ export type Database = {
         }
         Returns: undefined
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       sync_inventario: { Args: { payload: Json }; Returns: Json }
       ventas_pendientes: {
         Args: never
