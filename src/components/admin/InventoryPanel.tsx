@@ -155,6 +155,29 @@ export function InventoryPanel() {
     return Array.from(map.entries());
   }, [rows, matches]);
 
+  const syncNow = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("inventory-sync", { body: {} });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const s = (data as any)?.summary ?? {};
+      const msg = `Hoja: ${s.sheetRows ?? 0} filas · Vinculados: ${s.linked ?? 0} · Creados: ${s.created ?? 0} · Duplicados: ${s.ambiguous ?? 0} · Sin inventario: ${s.zeroed ?? 0}`;
+      setSyncResult(msg);
+      const errs: string[] = (data as any)?.errors ?? [];
+      if (errs.length) toast.warning(`Sincronizado con avisos: ${errs[0]}`);
+      else toast.success("Inventario sincronizado");
+      await load();
+    } catch (e) {
+      const m = e instanceof Error ? e.message : String(e);
+      setSyncResult(`Error: ${m}`);
+      toast.error("No se pudo sincronizar: " + m);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const deactivate = async (id: string) => {
     const { error } = await supabase.from("products").update({ active: false }).eq("id", id);
     if (error) {
