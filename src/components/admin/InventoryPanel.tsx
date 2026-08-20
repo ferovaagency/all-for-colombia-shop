@@ -84,6 +84,8 @@ export function InventoryPanel() {
   const [rows, setRows] = useState<InvProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
