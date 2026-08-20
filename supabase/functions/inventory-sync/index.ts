@@ -72,6 +72,14 @@ serve(async (req) => {
         authorized = !!isAdmin;
       }
     }
+    // pg_cron authenticates with an internal token stored in the DB.
+    if (!authorized) {
+      const cronToken = req.headers.get('x-cron-token');
+      if (cronToken) {
+        const { data: t } = await admin.from('internal_tokens').select('token').eq('name', 'inventory_cron').maybeSingle();
+        if (t?.token && t.token === cronToken) authorized = true;
+      }
+    }
     if (!authorized) return json({ error: 'No autorizado' }, 401);
 
     // ---- Read the sheet ----

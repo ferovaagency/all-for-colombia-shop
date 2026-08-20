@@ -75,6 +75,14 @@ serve(async (req) => {
       const { data: u } = await uc.auth.getUser();
       if (u?.user) { const { data: isAdmin } = await admin.rpc('has_role', { _user_id: u.user.id, _role: 'admin' }); authorized = !!isAdmin; }
     }
+    // DB trigger authenticates with an internal token stored in the DB.
+    if (!authorized) {
+      const cronToken = req.headers.get('x-cron-token');
+      if (cronToken) {
+        const { data: t } = await admin.from('internal_tokens').select('token').eq('name', 'inventory_cron').maybeSingle();
+        if (t?.token && t.token === cronToken) authorized = true;
+      }
+    }
     if (!authorized) return json({ error: 'No autorizado' }, 401);
 
     const { order_id } = await req.json().catch(() => ({}));
