@@ -16,7 +16,10 @@ const corsHeaders = {
 };
 
 const SHEET_ID = Deno.env.get('INVENTORY_SHEET_ID') || '13798JechMiinmFH_0jGnSuDJ6U5u5F6QYGmzCl6RY6E';
-const SHEET_GID = Deno.env.get('INVENTORY_SHEET_GID') || '0';
+// gid de la pestaña de inventario ("SKU / DESCRIPCION / Cantidad Disponible").
+// '0' no existe en esta hoja, así que se ignora y se usa la pestaña real.
+const ENV_GID = (Deno.env.get('INVENTORY_SHEET_GID') || '').trim();
+const SHEET_GID = ENV_GID && ENV_GID !== '0' ? ENV_GID : '602957575';
 const SHEET_SKU_RE = /^[A-ZÑ0-9.]{2,5}-\d{3,4}$/;
 const AUTO_MATCH_MIN = 90;
 const REVIEW_MIN = 72;
@@ -70,6 +73,14 @@ serve(async (req) => {
       if (u?.user) {
         const { data: isAdmin } = await admin.rpc('has_role', { _user_id: u.user.id, _role: 'admin' });
         authorized = !!isAdmin;
+      }
+    }
+    // pg_cron authenticates with an internal token stored in the DB.
+    if (!authorized) {
+      const cronToken = req.headers.get('x-cron-token');
+      if (cronToken) {
+        const { data: t } = await admin.from('internal_tokens').select('token').eq('name', 'inventory_cron').maybeSingle();
+        if (t?.token && t.token === cronToken) authorized = true;
       }
     }
     if (!authorized) return json({ error: 'No autorizado' }, 401);
@@ -153,10 +164,15 @@ serve(async (req) => {
       .map((p) => ({ id: p.id, stock: 0, inv_estado: 'sin_inventario', inv_synced_at: nowIso }));
 
     const errors: string[] = [];
+    // UPDATE por id (no upsert: un upsert exigiría columnas NOT NULL como slug).
     const chunkUpsert = async (rows: any[], label: string) => {
-      for (let i = 0; i < rows.length; i += 300) {
-        const { error } = await admin.from('products').upsert(rows.slice(i, i + 300), { onConflict: 'id' });
-        if (error) errors.push(`${label}: ${error.message}`);
+      const seen = new Set<string>();
+      for (let i = 0; i < rows.length; i += 25) {
+        const slice = rows.slice(i, i + 25).filter((r) => !seen.has(r.id) && seen.add(r.id));
+        const res = await Promise.all(
+          slice.map(({ id, ...patch }: any) => admin.from('products').update(patch).eq('id', id)),
+        );
+        for (const r of res) if (r.error && errors.length < 10) errors.push(`${label}: ${r.error.message}`);
       }
     };
     await chunkUpsert(linkUpserts, 'link');

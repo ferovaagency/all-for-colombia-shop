@@ -13,9 +13,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { formatCOP } from "@/lib/cart";
-import { RefreshCw, AlertTriangle, CheckCircle2, PackageX, Clock, ExternalLink } from "lucide-react";
-
-const N8N_URL = "https://n8n-production-cf9e.up.railway.app/workflow/qevd4vWnVCLhR7SU";
+import { RefreshCw, AlertTriangle, CheckCircle2, PackageX, Clock, CloudDownload } from "lucide-react";
 
 type InvProduct = {
   id: string;
@@ -86,6 +84,8 @@ export function InventoryPanel() {
   const [rows, setRows] = useState<InvProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -157,6 +157,29 @@ export function InventoryPanel() {
     return Array.from(map.entries());
   }, [rows, matches]);
 
+  const syncNow = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("inventory-sync", { body: {} });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const s = (data as any)?.summary ?? {};
+      const msg = `Hoja: ${s.sheetRows ?? 0} filas · Vinculados: ${s.linked ?? 0} · Creados: ${s.created ?? 0} · Duplicados: ${s.ambiguous ?? 0} · Sin inventario: ${s.zeroed ?? 0}`;
+      setSyncResult(msg);
+      const errs: string[] = (data as any)?.errors ?? [];
+      if (errs.length) toast.warning(`Sincronizado con avisos: ${errs[0]}`);
+      else toast.success("Inventario sincronizado");
+      await load();
+    } catch (e) {
+      const m = e instanceof Error ? e.message : String(e);
+      setSyncResult(`Error: ${m}`);
+      toast.error("No se pudo sincronizar: " + m);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const deactivate = async (id: string) => {
     const { error } = await supabase.from("products").update({ active: false }).eq("id", id);
     if (error) {
@@ -223,19 +246,9 @@ export function InventoryPanel() {
             {relativeEs(counts.last)}
           </p>
           {stale && (
-            <>
-              <p className="text-xs text-destructive font-medium">
-                La sincronización parece detenida
-              </p>
-              <a
-                href={N8N_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-secondary inline-flex items-center gap-1 mt-1 underline"
-              >
-                Revisar en n8n <ExternalLink className="h-3 w-3" />
-              </a>
-            </>
+            <p className="text-xs text-destructive font-medium">
+              La sincronización parece detenida — usa “Sincronizar ahora”
+            </p>
           )}
         </MetricCard>
       </div>
@@ -247,11 +260,21 @@ export function InventoryPanel() {
           onChange={(e) => setQ(e.target.value)}
           className="sm:max-w-sm"
         />
+        <Button onClick={syncNow} disabled={syncing || loading}>
+          <CloudDownload className={`h-4 w-4 mr-2 ${syncing ? "animate-pulse" : ""}`} />
+          {syncing ? "Sincronizando..." : "Sincronizar ahora"}
+        </Button>
         <Button variant="outline" onClick={load} disabled={loading}>
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
           Refrescar
         </Button>
       </div>
+
+      {syncResult && (
+        <p className="text-xs text-muted-foreground bg-muted/50 border rounded-lg px-3 py-2">
+          {syncResult}
+        </p>
+      )}
 
       <Tabs defaultValue="low">
         <TabsList>

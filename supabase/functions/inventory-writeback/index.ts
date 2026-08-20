@@ -19,7 +19,9 @@ const corsHeaders = {
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
 const SHEET_ID = Deno.env.get('INVENTORY_SHEET_ID') || '13798JechMiinmFH_0jGnSuDJ6U5u5F6QYGmzCl6RY6E';
-const SHEET_GID = Number(Deno.env.get('INVENTORY_SHEET_GID') || '0');
+const ENV_GID = Number(Deno.env.get('INVENTORY_SHEET_GID') || '0');
+// gid real de la pestaña de inventario (0 no existe en esta hoja).
+const SHEET_GID = ENV_GID > 0 ? ENV_GID : 602957575;
 
 /* ---------- Google service-account auth (RS256 JWT) ---------- */
 function b64url(bytes: Uint8Array): string {
@@ -74,6 +76,14 @@ serve(async (req) => {
       const uc = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: `Bearer ${bearer}` } } });
       const { data: u } = await uc.auth.getUser();
       if (u?.user) { const { data: isAdmin } = await admin.rpc('has_role', { _user_id: u.user.id, _role: 'admin' }); authorized = !!isAdmin; }
+    }
+    // DB trigger authenticates with an internal token stored in the DB.
+    if (!authorized) {
+      const cronToken = req.headers.get('x-cron-token');
+      if (cronToken) {
+        const { data: t } = await admin.from('internal_tokens').select('token').eq('name', 'inventory_cron').maybeSingle();
+        if (t?.token && t.token === cronToken) authorized = true;
+      }
     }
     if (!authorized) return json({ error: 'No autorizado' }, 401);
 
