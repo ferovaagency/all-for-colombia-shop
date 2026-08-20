@@ -1,7 +1,7 @@
 /**
  * Política de envíos All For All
- * - El precio de cada producto YA INCLUYE el costo de envío.
- * - Cobertura a todo el país, sin flete adicional.
+ * - Cobertura a todo el país.
+ * - El costo del envío se calcula según la ciudad de destino al finalizar la compra.
  */
 
 export const FREE_SHIPPING_THRESHOLD = 200000;
@@ -61,14 +61,14 @@ export type ShippingStatus =
  * `city` vacío ⇒ todavía no sabemos a dónde va el pedido.
  */
 export function getShippingStatus(_subtotal: number, _city?: string | null): ShippingStatus {
-  // El precio ya incluye el envío: siempre "incluido", sin flete adicional
-  // ni umbrales, para cualquier ciudad del país.
+  // El flete se calcula según la ciudad de destino al finalizar la compra
+  // (cotización con la transportadora). Aquí solo mostramos el aviso.
   return {
-    kind: "free",
-    label: "INCLUIDO",
-    note: "El precio ya incluye el envío a todo el país.",
+    kind: "quote",
+    label: "Se calcula en el checkout",
+    note: "El costo del envío se calcula según tu ciudad al finalizar la compra.",
     missing: 0,
-    cost: 0,
+    cost: null,
   };
 }
 
@@ -80,6 +80,6 @@ function formatShort(value: number) {
   }).format(value);
 }
 
-export const FREE_SHIPPING_HEADLINE = "Envío incluido en el precio";
-export const FREE_SHIPPING_CITIES_TEXT = "Envíos a todo Colombia";
-export const FREE_SHIPPING_REST_TEXT = "El precio ya incluye el costo de envío.";
+export const FREE_SHIPPING_HEADLINE = "Envíos a todo Colombia";
+export const FREE_SHIPPING_CITIES_TEXT = "Cobertura nacional";
+export const FREE_SHIPPING_REST_TEXT = "El costo del envío se calcula según tu ciudad.";

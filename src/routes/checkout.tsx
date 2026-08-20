@@ -474,7 +474,7 @@ function CheckoutPage() {
     const summary = items
       .map((i) => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`)
       .join("\n");
-    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0, 8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\nEnvío: Incluido en el precio ✅\n\n${summary}\n\n*Total (envío incluido):* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
+    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0, 8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\nEnvío: Flete se calcula según la ciudad\n\n${summary}\n\n*Subtotal (sin flete):* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
     window.open(whatsappUrl(msg), "_blank");
     firePurchase(orderId, payment);
     clear();
@@ -830,7 +830,7 @@ function CheckoutPage() {
               <span className="text-primary">{formatCOP(subtotal)}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Envío incluido en el precio. No se cobra flete adicional.
+              El costo del envío se calcula según tu ciudad y se suma al total.
             </p>
           </div>
           {/* Consentimientos obligatorios antes de pagar (Ley 1581 / Ley 1480) */}

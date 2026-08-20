@@ -105,8 +105,8 @@ export function Footer() {
             <li className="flex items-start gap-2">
               <Truck className="h-4 w-4 mt-0.5 shrink-0" />
               <span>
-                El precio incluye el envío. Cobertura a todo Colombia, sin costo de envío
-                adicional.
+                Cobertura a todo Colombia. El costo del envío se calcula según tu ciudad al
+                finalizar la compra.
               </span>
             </li>
             <li className="flex items-start gap-2">

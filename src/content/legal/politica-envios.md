@@ -83,29 +83,23 @@ Estos tiempos podrán variar por razones logísticas, condiciones climáticas, r
 
 ---
 
-# **7. ENVÍO INCLUIDO EN EL PRECIO**
+# **7. COSTO DEL ENVÍO**
 
-Salvo indicación expresa en contrario publicada en el Sitio Web, el precio de venta de cada producto **YA INCLUYE el costo de envío** a todo el territorio nacional donde ALL FOR ALL tiene cobertura.
+El costo del envío **no está incluido en el precio del producto** y corre por cuenta del cliente, salvo promociones puntuales publicadas en el Sitio Web.
 
-En consecuencia, el cliente **no pagará ningún valor adicional por concepto de flete** al finalizar su compra.
+El valor del flete se **calcula automáticamente al finalizar la compra** con base en la ciudad de destino, el peso y las dimensiones del producto, a través de la transportadora, y se muestra al cliente **antes de pagar**, sumándose al total del pedido.
 
-Las zonas rurales o de difícil acceso referidas en la sección 2 podrán presentar excepciones logísticas, las cuales serán informadas al cliente antes del despacho.
+# **8. FACTORES DEL CÁLCULO**
 
-ALL FOR ALL podrá modificar esta condición para futuras compras sin previo aviso, publicando la versión vigente en el Sitio Web.
+El valor del transporte se determina teniendo en cuenta factores como:
 
----
+* ciudad de destino;  
+* peso y peso volumétrico;  
+* dimensiones del empaque;  
+* tipo de producto;  
+* empresa transportadora.
 
-# **8. COSTO DEL ENVÍO**
-
-Dado que el costo de envío se encuentra incluido en el precio del producto, el cliente **no asumirá cargos adicionales de transporte** para las entregas cubiertas por esta Política.
-
-Únicamente podrán generarse costos de transporte adicionales en los casos excepcionales previstos en esta Política, tales como:
-
-* zonas de difícil acceso o con restricciones logísticas (sección 2);  
-* reenvíos por direcciones incorrectas o incompletas (sección 12);  
-* nuevos intentos de entrega atribuibles al cliente (sección 15).
-
-Cualquier costo excepcional será informado al cliente antes del despacho del pedido.
+En zonas rurales o de difícil acceso (sección 2), reenvíos por direcciones incorrectas (sección 12) o nuevos intentos de entrega atribuibles al cliente (sección 15) podrán generarse costos adicionales, que se informarán antes del despacho.
 
 ---
 

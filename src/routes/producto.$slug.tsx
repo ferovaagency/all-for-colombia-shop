@@ -369,7 +369,7 @@ function ProductDetailPage() {
           </div>
 
           <div className="inline-flex items-center gap-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-            <Truck className="h-3.5 w-3.5" /> Envío incluido en el precio · a todo el país
+            <Truck className="h-3.5 w-3.5" /> Envíos a todo el país · flete calculado en el checkout
           </div>
 
           {/* Urgencia: el precio de oferta sólo se mantiene mientras corra el reloj */}
@@ -428,8 +428,9 @@ function ProductDetailPage() {
           {/* Advertencias legales obligatorias en la ficha de producto */}
           <div className="mt-4 space-y-1.5 text-[11px] text-muted-foreground leading-relaxed">
             <p>
-              Los precios publicados incluyen los impuestos aplicables y el costo de envío a todo el
-              país, salvo que se indique expresamente lo contrario.
+              Los precios publicados incluyen los impuestos aplicables, salvo que se indique
+              expresamente lo contrario. El costo del envío se calcula según la ciudad de destino
+              y se informa antes de finalizar la compra.
             </p>
             <p>
               Las imágenes son ilustrativas y pueden presentar ligeras variaciones respecto al

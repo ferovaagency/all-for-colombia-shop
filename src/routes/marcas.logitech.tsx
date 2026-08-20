@@ -33,7 +33,7 @@ export const Route = createFileRoute("/marcas/logitech")({
       {
         name: "description",
         content:
-          "Logitech y Logitech G en All For All: series MX, ERGO, Serie G, Racing y PRO. El precio incluye el envío y garantía oficial.",
+          "Logitech y Logitech G en All For All: series MX, ERGO, Serie G, Racing y PRO. Envíos a todo Colombia y garantía oficial.",
       },
       { property: "og:title", content: "Tienda Logitech — All For All" },
       {
@@ -613,7 +613,7 @@ function HeroCarousel({ slides }: { slides: { product: any; gradient: string; wo
 
 function TrustBar() {
   const items = [
-    { icon: <Truck className="h-6 w-6" />, label: "Envío incluido en el precio" },
+    { icon: <Truck className="h-6 w-6" />, label: "Envíos a todo Colombia" },
     { icon: <ShieldCheck className="h-6 w-6" />, label: "Compra segura" },
     { icon: <PackageCheck className="h-6 w-6" />, label: "Envíos nacionales" },
     { icon: <RefreshCw className="h-6 w-6" />, label: "Garantía de devolución" },

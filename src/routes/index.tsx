@@ -27,13 +27,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Compra tecnología premium, equipos para el hogar, gaming, monitores y soluciones corporativas. El precio incluye el envío a todo Colombia.",
+          "Compra tecnología premium, equipos para el hogar, gaming, monitores y soluciones corporativas. Envíos a todo Colombia.",
       },
       { property: "og:title", content: "All For All — Todo lo que necesitas, para todos" },
       {
         property: "og:description",
         content:
-          "Tu tienda online en Colombia: tecnología, hogar, equipos corporativos. El precio incluye el envío a todo el país.",
+          "Tu tienda online en Colombia: tecnología, hogar, equipos corporativos. Envíos a todo el país.",
       },
     ],
   }),
@@ -145,8 +145,8 @@ function HomePage() {
       <section className="bg-neutral-950 text-white">
         <div className="container mx-auto px-6 lg:px-10 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
           <TrustItem
-            label="Envío incluido"
-            desc="El precio ya incluye el envío a todo el país"
+            label="Envíos a todo el país"
+            desc="El flete se calcula según tu ciudad en el checkout"
             icon={<Truck className="h-4 w-4" />}
           />
           <TrustItem

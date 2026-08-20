@@ -664,7 +664,7 @@ function LiveState({ deal }: { deal: Deal }) {
         <div className="container mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
           <Perk
             icon={<Truck className="h-8 w-8" />}
-            title="Envío incluido en el precio"
+            title="Envíos a todo Colombia"
             text={`${FREE_SHIPPING_CITIES_TEXT}. ${FREE_SHIPPING_REST_TEXT}`}
           />
           <Perk
