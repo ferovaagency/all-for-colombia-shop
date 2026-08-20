@@ -221,19 +221,9 @@ export function InventoryPanel() {
             {relativeEs(counts.last)}
           </p>
           {stale && (
-            <>
-              <p className="text-xs text-destructive font-medium">
-                La sincronización parece detenida
-              </p>
-              <a
-                href={N8N_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-secondary inline-flex items-center gap-1 mt-1 underline"
-              >
-                Revisar en n8n <ExternalLink className="h-3 w-3" />
-              </a>
-            </>
+            <p className="text-xs text-destructive font-medium">
+              La sincronización parece detenida — usa “Sincronizar ahora”
+            </p>
           )}
         </MetricCard>
       </div>
@@ -245,11 +235,21 @@ export function InventoryPanel() {
           onChange={(e) => setQ(e.target.value)}
           className="sm:max-w-sm"
         />
+        <Button onClick={syncNow} disabled={syncing || loading}>
+          <CloudDownload className={`h-4 w-4 mr-2 ${syncing ? "animate-pulse" : ""}`} />
+          {syncing ? "Sincronizando..." : "Sincronizar ahora"}
+        </Button>
         <Button variant="outline" onClick={load} disabled={loading}>
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
           Refrescar
         </Button>
       </div>
+
+      {syncResult && (
+        <p className="text-xs text-muted-foreground bg-muted/50 border rounded-lg px-3 py-2">
+          {syncResult}
+        </p>
+      )}
 
       <Tabs defaultValue="low">
         <TabsList>
