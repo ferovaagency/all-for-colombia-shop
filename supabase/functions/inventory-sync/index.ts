@@ -16,7 +16,10 @@ const corsHeaders = {
 };
 
 const SHEET_ID = Deno.env.get('INVENTORY_SHEET_ID') || '13798JechMiinmFH_0jGnSuDJ6U5u5F6QYGmzCl6RY6E';
-const SHEET_GID = Deno.env.get('INVENTORY_SHEET_GID') || '0';
+// gid de la pestaña de inventario ("SKU / DESCRIPCION / Cantidad Disponible").
+// '0' no existe en esta hoja, así que se ignora y se usa la pestaña real.
+const ENV_GID = (Deno.env.get('INVENTORY_SHEET_GID') || '').trim();
+const SHEET_GID = ENV_GID && ENV_GID !== '0' ? ENV_GID : '602957575';
 const SHEET_SKU_RE = /^[A-ZÑ0-9.]{2,5}-\d{3,4}$/;
 const AUTO_MATCH_MIN = 90;
 const REVIEW_MIN = 72;
