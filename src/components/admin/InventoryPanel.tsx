@@ -13,9 +13,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { formatCOP } from "@/lib/cart";
-import { RefreshCw, AlertTriangle, CheckCircle2, PackageX, Clock, ExternalLink } from "lucide-react";
-
-const N8N_URL = "https://n8n-production-cf9e.up.railway.app/workflow/qevd4vWnVCLhR7SU";
+import { RefreshCw, AlertTriangle, CheckCircle2, PackageX, Clock, CloudDownload } from "lucide-react";
 
 type InvProduct = {
   id: string;
