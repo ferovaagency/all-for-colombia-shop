@@ -164,10 +164,15 @@ serve(async (req) => {
       .map((p) => ({ id: p.id, stock: 0, inv_estado: 'sin_inventario', inv_synced_at: nowIso }));
 
     const errors: string[] = [];
+    // UPDATE por id (no upsert: un upsert exigiría columnas NOT NULL como slug).
     const chunkUpsert = async (rows: any[], label: string) => {
-      for (let i = 0; i < rows.length; i += 300) {
-        const { error } = await admin.from('products').upsert(rows.slice(i, i + 300), { onConflict: 'id' });
-        if (error) errors.push(`${label}: ${error.message}`);
+      const seen = new Set<string>();
+      for (let i = 0; i < rows.length; i += 25) {
+        const slice = rows.slice(i, i + 25).filter((r) => !seen.has(r.id) && seen.add(r.id));
+        const res = await Promise.all(
+          slice.map(({ id, ...patch }: any) => admin.from('products').update(patch).eq('id', id)),
+        );
+        for (const r of res) if (r.error && errors.length < 10) errors.push(`${label}: ${r.error.message}`);
       }
     };
     await chunkUpsert(linkUpserts, 'link');
