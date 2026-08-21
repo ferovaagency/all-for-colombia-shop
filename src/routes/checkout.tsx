@@ -34,9 +34,8 @@ import { OpenpayLogo, AcceptedCardBrands } from "@/components/payments/PaymentBr
 import { startAddiCheckout } from "@/lib/addi.functions";
 import { syncToBrevo } from "@/lib/brevo";
 import { trackBeginCheckout, trackPurchase } from "@/lib/analytics";
-import { ShippingSummary } from "@/components/shop/ShippingNotice";
+import { ShippingSelector, type ShippingSelection } from "@/components/shop/ShippingSelector";
 import { useCartStock } from "@/hooks/use-cart-stock";
-import { MAIN_CITIES, OTHER_CITY_VALUE, getShippingStatus } from "@/lib/shipping";
 import {
   EMPTY_PURCHASE_CONSENT,
   PurchaseConsent,
@@ -151,8 +150,13 @@ function CheckoutPage() {
   });
   const [payment, setPayment] = useState<PaymentMethod>("addi");
   const [receipt, setReceipt] = useState<File | null>(null);
-
-  const shippingStatus = getShippingStatus(subtotal, form.city);
+  const [shipping, setShipping] = useState<ShippingSelection>({
+    city: "",
+    destinyDaneCode: "",
+    courier: null,
+  });
+  const freight = shipping.courier?.cost ?? 0;
+  const total = subtotal + freight;
 
   const [consent, setConsent] = useState<PurchaseConsentState>(EMPTY_PURCHASE_CONSENT);
   const consentComplete = consent.terms && consent.adult;
@@ -197,7 +201,7 @@ function CheckoutPage() {
   const firePurchase = (orderId: string, method: string, valueOverride?: number) => {
     trackPurchase({
       transaction_id: orderId,
-      value: valueOverride ?? subtotal,
+      value: valueOverride ?? total,
       items: purchaseItemsRef.current,
       payment_method: method,
     });
@@ -325,6 +329,10 @@ function CheckoutPage() {
       toast.error("Debes aceptar los Términos y Condiciones y declarar que eres mayor de edad");
       return;
     }
+    if (!shipping.destinyDaneCode || !shipping.courier) {
+      toast.error("Selecciona tu ciudad y la transportadora de envío");
+      return;
+    }
     setSubmitting(true);
 
     let receiptUrl: string | null = null;
@@ -354,15 +362,18 @@ function CheckoutPage() {
       status: "pending",
       items: items,
       subtotal,
-      total: subtotal,
+      total,
       payment_method: payment,
       receipt_url: receiptUrl,
       shipping_address: {
         address: form.address,
-        city: form.city,
+        city: shipping.city || form.city,
         notes: form.notes,
-        shipping_policy: shippingStatus.kind, // free | below | quote
-        shipping_note: shippingStatus.note,
+        destinyDaneCode: shipping.destinyDaneCode,
+        deliveryCompany: shipping.courier?.id ?? null,
+        deliveryCompanyName: shipping.courier?.name ?? null,
+        freight,
+        package: shipping.pkg ?? null,
       },
     });
 
@@ -474,7 +485,7 @@ function CheckoutPage() {
     const summary = items
       .map((i) => `• ${i.name} x${i.quantity} — ${formatCOP(i.price * i.quantity)}`)
       .join("\n");
-    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0, 8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${form.city}\nEnvío: Flete se calcula según la ciudad\n\n${summary}\n\n*Subtotal (sin flete):* ${formatCOP(subtotal)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
+    const msg = `🛒 *Nuevo pedido All For All*\n\nPedido: ${orderId.slice(0, 8)}\nCliente: ${form.name}\nTel: ${form.phone}\nCiudad: ${shipping.city || form.city}\nEnvío: ${shipping.courier?.name ?? "-"} (${formatCOP(freight)})\n\n${summary}\n\nSubtotal: ${formatCOP(subtotal)}\nFlete: ${formatCOP(freight)}\n*Total:* ${formatCOP(total)}\nMétodo: ${payment}${receiptUrl ? "\n📎 Comprobante adjunto" : ""}`;
     window.open(whatsappUrl(msg), "_blank");
     firePurchase(orderId, payment);
     clear();
@@ -560,36 +571,15 @@ function CheckoutPage() {
                 />
               </div>
               <div className="sm:col-span-2">
-                <Label>Ciudad *</Label>
-                <select
-                  value={
-                    MAIN_CITIES.some((c) => c.name === form.city) ? form.city : OTHER_CITY_VALUE
-                  }
-                  onChange={(e) =>
-                    setField("city", e.target.value === OTHER_CITY_VALUE ? "" : e.target.value)
-                  }
-                  required
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="">Selecciona tu ciudad</option>
-                  {MAIN_CITIES.map((c) => (
-                    <option key={c.slug} value={c.name}>
-                      {c.name}
-                    </option>
-                  ))}
-                  <option value={OTHER_CITY_VALUE}>Otra ciudad</option>
-                </select>
-                {!MAIN_CITIES.some((c) => c.name === form.city) && (
-                  <Input
-                    className="mt-2"
-                    value={form.city}
-                    onChange={(e) => setField("city", e.target.value)}
-                    placeholder="Escribe tu ciudad"
-                    required
-                    maxLength={80}
-                  />
-                )}
-                <ShippingSummary subtotal={subtotal} city={form.city} className="mt-3" />
+                <ShippingSelector
+                  items={items}
+                  subtotal={subtotal}
+                  value={shipping}
+                  onChange={(s) => {
+                    setShipping(s);
+                    setField("city", s.city);
+                  }}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Notas (opcional)</Label>
@@ -676,7 +666,7 @@ function CheckoutPage() {
             {payment === "openpay_card" && cardOrderId && (
               <OpenpayCardForm
                 orderId={cardOrderId}
-                amount={subtotal}
+                amount={total}
                 customer={{
                   name: form.name.trim().split(/\s+/)[0] || form.name,
                   last_name: form.name.trim().split(/\s+/).slice(1).join(" ") || form.name,
@@ -823,15 +813,21 @@ function CheckoutPage() {
               </div>
             ))}
           </div>
-          <ShippingSummary subtotal={subtotal} city={form.city} className="mb-4" />
-          <div className="border-t pt-4 mb-6">
-            <div className="flex justify-between text-lg font-bold">
-              <span>Total</span>
-              <span className="text-primary">{formatCOP(subtotal)}</span>
+          <div className="border-t pt-4 mb-6 space-y-1.5">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span>{formatCOP(subtotal)}</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              El costo del envío se calcula según tu ciudad y se suma al total.
-            </p>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Envío{shipping.courier ? ` (${shipping.courier.name})` : ""}</span>
+              <span>
+                {shipping.courier ? formatCOP(freight) : <span className="text-muted-foreground text-xs">Elige ciudad y transportadora</span>}
+              </span>
+            </div>
+            <div className="flex justify-between text-lg font-bold border-t pt-2 mt-1">
+              <span>Total</span>
+              <span className="text-primary">{formatCOP(total)}</span>
+            </div>
           </div>
           {/* Consentimientos obligatorios antes de pagar (Ley 1581 / Ley 1480) */}
           <PurchaseConsent value={consent} onChange={setConsent} className="mb-4" />
@@ -842,6 +838,7 @@ function CheckoutPage() {
               submitting ||
               hasStockIssues ||
               !consentComplete ||
+              !shipping.courier ||
               (requiresReceipt && !receipt) ||
               (payment === "openpay_card" && !!cardOrderId)
             }
@@ -852,15 +849,17 @@ function CheckoutPage() {
               ? "Ajusta las cantidades en el carrito"
               : submitting
                 ? "Procesando..."
-                : payment === "openpay_card" && cardOrderId
-                  ? "Ingresa los datos de tu tarjeta ↓"
-                  : !consentComplete
-                    ? "Acepta los términos para continuar"
-                    : requiresReceipt && !receipt
-                      ? "⬆️ Primero sube el comprobante"
-                      : payment === "openpay_card"
-                        ? "Continuar al pago con tarjeta →"
-                        : "Confirmar pedido →"}
+                : !shipping.courier
+                  ? "Elige ciudad y transportadora"
+                  : payment === "openpay_card" && cardOrderId
+                    ? "Ingresa los datos de tu tarjeta ↓"
+                    : !consentComplete
+                      ? "Acepta los términos para continuar"
+                      : requiresReceipt && !receipt
+                        ? "⬆️ Primero sube el comprobante"
+                        : payment === "openpay_card"
+                          ? "Continuar al pago con tarjeta →"
+                          : "Confirmar pedido →"}
           </Button>
 
           <p className="text-xs text-muted-foreground text-center mt-3">
