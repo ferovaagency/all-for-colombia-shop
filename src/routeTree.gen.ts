@@ -41,6 +41,10 @@ import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
 import { Route as MarcasLogitechRouteImport } from './routes/marcas.logitech'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
 import { Route as ApiAddiConfigRouteImport } from './routes/api/addi/config'
+import { Route as ApiMipaqueteCreateGuideRouteImport } from './routes/api/mipaquete/create-guide'
+import { Route as ApiMipaqueteLocationsRouteImport } from './routes/api/mipaquete/locations'
+import { Route as ApiMipaqueteQuoteRouteImport } from './routes/api/mipaquete/quote'
+import { Route as ApiMipaqueteTrackingRouteImport } from './routes/api/mipaquete/tracking'
 import { Route as ApiOpenpayBanksRouteImport } from './routes/api/openpay/banks'
 import { Route as ApiOpenpayBrebQrRouteImport } from './routes/api/openpay/breb-qr'
 import { Route as ApiOpenpayCardChargeRouteImport } from './routes/api/openpay/card-charge'
@@ -217,6 +221,26 @@ const ApiAddiConfigRoute = ApiAddiConfigRouteImport.update({
   path: '/api/addi/config',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMipaqueteCreateGuideRoute = ApiMipaqueteCreateGuideRouteImport.update({
+  id: '/api/mipaquete/create-guide',
+  path: '/api/mipaquete/create-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMipaqueteLocationsRoute = ApiMipaqueteLocationsRouteImport.update({
+  id: '/api/mipaquete/locations',
+  path: '/api/mipaquete/locations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMipaqueteQuoteRoute = ApiMipaqueteQuoteRouteImport.update({
+  id: '/api/mipaquete/quote',
+  path: '/api/mipaquete/quote',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMipaqueteTrackingRoute = ApiMipaqueteTrackingRouteImport.update({
+  id: '/api/mipaquete/tracking',
+  path: '/api/mipaquete/tracking',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiOpenpayBanksRoute = ApiOpenpayBanksRouteImport.update({
   id: '/api/openpay/banks',
   path: '/api/openpay/banks',
@@ -330,6 +354,10 @@ export interface FileRoutesByFullPath {
   '/distribuidores/': typeof DistribuidoresIndexRoute
   '/legal/': typeof LegalIndexRoute
   '/api/addi/config': typeof ApiAddiConfigRoute
+  '/api/mipaquete/create-guide': typeof ApiMipaqueteCreateGuideRoute
+  '/api/mipaquete/locations': typeof ApiMipaqueteLocationsRoute
+  '/api/mipaquete/quote': typeof ApiMipaqueteQuoteRoute
+  '/api/mipaquete/tracking': typeof ApiMipaqueteTrackingRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
@@ -376,6 +404,10 @@ export interface FileRoutesByTo {
   '/distribuidores': typeof DistribuidoresIndexRoute
   '/legal': typeof LegalIndexRoute
   '/api/addi/config': typeof ApiAddiConfigRoute
+  '/api/mipaquete/create-guide': typeof ApiMipaqueteCreateGuideRoute
+  '/api/mipaquete/locations': typeof ApiMipaqueteLocationsRoute
+  '/api/mipaquete/quote': typeof ApiMipaqueteQuoteRoute
+  '/api/mipaquete/tracking': typeof ApiMipaqueteTrackingRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
@@ -426,6 +458,10 @@ export interface FileRoutesById {
   '/distribuidores/': typeof DistribuidoresIndexRoute
   '/legal/': typeof LegalIndexRoute
   '/api/addi/config': typeof ApiAddiConfigRoute
+  '/api/mipaquete/create-guide': typeof ApiMipaqueteCreateGuideRoute
+  '/api/mipaquete/locations': typeof ApiMipaqueteLocationsRoute
+  '/api/mipaquete/quote': typeof ApiMipaqueteQuoteRoute
+  '/api/mipaquete/tracking': typeof ApiMipaqueteTrackingRoute
   '/api/openpay/banks': typeof ApiOpenpayBanksRoute
   '/api/openpay/breb-qr': typeof ApiOpenpayBrebQrRoute
   '/api/openpay/card-charge': typeof ApiOpenpayCardChargeRoute
@@ -477,6 +513,10 @@ export interface FileRouteTypes {
     | '/distribuidores/'
     | '/legal/'
     | '/api/addi/config'
+    | '/api/mipaquete/create-guide'
+    | '/api/mipaquete/locations'
+    | '/api/mipaquete/quote'
+    | '/api/mipaquete/tracking'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
@@ -523,6 +563,10 @@ export interface FileRouteTypes {
     | '/distribuidores'
     | '/legal'
     | '/api/addi/config'
+    | '/api/mipaquete/create-guide'
+    | '/api/mipaquete/locations'
+    | '/api/mipaquete/quote'
+    | '/api/mipaquete/tracking'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
@@ -572,6 +616,10 @@ export interface FileRouteTypes {
     | '/distribuidores/'
     | '/legal/'
     | '/api/addi/config'
+    | '/api/mipaquete/create-guide'
+    | '/api/mipaquete/locations'
+    | '/api/mipaquete/quote'
+    | '/api/mipaquete/tracking'
     | '/api/openpay/banks'
     | '/api/openpay/breb-qr'
     | '/api/openpay/card-charge'
@@ -615,6 +663,10 @@ export interface RootRouteChildren {
   ProductoSlugRoute: typeof ProductoSlugRoute
   DistribuidoresIndexRoute: typeof DistribuidoresIndexRoute
   ApiAddiConfigRoute: typeof ApiAddiConfigRoute
+  ApiMipaqueteCreateGuideRoute: typeof ApiMipaqueteCreateGuideRoute
+  ApiMipaqueteLocationsRoute: typeof ApiMipaqueteLocationsRoute
+  ApiMipaqueteQuoteRoute: typeof ApiMipaqueteQuoteRoute
+  ApiMipaqueteTrackingRoute: typeof ApiMipaqueteTrackingRoute
   ApiOpenpayBanksRoute: typeof ApiOpenpayBanksRoute
   ApiOpenpayBrebQrRoute: typeof ApiOpenpayBrebQrRoute
   ApiOpenpayCardChargeRoute: typeof ApiOpenpayCardChargeRoute
@@ -855,6 +907,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAddiConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/mipaquete/create-guide': {
+      id: '/api/mipaquete/create-guide'
+      path: '/api/mipaquete/create-guide'
+      fullPath: '/api/mipaquete/create-guide'
+      preLoaderRoute: typeof ApiMipaqueteCreateGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mipaquete/locations': {
+      id: '/api/mipaquete/locations'
+      path: '/api/mipaquete/locations'
+      fullPath: '/api/mipaquete/locations'
+      preLoaderRoute: typeof ApiMipaqueteLocationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mipaquete/quote': {
+      id: '/api/mipaquete/quote'
+      path: '/api/mipaquete/quote'
+      fullPath: '/api/mipaquete/quote'
+      preLoaderRoute: typeof ApiMipaqueteQuoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/mipaquete/tracking': {
+      id: '/api/mipaquete/tracking'
+      path: '/api/mipaquete/tracking'
+      fullPath: '/api/mipaquete/tracking'
+      preLoaderRoute: typeof ApiMipaqueteTrackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/openpay/banks': {
       id: '/api/openpay/banks'
       path: '/api/openpay/banks'
@@ -1042,6 +1122,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProductoSlugRoute: ProductoSlugRoute,
   DistribuidoresIndexRoute: DistribuidoresIndexRoute,
   ApiAddiConfigRoute: ApiAddiConfigRoute,
+  ApiMipaqueteCreateGuideRoute: ApiMipaqueteCreateGuideRoute,
+  ApiMipaqueteLocationsRoute: ApiMipaqueteLocationsRoute,
+  ApiMipaqueteQuoteRoute: ApiMipaqueteQuoteRoute,
+  ApiMipaqueteTrackingRoute: ApiMipaqueteTrackingRoute,
   ApiOpenpayBanksRoute: ApiOpenpayBanksRoute,
   ApiOpenpayBrebQrRoute: ApiOpenpayBrebQrRoute,
   ApiOpenpayCardChargeRoute: ApiOpenpayCardChargeRoute,
