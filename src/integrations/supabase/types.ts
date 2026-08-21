@@ -835,12 +835,14 @@ export type Database = {
           distributor_price: number | null
           faq: Json | null
           featured: boolean | null
+          height_cm: number | null
           id: string
           images: string[] | null
           info_fabricante: string | null
           inv_estado: string | null
           inv_sku: string | null
           inv_synced_at: string | null
+          length_cm: number | null
           meta_description: string | null
           meta_title: string | null
           name: string
@@ -856,8 +858,10 @@ export type Database = {
           stock: number | null
           updated_at: string | null
           warranty: string | null
+          weight_kg: number | null
           wholesale_min_quantity: number | null
           wholesale_price: number | null
+          width_cm: number | null
         }
         Insert: {
           active?: boolean | null
@@ -876,12 +880,14 @@ export type Database = {
           distributor_price?: number | null
           faq?: Json | null
           featured?: boolean | null
+          height_cm?: number | null
           id?: string
           images?: string[] | null
           info_fabricante?: string | null
           inv_estado?: string | null
           inv_sku?: string | null
           inv_synced_at?: string | null
+          length_cm?: number | null
           meta_description?: string | null
           meta_title?: string | null
           name: string
@@ -897,8 +903,10 @@ export type Database = {
           stock?: number | null
           updated_at?: string | null
           warranty?: string | null
+          weight_kg?: number | null
           wholesale_min_quantity?: number | null
           wholesale_price?: number | null
+          width_cm?: number | null
         }
         Update: {
           active?: boolean | null
@@ -917,12 +925,14 @@ export type Database = {
           distributor_price?: number | null
           faq?: Json | null
           featured?: boolean | null
+          height_cm?: number | null
           id?: string
           images?: string[] | null
           info_fabricante?: string | null
           inv_estado?: string | null
           inv_sku?: string | null
           inv_synced_at?: string | null
+          length_cm?: number | null
           meta_description?: string | null
           meta_title?: string | null
           name?: string
@@ -938,8 +948,10 @@ export type Database = {
           stock?: number | null
           updated_at?: string | null
           warranty?: string | null
+          weight_kg?: number | null
           wholesale_min_quantity?: number | null
           wholesale_price?: number | null
+          width_cm?: number | null
         }
         Relationships: [
           {
