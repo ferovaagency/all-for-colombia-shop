@@ -107,7 +107,8 @@ export async function getApiKey(): Promise<ApiKey> {
   let apiKey = text.trim().replace(/^"|"$/g, '');
   try {
     const parsed = JSON.parse(text);
-    apiKey = parsed?.apiKey ?? parsed?.token ?? parsed?.data ?? apiKey;
+    // Prod returns { "APIKey": "<jwt>" }; be lenient about the key casing.
+    apiKey = parsed?.APIKey ?? parsed?.apiKey ?? parsed?.apikey ?? parsed?.token ?? parsed?.data ?? apiKey;
   } catch {
     /* plain token string */
   }
