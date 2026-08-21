@@ -162,6 +162,34 @@ function AdminPage() {
     URL.revokeObjectURL(url);
   };
 
+  const exportProductsCSV = (rows: any[]) => {
+    if (!rows.length) { toast.info("No hay productos para exportar"); return; }
+    const headers = [
+      "id","sku","inv_sku","nombre","slug","categoria","marca","precio","precio_oferta",
+      "stock","activo","peso_kg","largo_cm","ancho_cm","alto_cm","inv_estado",
+    ];
+    const esc = (v: any) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [headers.join(",")];
+    for (const p of rows) {
+      lines.push([
+        p.id, p.sku, p.inv_sku, p.name, p.slug,
+        p.categories?.name ?? p.category ?? "", p.brands?.name ?? p.brand ?? "",
+        p.price, p.sale_price, p.stock, p.active ? "SI" : "NO",
+        p.weight_kg, p.length_cm, p.width_cm, p.height_cm, p.inv_estado,
+      ].map(esc).join(","));
+    }
+    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `productos-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const downloadReceipt = async (path: string) => {
     if (!path) return;
     const { data, error } = await supabase.storage
@@ -553,6 +581,12 @@ function AdminPage() {
 
 
         <TabsContent value="products" className="mt-6">
+          <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
+            <span className="text-sm text-muted-foreground">{products.length} productos</span>
+            <Button size="sm" variant="outline" onClick={() => exportProductsCSV(products)}>
+              <Download className="h-3.5 w-3.5 mr-1" /> Exportar a Excel/Sheets (CSV)
+            </Button>
+          </div>
           <div className="bg-card border rounded-xl overflow-x-auto">
             <Table>
               <TableHeader>
@@ -882,6 +916,10 @@ function EditProductDialog({
         sku: product.sku || "",
         active: !!product.active,
         description: product.description || "",
+        weight_kg: product.weight_kg ?? "",
+        length_cm: product.length_cm ?? "",
+        width_cm: product.width_cm ?? "",
+        height_cm: product.height_cm ?? "",
       });
     }
   }, [product]);
@@ -901,7 +939,12 @@ function EditProductDialog({
         sku: form.sku || null,
         active: !!form.active,
         description: form.description || null,
-      })
+        // Cast: estas columnas se agregan por migración; types.ts se regenera luego.
+        weight_kg: form.weight_kg === "" ? null : Number(form.weight_kg),
+        length_cm: form.length_cm === "" ? null : Number(form.length_cm),
+        width_cm: form.width_cm === "" ? null : Number(form.width_cm),
+        height_cm: form.height_cm === "" ? null : Number(form.height_cm),
+      } as any)
       .eq("id", product.id);
     setSaving(false);
     if (error) {
@@ -944,6 +987,30 @@ function EditProductDialog({
               value={form.sale_price ?? ""}
               onChange={(e) => setF("sale_price", e.target.value)}
             />
+          </div>
+          <div className="sm:col-span-2 border-t pt-3 mt-1">
+            <p className="text-sm font-semibold mb-1">📦 Envío (para cotizar con la transportadora)</p>
+            <p className="text-xs text-muted-foreground mb-3">
+              Peso y medidas del producto empacado. Si se dejan vacíos, se usa un estimado (0.5 kg, 15×15×15 cm).
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <Label>Peso (kg)</Label>
+                <Input type="number" min={0} step="0.01" value={form.weight_kg ?? ""} onChange={(e) => setF("weight_kg", e.target.value)} placeholder="0.5" />
+              </div>
+              <div>
+                <Label>Largo (cm)</Label>
+                <Input type="number" min={0} step="0.1" value={form.length_cm ?? ""} onChange={(e) => setF("length_cm", e.target.value)} placeholder="15" />
+              </div>
+              <div>
+                <Label>Ancho (cm)</Label>
+                <Input type="number" min={0} step="0.1" value={form.width_cm ?? ""} onChange={(e) => setF("width_cm", e.target.value)} placeholder="15" />
+              </div>
+              <div>
+                <Label>Alto (cm)</Label>
+                <Input type="number" min={0} step="0.1" value={form.height_cm ?? ""} onChange={(e) => setF("height_cm", e.target.value)} placeholder="15" />
+              </div>
+            </div>
           </div>
           <div className="sm:col-span-2">
             <Label>Descripción</Label>
