@@ -29,7 +29,20 @@ export const Route = createFileRoute("/api/public/openpay-webhook")({
 
         let event: any;
         try { event = await request.json(); } catch { return new Response("Invalid JSON", { status: 400 }); }
-        if (event?.type === "verification") return Response.json({ verification_code: event.verification_code });
+        if (event?.type === "verification") {
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            await supabaseAdmin.from("internal_tokens").upsert(
+              {
+                name: "openpay_webhook_verification",
+                token: event.verification_code,
+                created_at: new Date().toISOString(),
+              },
+              { onConflict: "name" },
+            );
+          } catch {}
+          return Response.json({ verification_code: event.verification_code });
+        }
 
         const orderId = event?.transaction?.order_id;
         const nextStatus = STATUS_MAP[event?.type as string];
