@@ -12,7 +12,7 @@ export const Route = createFileRoute("/api/openpay/public-config")({
         const merchantId = process.env.OPENPAY_MERCHANT_ID?.trim();
         const publicKey = process.env.OPENPAY_PUBLIC_KEY?.trim();
         const privateKey = process.env.OPENPAY_PRIVATE_KEY?.trim();
-        const sandbox = (process.env.OPENPAY_SANDBOX ?? "true").toLowerCase() !== "false";
+        const sandbox = process.env.OPENPAY_SANDBOX?.trim() === "true";
         if (!merchantId || !publicKey) {
           return Response.json(
             {
