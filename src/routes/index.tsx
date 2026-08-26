@@ -19,6 +19,8 @@ import {
 } from "@/lib/shipping";
 import videoJbl from "@/assets/video-productos-jbl.mp4.asset.json";
 
+const JBL_VIDEO_URL = `https://allforall.com.co${videoJbl.url}`;
+
 export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
   head: () => ({
@@ -51,7 +53,7 @@ const PROMO_BANNERS: PromoBannerItem[] = [
   {
     id: 2,
     image: posterJbl,
-    video: videoJbl.url,
+    video: JBL_VIDEO_URL,
     link: "/tienda?marca=jbl",
     alt: "JBL — Sonido premium",
     aspectRatio: "16/9",
