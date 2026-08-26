@@ -34,7 +34,7 @@ export function PromoBannerSlide({
   eager?: boolean;
 }) {
   const reducedMotion = usePrefersReducedMotion();
-  const showVideo = banner.video && !reducedMotion;
+  const showVideo = Boolean(active && banner.video && !reducedMotion);
 
   return (
     <Link
@@ -50,6 +50,7 @@ export function PromoBannerSlide({
           muted
           loop
           playsInline
+          preload="metadata"
           poster={banner.image}
           className="absolute inset-0 h-full w-full object-cover object-center"
         >
