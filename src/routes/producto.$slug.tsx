@@ -400,9 +400,13 @@ function ProductDetailPage() {
               href={inStock ? whatsappLink : availabilityLink}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() =>
-                trackWhatsAppClick("product_detail", { sku: product.sku, product_id: product.id })
-              }
+              onClick={() => {
+                if (!inStock) {
+                  logAvailabilityRequest(product, "product_detail");
+                  trackWhatsAppClick("consultar_disponibilidad", { item_name: product.name });
+                }
+                trackWhatsAppClick("product_detail", { sku: product.sku, product_id: product.id });
+              }}
               className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-md font-medium text-white shadow transition-colors"
               style={{ backgroundColor: "#25D366" }}
             >
