@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
 import { OfferCountdownBadge } from "@/components/shop/OfferCountdown";
 import { trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
+import { logAvailabilityRequest } from "@/lib/availability";
 import { ProductImage } from "@/components/shop/ProductImage";
 
 type Product = {
@@ -144,12 +145,16 @@ export function ProductCard({ product }: { product: Product }) {
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() =>
+                  onClick={() => {
+                    logAvailabilityRequest(product, "product_card");
+                    trackWhatsAppClick("consultar_disponibilidad", {
+                      item_name: product.name,
+                    });
                     trackWhatsAppClick("product_card_availability", {
                       sku: product.sku,
                       product_id: product.id,
-                    })
-                  }
+                    });
+                  }}
                 >
                   <MessageCircle className="h-4 w-4 mr-1" />
                   Consultar disponibilidad
