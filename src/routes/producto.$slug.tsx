@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { trackViewItem, trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
+import { logAvailabilityRequest } from "@/lib/availability";
 import { cn } from "@/lib/utils";
 import { getProductBySlug } from "@/lib/ssr-data.functions";
 import { LegalLink } from "@/components/legal/ConsentControls";

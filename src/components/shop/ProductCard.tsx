@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
 import { OfferCountdownBadge } from "@/components/shop/OfferCountdown";
 import { trackAddToCart, trackWhatsAppClick } from "@/lib/analytics";
+import { logAvailabilityRequest } from "@/lib/availability";
 import { ProductImage } from "@/components/shop/ProductImage";
 
 type Product = {
