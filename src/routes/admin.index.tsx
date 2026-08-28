@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +58,7 @@ function AdminPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [posts, setPosts] = useState<any[]>([]);
   const [editing, setEditing] = useState<any | null>(null);
+  const [productSearch, setProductSearch] = useState("");
   const [distributors, setDistributors] = useState<any[]>([]);
   const [credDist, setCredDist] = useState<any | null>(null);
   const [orderFilter, setOrderFilter] = useState<"all" | "retail" | "distributor">("all");
@@ -99,6 +100,14 @@ function AdminPage() {
   useEffect(() => {
     reload();
   }, []);
+
+  const filteredProducts = useMemo(() => {
+    const q = productSearch.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter((p: any) =>
+      (p.sku || "").toLowerCase().includes(q) || (p.name || "").toLowerCase().includes(q),
+    );
+  }, [products, productSearch]);
 
   const toggleActive = async (id: string, active: boolean) => {
     await supabase.from("products").update({ active: !active }).eq("id", id);
@@ -572,8 +581,18 @@ function AdminPage() {
 
         <TabsContent value="products" className="mt-6">
           <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
-            <span className="text-sm text-muted-foreground">{products.length} productos</span>
-            <Button size="sm" variant="outline" onClick={() => exportProductsCSV(products)}>
+            <Input
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder="Buscar por SKU o nombre…"
+              className="max-w-xs h-9"
+            />
+            <span className="text-sm text-muted-foreground">
+              {productSearch
+                ? `${filteredProducts.length} de ${products.length} productos`
+                : `${products.length} productos`}
+            </span>
+            <Button size="sm" variant="outline" onClick={() => exportProductsCSV(filteredProducts)}>
               <Download className="h-3.5 w-3.5 mr-1" /> Exportar a Excel/Sheets (CSV)
             </Button>
           </div>
@@ -590,10 +609,10 @@ function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((p) => (
+                {filteredProducts.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{p.name}</TableCell>
-                    <TableCell className="text-xs">{p.sku}</TableCell>
+                    <TableCell className="text-xs font-mono">{p.sku || "—"}</TableCell>
                     <TableCell>{formatCOP(Number(p.sale_price ?? p.price ?? 0))}</TableCell>
                     <TableCell>{p.stock}</TableCell>
                     <TableCell className="text-xs">{p.categories?.name || "—"}</TableCell>
@@ -621,10 +640,12 @@ function AdminPage() {
                     </TableCell>
                   </TableRow>
                 ))}
-                {products.length === 0 && (
+                {filteredProducts.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      Sin productos. Usa el generador de fichas para crear el primero.
+                      {productSearch
+                        ? `Ningún producto coincide con "${productSearch}"`
+                        : "Sin productos. Usa el generador de fichas para crear el primero."}
                     </TableCell>
                   </TableRow>
                 )}
