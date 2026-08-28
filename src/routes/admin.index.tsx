@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { WeeklyDealsAdmin } from "@/components/admin/WeeklyDealsAdmin";
 import { BulkInventoryUpload } from "@/components/admin/BulkInventoryUpload";
 import { InventoryPanel } from "@/components/admin/InventoryPanel";
+import { NewCategoryForm, NewBrandForm } from "@/components/admin/CategoryBrandForms";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin — All For All" }, { name: "robots", content: "noindex" }] }),
