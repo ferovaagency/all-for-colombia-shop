@@ -654,9 +654,11 @@ function AdminPage() {
         </TabsContent>
 
         <TabsContent value="categories" className="mt-6">
+          <NewCategoryForm categories={categories} onCreated={reload} />
           <SimpleList items={categories} cols={["name", "slug", "sort_order"]} />
         </TabsContent>
         <TabsContent value="brands" className="mt-6">
+          <NewBrandForm brands={brands} onCreated={reload} />
           <SimpleList items={brands} cols={["name", "slug"]} />
         </TabsContent>
         <TabsContent value="customers" className="mt-6">
