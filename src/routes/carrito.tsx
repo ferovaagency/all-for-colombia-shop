@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useCart, formatCOP } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
@@ -9,7 +10,7 @@ import { useCartStock } from "@/hooks/use-cart-stock";
 import { AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/carrito")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/carrito"), {
     meta: [
       { title: "Carrito — All For All" },
       // Sobrescribe el "index, follow" del head global de __root.tsx.

@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { getShopData } from "@/lib/ssr-data.functions";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,22 +39,34 @@ export const Route = createFileRoute("/tienda")({
     orden: typeof s.orden === "string" ? s.orden : undefined,
   }),
   loader: () => getShopData(),
-  head: () => ({
-    meta: [
-      { title: "Tienda — All For All" },
+  // El canonical de /tienda incluye categoria y marca cuando están presentes:
+  // el sitemap envía esas URLs con parámetro, así que declarar /tienda a secas
+  // lo contradecía. q, oferta y orden se dejan fuera a propósito: son
+  // variantes de la misma lista y deben consolidar en la URL sin ellos.
+  head: ({ match }) =>
+    withCanonical(
+      canonicalUrl("/tienda", {
+        categoria: match.search.categoria,
+        marca: match.search.marca,
+      }),
       {
-        name: "description",
-        content: "Catálogo completo de productos: tecnología, hogar, equipos corporativos y más.",
+        meta: [
+          { title: "Tienda — All For All" },
+          {
+            name: "description",
+            content:
+              "Catálogo completo de productos: tecnología, hogar, equipos corporativos y más.",
+          },
+          { property: "og:title", content: "Tienda online — Catálogo All For All" },
+          {
+            property: "og:description",
+            content:
+              "Explora el catálogo completo de All For All: tecnología, gaming, monitores, hogar y equipos corporativos con envío a toda Colombia.",
+          },
+          { property: "og:type", content: "website" },
+        ],
       },
-      { property: "og:title", content: "Tienda online — Catálogo All For All" },
-      {
-        property: "og:description",
-        content:
-          "Explora el catálogo completo de All For All: tecnología, gaming, monitores, hogar y equipos corporativos con envío a toda Colombia.",
-      },
-      { property: "og:type", content: "website" },
-    ],
-  }),
+    ),
   component: ShopPage,
 });
 

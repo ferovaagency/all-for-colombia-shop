@@ -14,7 +14,6 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { Toaster } from "@/components/ui/sonner";
-import { Canonical } from "@/components/seo/Canonical";
 import { COOKIE_PREFS_KEY, LEGAL_VERSIONS } from "@/lib/legal-versions";
 
 const AIAssistant = lazy(() =>
@@ -236,7 +235,6 @@ function RootComponent() {
   return (
     <>
       <ScrollToTop />
-      <Canonical />
       <div className="flex min-h-screen flex-col">
         <Header />
         <main className="flex-1">

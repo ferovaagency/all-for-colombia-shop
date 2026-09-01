@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import { z } from "zod";
 import { LegalLink, PrivacyNotice } from "@/components/legal/ConsentControls";
 
 export const Route = createFileRoute("/ventas-corporativas")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/ventas-corporativas"), {
     meta: [
       { title: "Ventas Corporativas — All For All" },
       {

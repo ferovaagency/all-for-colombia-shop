@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useState } from "react";
 import { CheckCircle2, Loader2, ScrollText, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { submitPrivacyRequest } from "@/lib/consent.functions";
 import { recordLegalAcceptance } from "@/lib/consent";
 
 export const Route = createFileRoute("/pqrs")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/pqrs"), {
     meta: [
       { title: "PQRS y Derechos de Datos Personales — All For All" },
       {

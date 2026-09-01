@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/marcas/logitech")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/marcas/logitech"), {
     meta: [
       {
         title: "Logitech y Logitech G en Colombia | All For All",

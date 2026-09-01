@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Search, Truck, ShieldCheck, Building2, Zap } from "lucide-react";
@@ -23,7 +24,7 @@ const JBL_VIDEO_URL = `https://allforall.com.co${videoJbl.url}`;
 
 export const Route = createFileRoute("/")({
   loader: () => getHomeData(),
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/"), {
     meta: [
       { title: "All For All — Tecnología, hogar y equipos en Colombia" },
       {

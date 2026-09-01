@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { toast } from "sonner";
 import { lookupGuestOrder } from "@/lib/public.functions";
 
 export const Route = createFileRoute("/mi-cuenta")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/mi-cuenta"), {
     meta: [
       { title: "Mi cuenta — All For All" },
       // Sobrescribe el "index, follow" del head global de __root.tsx.

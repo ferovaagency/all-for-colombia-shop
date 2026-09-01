@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import { CheckCircle2 } from "lucide-react";
 import { LegalLink, PrivacyNotice } from "@/components/legal/ConsentControls";
 
 export const Route = createFileRoute("/distribuidores/registro")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/distribuidores/registro"), {
     meta: [
       { title: "Solicitud de distribuidor — All For All" },
       {

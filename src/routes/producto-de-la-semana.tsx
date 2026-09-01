@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/producto-de-la-semana")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/producto-de-la-semana"), {
     meta: [
       { title: "Producto de la Semana — Hasta 80% OFF | All For All" },
       {

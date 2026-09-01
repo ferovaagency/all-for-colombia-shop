@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { canonicalUrl, withCanonical } from '@/lib/seo';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -62,7 +63,7 @@ function BlogIndex() {
 }
 
 export const Route = createFileRoute('/blog')({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/blog"), {
     meta: [
       { title: 'Blog — All For All' },
       { name: 'description', content: 'Guías, comparativas y tendencias en tecnología.' },

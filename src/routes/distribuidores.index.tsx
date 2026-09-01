@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Handshake, ShieldCheck, FileText, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/distribuidores/")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/distribuidores"), {
     meta: [
       { title: "Distribuidores — All For All" },
       { name: "description", content: "Conviértete en distribuidor autorizado de All For All. Precios mayoristas, catálogo exclusivo y soporte dedicado." },

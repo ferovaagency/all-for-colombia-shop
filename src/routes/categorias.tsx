@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useMemo } from "react";
 import { getCategoriesData } from "@/lib/ssr-data.functions";
 
 export const Route = createFileRoute("/categorias")({
   loader: () => getCategoriesData(),
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/categorias"), {
     meta: [
       { title: "Categorías — All For All" },
       { name: "description", content: "Explora todas nuestras categorías de productos." },

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { canonicalUrl, withCanonical } from '@/lib/seo';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -100,4 +101,11 @@ function BlogPost() {
   );
 }
 
-export const Route = createFileRoute('/blog/$slug')({ component: BlogPost });
+export const Route = createFileRoute('/blog/$slug')({
+  // El resto del meta de esta ruta se sigue escribiendo desde el cliente en el
+  // useEffect de abajo (depende de datos que hoy no pasan por un loader). El
+  // canonical sí se puede calcular solo con el slug, así que se emite desde el
+  // servidor.
+  head: ({ params }) => withCanonical(canonicalUrl(`/blog/${params.slug}`), {}),
+  component: BlogPost,
+});

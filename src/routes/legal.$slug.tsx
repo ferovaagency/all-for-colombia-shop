@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { ArrowLeft } from "lucide-react";
 import { LegalMarkdown, extractHeadings } from "@/components/legal/LegalMarkdown";
 import { LEGAL_CONTACT, LEGAL_DOCS, formatEffectiveDate, getLegalDoc } from "@/lib/legal";
@@ -10,9 +11,10 @@ export const Route = createFileRoute("/legal/$slug")({
     return { slug: doc.slug };
   },
   head: ({ params }) => {
+    const url = canonicalUrl(`/legal/${params.slug}`);
     const doc = getLegalDoc(params.slug);
     if (!doc) return {};
-    return {
+    return withCanonical(url, {
       meta: [
         { title: `${doc.title} — All For All` },
         { name: "description", content: doc.description },
@@ -21,7 +23,7 @@ export const Route = createFileRoute("/legal/$slug")({
         { property: "og:type", content: "article" },
         { name: "robots", content: "index, follow" },
       ],
-    };
+    });
   },
   component: LegalDocPage,
 });

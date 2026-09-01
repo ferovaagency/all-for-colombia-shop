@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCart, formatCOP, whatsappUrl } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
@@ -64,7 +65,7 @@ const QR_TOTAL_SECONDS = 10 * 60;
 const POLL_INTERVAL_MS = 30_000;
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/checkout"), {
     meta: [
       { title: "Checkout — All For All" },
       // Sobrescribe el "index, follow" del head global de __root.tsx.

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import {
   MapPin,
   Truck,
@@ -12,7 +13,7 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/nosotros")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/nosotros"), {
     meta: [
       { title: "Sobre nosotros — All For All" },
       {

@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { ArrowUpRight, FileText, ShieldCheck } from "lucide-react";
 import { LEGAL_CONTACT, LEGAL_DOCS, formatEffectiveDate } from "@/lib/legal";
 import { Button } from "@/components/ui/button";
 import { openCookiePreferences } from "@/lib/consent";
 
 export const Route = createFileRoute("/legal/")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/legal"), {
     meta: [
       { title: "Centro Legal — All For All" },
       {

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +19,7 @@ const schema = z.object({
 });
 
 export const Route = createFileRoute("/contacto")({
-  head: () => ({
+  head: () => withCanonical(canonicalUrl("/contacto"), {
     meta: [
       { title: "Contacto — All For All" },
       {

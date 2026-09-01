@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -27,9 +28,10 @@ import { ProductImage } from "@/components/shop/ProductImage";
 
 export const Route = createFileRoute("/producto/$slug")({
   loader: ({ params }) => getProductBySlug({ data: { slug: params.slug } }),
-  head: ({ loaderData }) => {
+  head: ({ params, loaderData }) => {
+    const url = canonicalUrl(`/producto/${params.slug}`);
     const p: any = (loaderData as any)?.product;
-    if (!p) return { meta: [{ title: "Producto — All For All" }] };
+    if (!p) return withCanonical(url, { meta: [{ title: "Producto — All For All" }] });
     const title = p.meta_title || `${p.name} — All For All`;
     const description =
       p.meta_description ||
@@ -47,7 +49,7 @@ export const Route = createFileRoute("/producto/$slug")({
       meta.push({ property: "og:image", content: image });
       meta.push({ name: "twitter:image", content: image });
     }
-    return { meta };
+    return withCanonical(url, { meta });
   },
   component: ProductDetailPage,
 });
