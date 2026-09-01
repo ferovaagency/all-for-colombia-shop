@@ -228,21 +228,49 @@ function ProductDetailPage() {
 
   const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
 
+  // Un único bloque Product: antes había dos (uno con offers y otro con
+  // review/aggregateRating) y Google podía quedarse con el equivocado.
+  // description e image se omiten cuando están vacíos en vez de emitirse como
+  // "" o []: hay productos sin descripción y sin imagen, y una clave vacía es
+  // peor que una clave ausente.
+  const schemaDescription = product.short_description || product.description || "";
+  // Fin del año siguiente: fecha razonable y estable para priceValidUntil.
+  const priceValidUntil = `${new Date().getFullYear() + 1}-12-31`;
+
   const jsonLd = {
     "@context": "https://schema.org/",
     "@type": "Product",
     name: product.name,
-    description: product.short_description || product.description || "",
+    ...(schemaDescription ? { description: schemaDescription } : {}),
     sku: product.sku || undefined,
-    image: images,
+    ...(images.length > 0 ? { image: images } : {}),
     brand: product.brands?.name ? { "@type": "Brand", name: product.brands.name } : undefined,
     offers: {
       "@type": "Offer",
       price: finalPrice,
       priceCurrency: "COP",
       availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+      priceValidUntil,
       url: productUrl,
     },
+    ...(reviews.length > 0
+      ? {
+          review: reviews.map((r) => ({
+            "@type": "Review",
+            author: { "@type": "Person", name: r.nombre_completo },
+            reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
+            reviewBody: r.contenido,
+          })),
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: (
+              reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
+            ).toFixed(1),
+            reviewCount: reviews.length,
+          },
+        }
+      : {}),
   };
 
   return (
@@ -732,32 +760,8 @@ function ProductDetailPage() {
         />
       )}
 
-      {/* JSON-LD Reviews */}
-      {reviews.length > 0 && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Product",
-              name: product.name,
-              review: reviews.map((r) => ({
-                "@type": "Review",
-                author: { "@type": "Person", name: r.nombre_completo },
-                reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
-                reviewBody: r.contenido,
-              })),
-              aggregateRating: {
-                "@type": "AggregateRating",
-                ratingValue: (
-                  reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
-                ).toFixed(1),
-                reviewCount: reviews.length,
-              },
-            }),
-          }}
-        />
-      )}
+      {/* review y aggregateRating viven ahora en el bloque Product único de
+          arriba, junto con offers. */}
     </div>
   );
 }
