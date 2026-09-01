@@ -64,7 +64,14 @@ const QR_TOTAL_SECONDS = 10 * 60;
 const POLL_INTERVAL_MS = 30_000;
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — All For All" }] }),
+  head: () => ({
+    meta: [
+      { title: "Checkout — All For All" },
+      // Sobrescribe el "index, follow" del head global de __root.tsx.
+      { name: "robots", content: "noindex, follow" },
+      { name: "googlebot", content: "noindex, follow" },
+    ],
+  }),
   component: CheckoutPage,
 });
 

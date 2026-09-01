@@ -9,7 +9,14 @@ import { toast } from "sonner";
 import { lookupGuestOrder } from "@/lib/public.functions";
 
 export const Route = createFileRoute("/mi-cuenta")({
-  head: () => ({ meta: [{ title: "Mi cuenta — All For All" }] }),
+  head: () => ({
+    meta: [
+      { title: "Mi cuenta — All For All" },
+      // Sobrescribe el "index, follow" del head global de __root.tsx.
+      { name: "robots", content: "noindex, follow" },
+      { name: "googlebot", content: "noindex, follow" },
+    ],
+  }),
   component: MyAccountPage,
 });
 

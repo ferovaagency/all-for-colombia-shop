@@ -9,7 +9,14 @@ import { useCartStock } from "@/hooks/use-cart-stock";
 import { AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/carrito")({
-  head: () => ({ meta: [{ title: "Carrito — All For All" }] }),
+  head: () => ({
+    meta: [
+      { title: "Carrito — All For All" },
+      // Sobrescribe el "index, follow" del head global de __root.tsx.
+      { name: "robots", content: "noindex, follow" },
+      { name: "googlebot", content: "noindex, follow" },
+    ],
+  }),
   component: CartPage,
 });
 
