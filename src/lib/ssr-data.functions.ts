@@ -83,6 +83,20 @@ export const getShopData = createServerFn({ method: "GET" }).handler(async () =>
   }
 });
 
+export const getCategoriesData = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("categories_with_products" as any)
+      .select("*")
+      .order("sort_order");
+    return { categories: (data as any[]) ?? [] };
+  } catch (e) {
+    console.error("getCategoriesData failed:", e);
+    return { categories: [] as any[] };
+  }
+});
+
 export const getProductBySlug = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ slug: z.string().min(1).max(200) }).parse(input))
   .handler(async ({ data }) => {

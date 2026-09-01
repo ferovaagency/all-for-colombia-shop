@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
+import { getCategoriesData } from "@/lib/ssr-data.functions";
 
 export const Route = createFileRoute("/categorias")({
+  loader: () => getCategoriesData(),
   head: () => ({
     meta: [
       { title: "Categorías — All For All" },
@@ -25,31 +26,24 @@ const ICONS: Record<string, string> = {
 };
 
 function CategoriesPage() {
-  const [parents, setParents] = useState<any[]>([]);
-  const [children, setChildren] = useState<Record<string, any[]>>({});
-  const [counts, setCounts] = useState<Record<string, number>>({});
+  // Los datos llegan del loader (servidor), así que el HTML servido ya trae
+  // los enlaces de categoría. Antes se pedían en un useEffect del navegador y
+  // el HTML salía vacío.
+  const { categories } = Route.useLoaderData();
 
-  useEffect(() => {
-    (async () => {
-      const { data: cats } = await supabase
-        .from("categories_with_products" as any)
-        .select("*")
-        .order("sort_order");
-      const all = ((cats as any) || []);
-      setParents(all.filter((c: any) => !c.parent_id));
-      const ch: Record<string, any[]> = {};
-      const cnt: Record<string, number> = {};
-      all.forEach((c: any) => {
-        if (c.parent_id) {
-          ch[c.parent_id] = ch[c.parent_id] || [];
-          ch[c.parent_id].push(c);
-        }
-        if (typeof c.product_count === "number") cnt[c.id] = c.product_count;
-      });
-      setChildren(ch);
-      setCounts(cnt);
-    })();
-  }, []);
+  const { parents, children, counts } = useMemo(() => {
+    const all: any[] = categories ?? [];
+    const ch: Record<string, any[]> = {};
+    const cnt: Record<string, number> = {};
+    all.forEach((c: any) => {
+      if (c.parent_id) {
+        ch[c.parent_id] = ch[c.parent_id] || [];
+        ch[c.parent_id].push(c);
+      }
+      if (typeof c.product_count === "number") cnt[c.id] = c.product_count;
+    });
+    return { parents: all.filter((c: any) => !c.parent_id), children: ch, counts: cnt };
+  }, [categories]);
 
   return (
     <div className="container mx-auto px-4 py-12">
