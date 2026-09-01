@@ -254,7 +254,11 @@ function ProductDetailPage() {
       availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       itemCondition: "https://schema.org/NewCondition",
       priceValidUntil,
-      url: productUrl,
+      // No usa productUrl porque ese depende de window y sale como "" en el
+      // HTML servido, que es justamente el que leen los crawlers. Se calcula
+      // con el mismo canonicalUrl que emite el canonical de la ruta, así el
+      // schema y el canonical nunca se contradicen.
+      url: canonicalUrl(`/producto/${slug}`),
     },
     ...(reviews.length > 0
       ? {
