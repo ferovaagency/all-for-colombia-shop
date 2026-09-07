@@ -98,6 +98,16 @@ function AdminPage() {
     setDistributors(dist.distributors || []);
   };
 
+  // Recarga solo el catálogo (útil tras sincronizar inventario o al volver a la pestaña).
+  const reloadProducts = async () => {
+    const { data } = await supabase
+      .from("products")
+      .select("*, categories(name), brands(name)")
+      .order("created_at", { ascending: false })
+      .range(0, 4999);
+    if (data) setProducts(data);
+  };
+
   useEffect(() => {
     reload();
   }, []);
