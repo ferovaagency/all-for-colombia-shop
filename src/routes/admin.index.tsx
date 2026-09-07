@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, Handshake, Check, X as XIcon, Send, Download } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
@@ -809,7 +810,7 @@ function AdminPage() {
         </TabsContent>
       </Tabs>
 
-      <EditProductDialog product={editing} onClose={() => setEditing(null)} onSaved={reload} />
+      <EditProductDialog product={editing} categories={categories} brands={brands} onClose={() => setEditing(null)} onSaved={reload} />
       <DistributorCredentialsDialog
         distributor={credDist}
         onClose={() => setCredDist(null)}
@@ -820,12 +821,19 @@ function AdminPage() {
 }
 
 
+const NO_CATEGORY = "__no_category__";
+const NO_BRAND = "__no_brand__";
+
 function EditProductDialog({
   product,
+  categories,
+  brands,
   onClose,
   onSaved,
 }: {
   product: any | null;
+  categories: any[];
+  brands: any[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -846,6 +854,8 @@ function EditProductDialog({
         length_cm: product.length_cm ?? "",
         width_cm: product.width_cm ?? "",
         height_cm: product.height_cm ?? "",
+        category_id: product.category_id ?? NO_CATEGORY,
+        brand_id: product.brand_id ?? NO_BRAND,
       });
     }
   }, [product]);
@@ -870,6 +880,8 @@ function EditProductDialog({
         length_cm: form.length_cm === "" ? null : Number(form.length_cm),
         width_cm: form.width_cm === "" ? null : Number(form.width_cm),
         height_cm: form.height_cm === "" ? null : Number(form.height_cm),
+        category_id: form.category_id === NO_CATEGORY ? null : form.category_id,
+        brand_id: form.brand_id === NO_BRAND ? null : form.brand_id,
       } as any)
       .eq("id", product.id);
     setSaving(false);
@@ -913,6 +925,30 @@ function EditProductDialog({
               value={form.sale_price ?? ""}
               onChange={(e) => setF("sale_price", e.target.value)}
             />
+          </div>
+          <div>
+            <Label>Categoría</Label>
+            <Select value={form.category_id ?? NO_CATEGORY} onValueChange={(v) => setF("category_id", v)}>
+              <SelectTrigger><SelectValue placeholder="Sin categoría" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_CATEGORY}>Sin categoría</SelectItem>
+                {[...categories].sort((a, b) => (a.name || "").localeCompare(b.name || "")).map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Marca</Label>
+            <Select value={form.brand_id ?? NO_BRAND} onValueChange={(v) => setF("brand_id", v)}>
+              <SelectTrigger><SelectValue placeholder="Sin marca" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_BRAND}>Sin marca</SelectItem>
+                {[...brands].sort((a, b) => (a.name || "").localeCompare(b.name || "")).map((b) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="sm:col-span-2 border-t pt-3 mt-1">
             <p className="text-sm font-semibold mb-1">📦 Envío (para cotizar con la transportadora)</p>
