@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788815477189,
+      "tag": "0000_sync_inventario_no_toca_activo",
+      "breakpoints": true
+    }
+  ]
+}
