@@ -11,6 +11,7 @@ type RealOrder = {
 export function SocialProofPopup() {
   const [item, setItem] = useState<RealOrder | null>(null);
   const [orders, setOrders] = useState<RealOrder[]>([]);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,41 +37,71 @@ export function SocialProofPopup() {
   useEffect(() => {
     if (orders.length === 0) return;
     let i = 0;
+    let hideTimeout: ReturnType<typeof setTimeout> | undefined;
     const show = () => {
       setItem(orders[i % orders.length]);
       i++;
-      setTimeout(() => setItem(null), 6000);
+      // Espera un frame para que la animación de entrada se vea
+      requestAnimationFrame(() => setVisible(true));
+      hideTimeout = setTimeout(() => {
+        setVisible(false);
+        // Quita el elemento del DOM cuando termina la animación de salida
+        setTimeout(() => setItem(null), 250);
+      }, 6000);
     };
     const initial = setTimeout(show, 12000);
     const interval = setInterval(show, 45000);
     return () => {
       clearTimeout(initial);
       clearInterval(interval);
+      if (hideTimeout) clearTimeout(hideTimeout);
     };
   }, [orders]);
 
   if (!item) return null;
 
+  const dismiss = () => {
+    setVisible(false);
+    setTimeout(() => setItem(null), 200);
+  };
+
   return (
-    <div className="fixed bottom-[calc(max(1.5rem,env(safe-area-inset-bottom))+4.5rem)] left-3 z-40 max-w-[calc(100vw-1.5rem)] animate-in slide-in-from-bottom-4 fade-in duration-150 sm:left-4 sm:max-w-xs">
-      <div className="bg-card border shadow-lg rounded-xl p-3 pr-8 flex gap-3 items-start relative">
+    <div
+      role="status"
+      aria-live="polite"
+      className={`fixed left-3 bottom-3 z-40 w-[min(20rem,calc(100vw-1.5rem))] sm:left-4 sm:bottom-4 transition-all duration-200 ease-out ${
+        visible
+          ? "translate-y-0 opacity-100"
+          : "translate-y-3 opacity-0 pointer-events-none"
+      }`}
+    >
+      <div className="relative flex items-center gap-3 rounded-xl border bg-card/95 p-3 pr-10 shadow-xl backdrop-blur-sm">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-secondary/10 text-secondary">
+          <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1 text-xs leading-snug">
+          <p className="text-foreground">
+            <span className="font-semibold">{item.customerFirstName}</span>
+            {item.city ? ` desde ${item.city}` : ""} acaba de comprar
+          </p>
+          <p
+            className="mt-0.5 text-muted-foreground overflow-hidden"
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+            }}
+          >
+            {item.productName}
+          </p>
+        </div>
         <button
-          onClick={() => setItem(null)}
-          className="absolute right-0 top-0 grid size-11 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+          onClick={dismiss}
+          className="absolute right-1 top-1 grid size-8 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
           aria-label="Cerrar aviso de compra reciente"
         >
           <X className="size-4" aria-hidden="true" />
         </button>
-        <div className="h-9 w-9 rounded-full bg-secondary/10 text-secondary flex items-center justify-center flex-shrink-0">
-          <ShoppingBag className="h-4 w-4" />
-        </div>
-        <div className="text-xs leading-relaxed">
-          <p>
-            <span className="font-semibold">{item.customerFirstName}</span>
-            {item.city ? ` desde ${item.city}` : ""} acaba de comprar
-          </p>
-          <p className="text-muted-foreground truncate">{item.productName}</p>
-        </div>
       </div>
     </div>
   );
