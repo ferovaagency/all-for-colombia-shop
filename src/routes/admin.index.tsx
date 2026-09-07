@@ -911,6 +911,12 @@ function EditProductDialog({
           <DialogTitle>Editar producto</DialogTitle>
         </DialogHeader>
         <div className="grid sm:grid-cols-2 gap-4">
+          {product?.inv_sku && (
+            <p className="sm:col-span-2 text-xs bg-muted rounded-md p-2 text-muted-foreground">
+              Este producto está vinculado al inventario ({product.inv_sku}): el stock y el precio se
+              actualizan desde la hoja cada 15 minutos. Los demás cambios se mantienen.
+            </p>
+          )}
           <div className="sm:col-span-2">
             <Label>Nombre</Label>
             <Input value={form.name || ""} onChange={(e) => setF("name", e.target.value)} />
