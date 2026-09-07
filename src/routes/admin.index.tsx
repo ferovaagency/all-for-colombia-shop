@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2, ExternalLink, Sparkles, Eye, Pencil, AlertCircle, Handshake, Check, X as XIcon, Send, Download } from "lucide-react";
 import { WHATSAPP_NUMBER } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
