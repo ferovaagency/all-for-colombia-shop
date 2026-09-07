@@ -16,7 +16,7 @@ import { formatCOP, whatsappUrl } from "@/lib/cart";
 import { toast } from "sonner";
 import { WeeklyDealsAdmin } from "@/components/admin/WeeklyDealsAdmin";
 import { InventoryPanel } from "@/components/admin/InventoryPanel";
-import { NewCategoryForm, NewBrandForm } from "@/components/admin/CategoryBrandForms";
+import { NewCategoryForm, NewBrandForm, EditableCategoryList, EditableBrandList } from "@/components/admin/CategoryBrandForms";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin — All For All" }, { name: "robots", content: "noindex" }] }),
@@ -661,11 +661,11 @@ function AdminPage() {
 
         <TabsContent value="categories" className="mt-6">
           <NewCategoryForm categories={categories} onCreated={reload} />
-          <SimpleList items={categories} cols={["name", "slug", "sort_order"]} />
+          <EditableCategoryList categories={categories} onSaved={reload} />
         </TabsContent>
         <TabsContent value="brands" className="mt-6">
           <NewBrandForm brands={brands} onCreated={reload} />
-          <SimpleList items={brands} cols={["name", "slug"]} />
+          <EditableBrandList brands={brands} onSaved={reload} />
         </TabsContent>
         <TabsContent value="customers" className="mt-6">
           <SimpleList items={customers} cols={["name", "email", "phone", "company"]} />
