@@ -1,44 +1,90 @@
 Imágenes del microsite de Esenses  —  /marcas/esenses
 =====================================================
 
-Estos archivos NO están en el repo todavía. La página está construida para
-funcionar sin ellos: cada <img> tiene onError y cae a un fondo sólido o a un
-degradado de marca (negro / grafito / metalizado). No se importan por
-`import`, se referencian por URL pública, para que un archivo faltante no
-rompa la compilación.
+Son 17 nombres de archivo, salidos de 16 imágenes distintas del home oficial
+(MH-10-1.webp se usa en dos sitios). NINGUNO está en el repo todavía.
+La página está construida para funcionar sin ellos: cada <img> tiene onError y, si el archivo falta, la imagen
+se desmonta sola y queda el degradado o el fondo sólido de marca (negro,
+grafito, metalizado). No se importan por `import`, se referencian por URL
+pública, para que un archivo faltante no rompa la compilación.
 
-Cuando se consigan los archivos, se dejan aquí con EXACTAMENTE estos nombres:
+Origen: home oficial de https://esenses.com.co/ — solo las imágenes de marca,
+banner y ambiente. Las que en el sitio oficial llevan nombre de EAN
+(7707409…) son fotos de ficha de producto y NO se usan aquí.
 
-  logo.webp
-      Logotipo de Esenses en blanco o negativo, fondo transparente.
-      Origen: manual de marca de Esenses o el logo del header de
-      https://esenses.com.co/
-      Uso: barra de marca sobre el hero. Alto recomendado ~80 px.
+Cuando se consigan los archivos, se dejan en esta carpeta con EXACTAMENTE
+estos nombres:
 
-  hero-1.jpg
-      Primer banner del carrusel principal, a todo el ancho.
-      Origen: slider del home de https://esenses.com.co/
-      Uso: slide 1 del hero. Recomendado 2400x900, foco visual a la derecha
-      (el texto va a la izquierda).
 
-  hero-2.webp
-      Segundo banner del carrusel principal.
-      Origen: slider del home de https://esenses.com.co/
-      Mismas medidas que hero-1.
+HERO — carrusel de 3 banners a todo el ancho
+--------------------------------------------
+  hero-1.jpg          ← Banner-esenses-01-02.jpg
+      Slide 1. Lleva encima el eslogan y el botón COMPRA AHORA.
+  hero-2.jpg          ← 01.jpg
+      Slide 2 ("Sonido y estilo en cada detalle").
+  hero-3.jpg          ← 02-2.jpg
+      Slide 3 ("Tecnología que acompaña tu ritmo").
 
-  banner-parlantes.webp
-      Banner promocional grande de la línea de parlantes / audio.
-      Origen: sección promocional del home de https://esenses.com.co/
+  Recomendado 2400x900. El texto va a la izquierda con un velo oscuro, así
+  que el foco visual de la foto conviene que quede a la derecha.
+
+
+LOGO
+----
+  logo.webp           ← logonuevo.webp
+      Logotipo de Esenses, fondo transparente, versión clara o negativo.
+      Uso: encima del hero. Alto de render ~40 px, subir a 2x (~80 px).
+      Si falta, el hero escribe "ESENSES" en tipografía de marca.
+
+
+BANNER PROMOCIONAL — línea de audio
+-----------------------------------
+  banner-parlantes.webp   ← bannerspeaker-scaled.webp
+      Banner grande de parlantes y accesorios de audio.
       Recomendado 2000x700.
 
-  destacado-diadema.webp    Audífonos de diadema (colección "Audífonos").
-  destacado-parlante.webp   Parlante Bluetooth (colección "Parlantes").
-  destacado-tws.webp        Audífonos inalámbricos TWS (colección "Audífonos").
-  destacado-reloj.webp      Reloj inteligente (colección "Relojes inteligentes").
-      Origen: fichas de producto o banners de categoría de esenses.com.co.
-      Uso: mosaico "Colecciones Esenses". Recomendado cuadrado o 4:5,
-      mínimo 800 px de lado.
+
+MOSAICO DE COLECCIONES — 6 fichas, siempre visibles
+---------------------------------------------------
+  destacado-diadema.webp    ← diadema.webp        → "Audífonos de diadema"
+  destacado-tws.webp        ← eb-tws-91.webp      → "Audífonos TWS"
+  destacado-parlante.webp   ← speaker.webp        → "Parlantes"
+  destacado-reloj.webp      ← SW-IRON-NEGRO.webp  → "Relojes inteligentes"
+  destacado-cables.webp     ← CA-010.webp         → "Cables y cargadores"
+  destacado-audio-pro.webp  ← MH-10-1.webp        → "Audio profesional"
+
+      Se recortan en 4:5. Mínimo 800 px de lado. Cada ficha enlaza a
+      /tienda?marca=esenses.
+
+
+SECCIÓN "EL MUNDO ESENSES" — fotos de ambiente
+----------------------------------------------
+  ambiente-1.webp     ← DSC0077.webp      → tarjeta "Para tu día"
+  ambiente-2.webp     ← DSC0083.webp      → tarjeta "Para tu espacio"
+
+      Fotos de estilo de vida, a lo ancho, con el eslogan de la marca encima.
+      Se recortan en object-cover sobre un bloque de mínimo 420 px de alto:
+      conviene que el sujeto quede centrado y el texto entra abajo a la
+      izquierda sobre un degradado negro. Recomendado 1600x1200 o más.
+
+
+SECCIÓN "PRODUCTOS INSIGNIA" — dos vistas por producto
+------------------------------------------------------
+  insignia-mh10-a.webp      ← MH-10-1.webp     → Diadema MH-10, vista 1
+  insignia-mh10-b.webp      ← MH-10-4.webp     → Diadema MH-10, vista 2
+  insignia-hp10000-a.jpg    ← HP-10000.jpg     → Parlante HP-10000, vista 1
+  insignia-hp10000-b.jpg    ← HP-10000.1.jpg   → Parlante HP-10000, vista 2
+
+      Las dos vistas de cada producto se alternan al pasar el mouse o al
+      tocar. Se recortan en 4:3, así que las dos fotos de un mismo producto
+      deben tener el objeto más o menos del mismo tamaño y en la misma
+      posición; si no, el cambio "salta".
+
+      Nota: destacado-audio-pro.webp e insignia-mh10-a.webp salen del mismo
+      archivo de origen (MH-10-1.webp). Se dejan duplicados a propósito, para
+      poder cambiar uno sin tocar el otro.
+
 
 Nota: al momento de construir la página el proxy de red bloqueaba
-esenses.com.co (403), así que las imágenes no se pudieron descargar. Hay que
-bajarlas manualmente o pedírselas a la marca.
+esenses.com.co (403), así que ninguna imagen se pudo descargar. Hay que
+bajarlas manualmente del home oficial o pedírselas a la marca.
