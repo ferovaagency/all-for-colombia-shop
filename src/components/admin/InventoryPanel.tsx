@@ -80,7 +80,7 @@ function MetricCard({
   );
 }
 
-export function InventoryPanel() {
+export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<void> } = {}) {
   const [rows, setRows] = useState<InvProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
