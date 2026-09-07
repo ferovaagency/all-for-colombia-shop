@@ -879,6 +879,8 @@ function EditProductDialog({
         length_cm: form.length_cm === "" ? null : Number(form.length_cm),
         width_cm: form.width_cm === "" ? null : Number(form.width_cm),
         height_cm: form.height_cm === "" ? null : Number(form.height_cm),
+        category_id: form.category_id === NO_CATEGORY ? null : form.category_id,
+        brand_id: form.brand_id === NO_BRAND ? null : form.brand_id,
       } as any)
       .eq("id", product.id);
     setSaving(false);
