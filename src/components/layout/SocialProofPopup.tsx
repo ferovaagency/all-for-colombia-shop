@@ -9,9 +9,13 @@ type RealOrder = {
 };
 
 export function SocialProofPopup() {
-  const [item, setItem] = useState<RealOrder | null>(null);
+  const [item, setItem] = useState<RealOrder | null>({
+    customerFirstName: "Laura",
+    city: "Bogotá",
+    productName: "Mouse Logitech M650 Signature inalámbrico color grafito",
+  });
   const [orders, setOrders] = useState<RealOrder[]>([]);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
