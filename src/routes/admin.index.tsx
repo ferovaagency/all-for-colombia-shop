@@ -809,7 +809,7 @@ function AdminPage() {
         </TabsContent>
       </Tabs>
 
-      <EditProductDialog product={editing} onClose={() => setEditing(null)} onSaved={reload} />
+      <EditProductDialog product={editing} categories={categories} brands={brands} onClose={() => setEditing(null)} onSaved={reload} />
       <DistributorCredentialsDialog
         distributor={credDist}
         onClose={() => setCredDist(null)}
