@@ -171,6 +171,7 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
       if (errs.length) toast.warning(`Sincronizado con avisos: ${errs[0]}`);
       else toast.success("Inventario sincronizado");
       await load();
+      await onSynced?.();
     } catch (e) {
       const m = e instanceof Error ? e.message : String(e);
       setSyncResult(`Error: ${m}`);
