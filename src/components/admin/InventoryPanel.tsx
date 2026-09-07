@@ -80,7 +80,7 @@ function MetricCard({
   );
 }
 
-export function InventoryPanel() {
+export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<void> } = {}) {
   const [rows, setRows] = useState<InvProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -171,6 +171,7 @@ export function InventoryPanel() {
       if (errs.length) toast.warning(`Sincronizado con avisos: ${errs[0]}`);
       else toast.success("Inventario sincronizado");
       await load();
+      await onSynced?.();
     } catch (e) {
       const m = e instanceof Error ? e.message : String(e);
       setSyncResult(`Error: ${m}`);

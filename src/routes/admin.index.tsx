@@ -98,6 +98,16 @@ function AdminPage() {
     setDistributors(dist.distributors || []);
   };
 
+  // Recarga solo el catálogo (útil tras sincronizar inventario o al volver a la pestaña).
+  const reloadProducts = async () => {
+    const { data } = await supabase
+      .from("products")
+      .select("*, categories(name), brands(name)")
+      .order("created_at", { ascending: false })
+      .range(0, 4999);
+    if (data) setProducts(data);
+  };
+
   useEffect(() => {
     reload();
   }, []);
@@ -259,7 +269,7 @@ function AdminPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="orders">
+      <Tabs defaultValue="orders" onValueChange={(v) => { if (v === "products") void reloadProducts(); }}>
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="orders">Pedidos ({orders.length})</TabsTrigger>
           <TabsTrigger value="products">Productos ({products.length})</TabsTrigger>
@@ -657,7 +667,7 @@ function AdminPage() {
 
 
         <TabsContent value="inventory" className="mt-6">
-          <InventoryPanel />
+          <InventoryPanel onSynced={reloadProducts} />
         </TabsContent>
 
         <TabsContent value="categories" className="mt-6">
