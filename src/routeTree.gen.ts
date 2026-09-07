@@ -38,6 +38,7 @@ import { Route as DistribuidoresPortalRouteImport } from './routes/distribuidore
 import { Route as DistribuidoresRegistroRouteImport } from './routes/distribuidores.registro'
 import { Route as LegalIndexRouteImport } from './routes/legal.index'
 import { Route as LegalSlugRouteImport } from './routes/legal.$slug'
+import { Route as MarcasEsensesRouteImport } from './routes/marcas.esenses'
 import { Route as MarcasLogitechRouteImport } from './routes/marcas.logitech'
 import { Route as ProductoSlugRouteImport } from './routes/producto.$slug'
 import { Route as ApiAddiConfigRouteImport } from './routes/api/addi/config'
@@ -206,6 +207,11 @@ const LegalSlugRoute = LegalSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => LegalRoute,
 } as any)
+const MarcasEsensesRoute = MarcasEsensesRouteImport.update({
+  id: '/marcas/esenses',
+  path: '/marcas/esenses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarcasLogitechRoute = MarcasLogitechRouteImport.update({
   id: '/marcas/logitech',
   path: '/marcas/logitech',
@@ -348,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/legal/$slug': typeof LegalSlugRoute
+  '/marcas/esenses': typeof MarcasEsensesRoute
   '/marcas/logitech': typeof MarcasLogitechRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/legal/$slug': typeof LegalSlugRoute
+  '/marcas/esenses': typeof MarcasEsensesRoute
   '/marcas/logitech': typeof MarcasLogitechRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -452,6 +460,7 @@ export interface FileRoutesById {
   '/distribuidores/portal': typeof DistribuidoresPortalRouteWithChildren
   '/distribuidores/registro': typeof DistribuidoresRegistroRoute
   '/legal/$slug': typeof LegalSlugRoute
+  '/marcas/esenses': typeof MarcasEsensesRoute
   '/marcas/logitech': typeof MarcasLogitechRoute
   '/producto/$slug': typeof ProductoSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -507,6 +516,7 @@ export interface FileRouteTypes {
     | '/distribuidores/portal'
     | '/distribuidores/registro'
     | '/legal/$slug'
+    | '/marcas/esenses'
     | '/marcas/logitech'
     | '/producto/$slug'
     | '/admin/'
@@ -557,6 +567,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/distribuidores/registro'
     | '/legal/$slug'
+    | '/marcas/esenses'
     | '/marcas/logitech'
     | '/producto/$slug'
     | '/admin'
@@ -610,6 +621,7 @@ export interface FileRouteTypes {
     | '/distribuidores/portal'
     | '/distribuidores/registro'
     | '/legal/$slug'
+    | '/marcas/esenses'
     | '/marcas/logitech'
     | '/producto/$slug'
     | '/admin/'
@@ -659,6 +671,7 @@ export interface RootRouteChildren {
   VentasCorporativasRoute: typeof VentasCorporativasRoute
   DistribuidoresPortalRoute: typeof DistribuidoresPortalRouteWithChildren
   DistribuidoresRegistroRoute: typeof DistribuidoresRegistroRoute
+  MarcasEsensesRoute: typeof MarcasEsensesRoute
   MarcasLogitechRoute: typeof MarcasLogitechRoute
   ProductoSlugRoute: typeof ProductoSlugRoute
   DistribuidoresIndexRoute: typeof DistribuidoresIndexRoute
@@ -885,6 +898,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/legal/$slug'
       preLoaderRoute: typeof LegalSlugRouteImport
       parentRoute: typeof LegalRoute
+    }
+    '/marcas/esenses': {
+      id: '/marcas/esenses'
+      path: '/marcas/esenses'
+      fullPath: '/marcas/esenses'
+      preLoaderRoute: typeof MarcasEsensesRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/marcas/logitech': {
       id: '/marcas/logitech'
@@ -1118,6 +1138,7 @@ const rootRouteChildren: RootRouteChildren = {
   VentasCorporativasRoute: VentasCorporativasRoute,
   DistribuidoresPortalRoute: DistribuidoresPortalRouteWithChildren,
   DistribuidoresRegistroRoute: DistribuidoresRegistroRoute,
+  MarcasEsensesRoute: MarcasEsensesRoute,
   MarcasLogitechRoute: MarcasLogitechRoute,
   ProductoSlugRoute: ProductoSlugRoute,
   DistribuidoresIndexRoute: DistribuidoresIndexRoute,

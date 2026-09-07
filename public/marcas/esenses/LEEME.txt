@@ -1,0 +1,44 @@
+Imágenes del microsite de Esenses  —  /marcas/esenses
+=====================================================
+
+Estos archivos NO están en el repo todavía. La página está construida para
+funcionar sin ellos: cada <img> tiene onError y cae a un fondo sólido o a un
+degradado de marca (negro / grafito / metalizado). No se importan por
+`import`, se referencian por URL pública, para que un archivo faltante no
+rompa la compilación.
+
+Cuando se consigan los archivos, se dejan aquí con EXACTAMENTE estos nombres:
+
+  logo.webp
+      Logotipo de Esenses en blanco o negativo, fondo transparente.
+      Origen: manual de marca de Esenses o el logo del header de
+      https://esenses.com.co/
+      Uso: barra de marca sobre el hero. Alto recomendado ~80 px.
+
+  hero-1.jpg
+      Primer banner del carrusel principal, a todo el ancho.
+      Origen: slider del home de https://esenses.com.co/
+      Uso: slide 1 del hero. Recomendado 2400x900, foco visual a la derecha
+      (el texto va a la izquierda).
+
+  hero-2.webp
+      Segundo banner del carrusel principal.
+      Origen: slider del home de https://esenses.com.co/
+      Mismas medidas que hero-1.
+
+  banner-parlantes.webp
+      Banner promocional grande de la línea de parlantes / audio.
+      Origen: sección promocional del home de https://esenses.com.co/
+      Recomendado 2000x700.
+
+  destacado-diadema.webp    Audífonos de diadema (colección "Audífonos").
+  destacado-parlante.webp   Parlante Bluetooth (colección "Parlantes").
+  destacado-tws.webp        Audífonos inalámbricos TWS (colección "Audífonos").
+  destacado-reloj.webp      Reloj inteligente (colección "Relojes inteligentes").
+      Origen: fichas de producto o banners de categoría de esenses.com.co.
+      Uso: mosaico "Colecciones Esenses". Recomendado cuadrado o 4:5,
+      mínimo 800 px de lado.
+
+Nota: al momento de construir la página el proxy de red bloqueaba
+esenses.com.co (403), así que las imágenes no se pudieron descargar. Hay que
+bajarlas manualmente o pedírselas a la marca.

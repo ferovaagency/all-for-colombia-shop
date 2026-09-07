@@ -133,6 +133,14 @@ export function Header() {
               >
                 Logitech
               </Link>
+
+              <Link
+                to="/marcas/esenses"
+                className="px-3 py-2 text-sm font-medium rounded-md hover:bg-white/10 transition-smooth"
+                activeProps={{ className: "bg-white/15" }}
+              >
+                Esenses
+              </Link>
             </nav>
 
             <div className="hidden md:flex items-center flex-1 max-w-xs ml-2">
@@ -200,6 +208,14 @@ export function Header() {
                   activeProps={{ className: "bg-white/15" }}
                 >
                   Logitech
+                </Link>
+                <Link
+                  to="/marcas/esenses"
+                  onClick={() => setOpen(false)}
+                  className="px-3 py-2.5 rounded-md text-sm font-semibold hover:bg-white/10"
+                  activeProps={{ className: "bg-white/15" }}
+                >
+                  Esenses
                 </Link>
 
                 <button
