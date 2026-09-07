@@ -926,6 +926,30 @@ function EditProductDialog({
               onChange={(e) => setF("sale_price", e.target.value)}
             />
           </div>
+          <div>
+            <Label>Categoría</Label>
+            <Select value={form.category_id ?? NO_CATEGORY} onValueChange={(v) => setF("category_id", v)}>
+              <SelectTrigger><SelectValue placeholder="Sin categoría" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_CATEGORY}>Sin categoría</SelectItem>
+                {[...categories].sort((a, b) => (a.name || "").localeCompare(b.name || "")).map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Marca</Label>
+            <Select value={form.brand_id ?? NO_BRAND} onValueChange={(v) => setF("brand_id", v)}>
+              <SelectTrigger><SelectValue placeholder="Sin marca" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_BRAND}>Sin marca</SelectItem>
+                {[...brands].sort((a, b) => (a.name || "").localeCompare(b.name || "")).map((b) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="sm:col-span-2 border-t pt-3 mt-1">
             <p className="text-sm font-semibold mb-1">📦 Envío (para cotizar con la transportadora)</p>
             <p className="text-xs text-muted-foreground mb-3">
