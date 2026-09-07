@@ -52,24 +52,27 @@ const BRAND_GRADIENT = "linear-gradient(115deg,#050505 0%,#1c1f24 45%,#5b636d 10
 const BRAND_GRADIENT_ALT = "linear-gradient(115deg,#0a0a0a 0%,#2a2f36 50%,#8d949c 100%)";
 const SLOGAN = "Un mundo de posibilidades con tecnología innovadora";
 
+/**
+ * Un archivo por foto. `mh10A`, `mh10B` y `sp3720A` se referencian dos veces
+ * a propósito (colecciones e insignia): se reusa el mismo archivo, no se
+ * duplica. La extensión de cada uno es la del original de esenses.com.co,
+ * para que baste con descargar y renombrar, sin convertir nada.
+ */
 const IMG = {
   logo: "/marcas/esenses/logo.webp",
-  hero1: "/marcas/esenses/hero-1.jpg",
+  hero1: "/marcas/esenses/hero-1.webp",
   hero2: "/marcas/esenses/hero-2.jpg",
-  hero3: "/marcas/esenses/hero-3.jpg",
+  hero3: "/marcas/esenses/hero-3.webp",
   bannerParlantes: "/marcas/esenses/banner-parlantes.webp",
-  diadema: "/marcas/esenses/destacado-diadema.webp",
-  parlante: "/marcas/esenses/destacado-parlante.webp",
-  tws: "/marcas/esenses/destacado-tws.webp",
-  reloj: "/marcas/esenses/destacado-reloj.webp",
-  cables: "/marcas/esenses/destacado-cables.webp",
-  audioPro: "/marcas/esenses/destacado-audio-pro.webp",
+  mh10A: "/marcas/esenses/mh10-a.webp",
+  mh10B: "/marcas/esenses/mh10-b.webp",
+  sp3720A: "/marcas/esenses/sp3720-a.webp",
+  sp3720B: "/marcas/esenses/sp3720-b.webp",
+  tws: "/marcas/esenses/tws.jpg",
+  reloj: "/marcas/esenses/reloj.webp",
+  cables: "/marcas/esenses/cables.webp",
   ambiente1: "/marcas/esenses/ambiente-1.webp",
   ambiente2: "/marcas/esenses/ambiente-2.webp",
-  mh10A: "/marcas/esenses/insignia-mh10-a.webp",
-  mh10B: "/marcas/esenses/insignia-mh10-b.webp",
-  hp10000A: "/marcas/esenses/insignia-hp10000-a.jpg",
-  hp10000B: "/marcas/esenses/insignia-hp10000-b.jpg",
 };
 
 /**
@@ -703,12 +706,12 @@ function EsensesProductCard({ product }: { product: any }) {
 /* ============================== COLECCIONES ============================== */
 
 const COLECCIONES = [
-  { image: IMG.diadema, label: "Audífonos de diadema", tagline: "Sonido envolvente" },
-  { image: IMG.tws, label: "Audífonos TWS", tagline: "Libertad inalámbrica" },
-  { image: IMG.parlante, label: "Parlantes", tagline: "Potencia portátil" },
+  { image: IMG.mh10A, label: "Audífonos", tagline: "Diadema, in-ear y gaming" },
+  { image: IMG.mh10B, label: "Audio profesional", tagline: "Monitoreo y estudio" },
+  { image: IMG.sp3720A, label: "Parlantes", tagline: "Bluetooth con potencia real" },
+  { image: IMG.tws, label: "Audífonos TWS", tagline: "EB-TWS-91: libertad inalámbrica" },
   { image: IMG.reloj, label: "Relojes inteligentes", tagline: "Tu día, medido" },
   { image: IMG.cables, label: "Cables y cargadores", tagline: "Carga rápida y confiable" },
-  { image: IMG.audioPro, label: "Audio profesional", tagline: "Monitoreo y estudio" },
 ];
 
 function Colecciones() {
@@ -937,19 +940,19 @@ function MundoEsenses() {
 
 const INSIGNIAS = [
   {
-    key: "mh10",
-    name: "Diadema MH-10",
-    tagline: "Audio profesional",
-    text: "Diadema over-ear de monitoreo, con almohadillas amplias y cable desmontable. Pensada para escuchar horas sin cansancio.",
+    key: "mh10g",
+    name: "Diadema Multimedia Gaming MH-10G",
+    tagline: "Audio y juego",
+    text: "Diadema over-ear con almohadillas amplias y micrófono integrado. Sirve igual para las llamadas del trabajo y para jugar horas sin cansancio.",
     views: [IMG.mh10A, IMG.mh10B],
     gradient: BRAND_GRADIENT,
   },
   {
-    key: "hp10000",
-    name: "Parlante HP-10000",
-    tagline: "Potencia para la fiesta",
-    text: "Torre de sonido de alta potencia con conexión inalámbrica e iluminación. El equipo grande de la línea de audio Esenses.",
-    views: [IMG.hp10000A, IMG.hp10000B],
+    key: "sp3720",
+    name: "Parlante Inalámbrico Bluetooth 20 W Vertical SP-3720",
+    tagline: "Potencia vertical",
+    text: "Formato vertical de 20 W con conexión Bluetooth. Ocupa poco en el escritorio o la sala y suena como algo del doble de su tamaño.",
+    views: [IMG.sp3720A, IMG.sp3720B],
     gradient: BRAND_GRADIENT_ALT,
   },
 ];
