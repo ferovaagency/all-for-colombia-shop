@@ -820,12 +820,19 @@ function AdminPage() {
 }
 
 
+const NO_CATEGORY = "__no_category__";
+const NO_BRAND = "__no_brand__";
+
 function EditProductDialog({
   product,
+  categories,
+  brands,
   onClose,
   onSaved,
 }: {
   product: any | null;
+  categories: any[];
+  brands: any[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -846,6 +853,8 @@ function EditProductDialog({
         length_cm: product.length_cm ?? "",
         width_cm: product.width_cm ?? "",
         height_cm: product.height_cm ?? "",
+        category_id: product.category_id ?? NO_CATEGORY,
+        brand_id: product.brand_id ?? NO_BRAND,
       });
     }
   }, [product]);
