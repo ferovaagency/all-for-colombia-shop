@@ -10,6 +10,7 @@ import { DynamicCategoryGrid } from "@/components/shop/DynamicCategoryGrid";
 import { HomeCatalog } from "@/components/shop/HomeCatalog";
 import { BrandShowcase } from "@/components/shop/BrandShowcase";
 import { Reveal } from "@/components/shop/Reveal";
+import bannerCorsair from "@/assets/banner-corsair-sillas-gamer.webp";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.webp";
 import posterJbl from "@/assets/poster-jbl.webp";
 import { getHomeData } from "@/lib/ssr-data.functions";
@@ -43,6 +44,14 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
+const CORSAIR_BANNER: PromoBannerItem = {
+  id: 3,
+  image: bannerCorsair,
+  link: "/tienda?marca=corsair",
+  alt: "Corsair — Sillas gamer: confort que impulsa tu juego",
+  aspectRatio: "1983/793",
+};
+
 const PROMO_BANNERS: PromoBannerItem[] = [
   {
     id: 1,
@@ -61,6 +70,9 @@ const PROMO_BANNERS: PromoBannerItem[] = [
   },
 ];
 
+// El hero lleva ademas el banner de Corsair; el slider de mitad de pagina no.
+const HERO_BANNERS: PromoBannerItem[] = [CORSAIR_BANNER, ...PROMO_BANNERS];
+
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
 const DM = { fontFamily: "'DM Sans', 'Inter', sans-serif" };
 
@@ -72,6 +84,12 @@ function HomePage() {
   const products = initial.products ?? [];
   const brands = initial.brands ?? [];
   const posts = initial.posts ?? [];
+
+  const [heroIndex, setHeroIndex] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setHeroIndex((p) => (p + 1) % HERO_BANNERS.length), 4500);
+    return () => clearInterval(t);
+  }, []);
 
   const [bannerIndex, setBannerIndex] = useState(0);
   useEffect(() => {
@@ -93,9 +111,9 @@ function HomePage() {
       {/* ============ HERO BANNER ============ */}
       <section className="relative w-full overflow-hidden bg-neutral-950">
         <PromoBannerSlider
-          banners={PROMO_BANNERS}
-          index={bannerIndex}
-          onSelect={setBannerIndex}
+          banners={HERO_BANNERS}
+          index={heroIndex}
+          onSelect={setHeroIndex}
           eagerFirst
           className="w-full"
         />
