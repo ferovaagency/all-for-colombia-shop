@@ -140,15 +140,31 @@ serve(async (req) => {
       .range(0, 9999);
     if (pErr) return json({ error: pErr.message }, 500);
 
-    // Indice por SKU normalizado. inv_sku manda; sku es el respaldo.
-    const porSku = new Map<string, any>();
-    for (const p of products!) if (p.sku) porSku.set(skuKey(p.sku), p);
-    for (const p of products!) if (p.inv_sku) porSku.set(skuKey(p.inv_sku), p);
+    // Indice de busqueda, de mas fuerte a mas debil:
+    //   1. inv_sku exacto  2. sku exacto  3. inv_sku normalizado  4. sku normalizado
+    // Asi, cuando dos productos comparten un SKU parecido, gana el que coincide
+    // literalmente y no el que quedo de ultimo en la lista.
+    const exactoInv = new Map<string, any>();
+    const exactoSku = new Map<string, any>();
+    const normInv = new Map<string, any>();
+    const normSku = new Map<string, any>();
+    for (const p of products!) {
+      if (p.inv_sku) { const v = String(p.inv_sku).trim(); exactoInv.set(v, p); normInv.set(skuKey(v), p); }
+      if (p.sku) { const v = String(p.sku).trim(); if (!exactoSku.has(v)) exactoSku.set(v, p); if (!normSku.has(skuKey(v))) normSku.set(skuKey(v), p); }
+    }
+    const buscar = (sku: string) => {
+      const v = sku.trim(), k = skuKey(v);
+      return exactoInv.get(v) || exactoSku.get(v) || normInv.get(k) || normSku.get(k) || null;
+    };
+    // inv_sku tiene indice unico parcial: dos productos no pueden compartirlo.
+    const invOcupados = new Set<string>(products!.filter((p) => p.inv_sku).map((p) => String(p.inv_sku).trim()));
 
     const slugsUsados = new Set<string>(products!.map((p) => String(p.slug || '')).filter(Boolean));
     const used = new Set<string>();
     const updates: any[] = [];
     const newRows: any[] = [];
+    const conflictos: { sku: string; motivo: string }[] = [];
+    const left = (t: string) => String(t ?? '').slice(0, 40);
     const nowIso = new Date().toISOString();
 
     const slugify = (s: string, sku: string) => {
@@ -162,13 +178,12 @@ serve(async (req) => {
     };
 
     for (const row of sheet) {
-      const hit = porSku.get(skuKey(row.sku));
+      const hit = buscar(row.sku);
 
       if (hit && !used.has(hit.id)) {
         used.add(hit.id);
         // NUNCA se escriben name ni slug: son de la pagina.
         const patch: any = {
-          inv_sku: row.sku,
           stock: row.stock,
           price: row.price,
           inv_estado: 'vinculado',
@@ -182,6 +197,18 @@ serve(async (req) => {
           patch.active = row.active;
         }
         patch.inv_activo_hoja = row.active;
+        // inv_sku solo se escribe si esta libre o si ya es de este producto.
+        // El indice unico parcial products_inv_sku_uniq no perdona.
+        const mio = hit.inv_sku ? String(hit.inv_sku).trim() : '';
+        if (mio !== row.sku.trim()) {
+          if (!invOcupados.has(row.sku.trim())) {
+            if (mio) invOcupados.delete(mio);
+            invOcupados.add(row.sku.trim());
+            patch.inv_sku = row.sku;
+          } else {
+            conflictos.push({ sku: row.sku, motivo: `el inv_sku ya lo tiene otro producto (${left(hit.name)})` });
+          }
+        }
         updates.push({ id: hit.id, ...patch });
         continue;
       }
@@ -189,6 +216,11 @@ serve(async (req) => {
       if (hit) continue; // ya lo tomo otra fila; el SKU repetido ya quedo contado
 
       // SKU que no existe en la pagina -> se crea. Sin adivinar por nombre.
+      if (invOcupados.has(row.sku.trim())) {
+        conflictos.push({ sku: row.sku, motivo: 'no se creo: ese inv_sku ya existe en otro producto' });
+        continue;
+      }
+      invOcupados.add(row.sku.trim());
       newRows.push({
         name: row.name,
         slug: slugify(row.name, row.sku),
@@ -226,9 +258,19 @@ serve(async (req) => {
     if (!dryRun) {
       await chunkUpdate(updates, 'update');
       await chunkUpdate(zero, 'zero');
+      // Si un lote falla, se reintenta fila por fila: una fila mala ya no
+      // impide que se creen las demas, y el error dice exactamente cual es.
       for (let i = 0; i < newRows.length; i += 300) {
-        const { error } = await admin.from('products').insert(newRows.slice(i, i + 300));
-        if (error) errors.push(`create: ${error.message}`);
+        const lote = newRows.slice(i, i + 300);
+        const { error } = await admin.from('products').insert(lote);
+        if (!error) continue;
+        for (const fila of lote) {
+          const r = await admin.from('products').insert([fila]);
+          if (r.error) {
+            conflictos.push({ sku: fila.sku, motivo: `no se pudo crear: ${r.error.message}` });
+            if (errors.length < 10) errors.push(`create ${fila.sku}: ${r.error.message}`);
+          }
+        }
       }
     }
 
@@ -243,9 +285,13 @@ serve(async (req) => {
         creados: newRows.length,
         sinInventario: zero.length,
         sinSkuNoTocados: sinSku,
+        conflictos: conflictos.length,
       },
       // Las filas que la hoja trae mal formadas, para que se vean y se arreglen.
       descartadas: descartadas.slice(0, 50),
+      // SKU que chocaron con el indice unico de inv_sku. Cada uno es un producto
+      // duplicado en la pagina que hay que resolver a mano.
+      conflictos: conflictos.slice(0, 50),
       // Que productos crearia, para revisarlos antes de que entren.
       creariaEjemplos: newRows.slice(0, 50).map((r) => ({ sku: r.sku, name: r.name, stock: r.stock, price: r.price })),
       errors,
