@@ -4,9 +4,14 @@
 // Auth: call with the service-role key as Bearer (cron) OR an admin user's JWT
 // (the "Sincronizar ahora" button). verify_jwt = false in config.toml.
 //
-// Rules: price = "Precio Web Plano"; stock = "Cantidad Disponible"; active = "Activo Web".
-// Not in the sheet -> stock 0 + inv_estado 'sin_inventario'. Only stock/price/active/inv_*
-// are touched, never content. First run also links existing products by name/model-code.
+// Reglas acordadas con Mafe (11-09-2026):
+//   1. Un SKU nuevo en la hoja crea el producto en la pagina.
+//   2. La hoja manda en SKU, stock y precio. Si la hoja dice 0, es 0.
+//   3. El nombre se edita en la pagina y la hoja NUNCA lo pisa: el producto se
+//      ubica SOLO por SKU, nunca por nombre.
+//   4. El slug se escribe al crear y no se vuelve a tocar jamas.
+//   5. "Activo Web" se maneja en los dos lados: la hoja solo pisa el activo
+//      cuando esa celda cambio respecto a la ultima sincronizacion.
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -16,13 +21,10 @@ const corsHeaders = {
 };
 
 const SHEET_ID = Deno.env.get('INVENTORY_SHEET_ID') || '13798JechMiinmFH_0jGnSuDJ6U5u5F6QYGmzCl6RY6E';
-// gid de la pestaña de inventario ("SKU / DESCRIPCION / Cantidad Disponible").
-// '0' no existe en esta hoja, así que se ignora y se usa la pestaña real.
+// gid de la pestana de inventario ("SKU / DESCRIPCION / Cantidad Disponible").
+// '0' no existe en esta hoja, asi que se ignora y se usa la pestana real.
 const ENV_GID = (Deno.env.get('INVENTORY_SHEET_GID') || '').trim();
 const SHEET_GID = ENV_GID && ENV_GID !== '0' ? ENV_GID : '602957575';
-const SHEET_SKU_RE = /^[A-ZÑ0-9.]{2,5}-\d{3,4}$/;
-const AUTO_MATCH_MIN = 90;
-const REVIEW_MIN = 72;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -46,13 +48,12 @@ function parseCsv(text: string): string[][] {
 }
 const toInt = (s: string) => { const n = parseInt(String(s ?? '').replace(/[^\d-]/g, ''), 10); return Number.isFinite(n) ? n : 0; };
 
-/* ---------- matching ---------- */
+/* ---------- normalizacion ---------- */
 const strip = (s: string) => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
-const normName = (s: string) => strip(s).toUpperCase().replace(/[^A-Z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
-const STOP = new Set('DE LA EL LOS LAS Y CON PARA POR EN UN UNA PULGADAS PULGADA'.split(' '));
-const tokens = (s: string) => normName(s).split(' ').filter((t) => t && !STOP.has(t));
-const codes = (s: string) => tokens(s).filter((t) => /[A-Z]/.test(t) && /\d/.test(t) && t.length >= 3);
-const jaccard = (a: string[], b: string[]) => { const A = new Set(a), B = new Set(b); let i = 0; for (const x of A) if (B.has(x)) i++; const u = A.size + B.size - i; return u ? i / u : 0; };
+// Clave de comparacion de SKU: sin tildes, sin espacios, en mayuscula.
+// "HP -0240", "hp-0240" y "HP-0240" son el mismo SKU. El valor que se GUARDA
+// es siempre el de la hoja, tal cual; esto es solo para emparejar.
+const skuKey = (s: string) => strip(String(s ?? '')).toUpperCase().replace(/\s+/g, '');
 
 interface SheetRow { sku: string; name: string; stock: number; price: number; active: boolean; }
 
@@ -85,10 +86,18 @@ serve(async (req) => {
     }
     if (!authorized) return json({ error: 'No autorizado' }, 401);
 
+    // Modo prueba: ?dry=1 (o {"dry":true} en el body) calcula todo y devuelve
+    // el resumen SIN escribir una sola fila. Sirve para ver que haria la
+    // corrida antes de dejarla suelta.
+    let dryRun = new URL(req.url).searchParams.get('dry') === '1';
+    if (!dryRun && req.method === 'POST') {
+      try { const b = await req.json(); if (b && b.dry === true) dryRun = true; } catch { /* sin body */ }
+    }
+
     // ---- Read the sheet ----
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
     const csvRes = await fetch(url, { redirect: 'follow' });
-    if (!csvRes.ok) return json({ error: `No se pudo leer la hoja (HTTP ${csvRes.status}). ¿Está pública?` }, 502);
+    if (!csvRes.ok) return json({ error: `No se pudo leer la hoja (HTTP ${csvRes.status}). Esta publica?` }, 502);
     const grid = parseCsv(await csvRes.text());
 
     let hIdx = grid.findIndex((r) => r.some((c) => /^\s*sku\s*$/i.test(c)) && r.some((c) => /descripcion/i.test(c)));
@@ -97,75 +106,114 @@ serve(async (req) => {
     const col = (re: RegExp, fb: number) => { const i = header.findIndex((h) => re.test(h)); return i >= 0 ? i : fb; };
     const iSku = col(/^sku$/, 0), iName = col(/descripcion/, 1), iStock = col(/cantidad disponible/, 2), iPrice = col(/precio web plano/, 7), iActive = col(/activo web/, 8);
 
+    // Se acepta CUALQUIER SKU no vacio. Antes habia un filtro de formato que
+    // descartaba en silencio las filas con tilde, espacio o forma distinta, y
+    // esos productos terminaban en stock 0. Ahora lo unico que descarta una
+    // fila es que le falte el SKU o la descripcion, y queda contado.
     const sheet: SheetRow[] = [];
+    const descartadas: { fila: number; sku: string; motivo: string }[] = [];
+    const vistos = new Set<string>();
     for (let r = hIdx + 1; r < grid.length; r++) {
       const cells = grid[r];
       const sku = (cells[iSku] || '').trim();
       if (/^fecha$/i.test(sku)) break;
-      if (!SHEET_SKU_RE.test(sku)) continue;
       const name = (cells[iName] || '').trim();
-      if (!name) continue;
-      sheet.push({ sku, name, stock: Math.max(0, toInt(cells[iStock])), price: Math.max(0, toInt(cells[iPrice])), active: /^\s*si\s*$/i.test((cells[iActive] || '').trim()) });
+      if (!sku && !name) continue; // fila en blanco, no es un descarte
+      if (!sku) { descartadas.push({ fila: r + 1, sku: '', motivo: 'sin SKU' }); continue; }
+      if (!name) { descartadas.push({ fila: r + 1, sku, motivo: 'sin descripcion' }); continue; }
+      const key = skuKey(sku);
+      if (vistos.has(key)) { descartadas.push({ fila: r + 1, sku, motivo: 'SKU repetido en la hoja' }); continue; }
+      vistos.add(key);
+      sheet.push({
+        sku,
+        name,
+        stock: Math.max(0, toInt(cells[iStock])),
+        price: Math.max(0, toInt(cells[iPrice])),
+        active: /^\s*si\s*$/i.test((cells[iActive] || '').trim()),
+      });
     }
 
     // ---- Load products ----
     const { data: products, error: pErr } = await admin
       .from('products')
-      .select('id, name, sku, inv_sku, stock')
+      .select('id, name, slug, sku, inv_sku, stock, active, inv_activo_hoja')
       .range(0, 9999);
     if (pErr) return json({ error: pErr.message }, 500);
 
-    const byInv = new Map<string, any>();
-    for (const p of products!) if (p.inv_sku) byInv.set(String(p.inv_sku).trim(), p);
-    const bySku = new Map<string, any>();
-    for (const p of products!) if (p.sku) bySku.set(String(p.sku).trim(), p);
+    // Indice por SKU normalizado. inv_sku manda; sku es el respaldo.
+    const porSku = new Map<string, any>();
+    for (const p of products!) if (p.sku) porSku.set(skuKey(p.sku), p);
+    for (const p of products!) if (p.inv_sku) porSku.set(skuKey(p.inv_sku), p);
 
+    const slugsUsados = new Set<string>(products!.map((p) => String(p.slug || '')).filter(Boolean));
     const used = new Set<string>();
-    const linkUpserts: any[] = [];
+    const updates: any[] = [];
     const newRows: any[] = [];
-    const ambiguous: any[] = [];
     const nowIso = new Date().toISOString();
-    const slugify = (s: string, sku: string) =>
-      `${strip(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'producto'}-${sku.toLowerCase()}`;
 
-    // candidates for name/code match = products without a sheet-style link
-    const cand = products!.filter((p) => !(p.inv_sku && SHEET_SKU_RE.test(String(p.inv_sku).trim())) && !(p.sku && SHEET_SKU_RE.test(String(p.sku).trim())));
-    const candIdx = cand.map((p) => ({ p, nn: normName(p.name), tk: tokens(p.name), cd: new Set(codes(p.name)) }));
+    const slugify = (s: string, sku: string) => {
+      const base = `${strip(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'producto'}-${skuKey(sku).toLowerCase()}`;
+      // El slug se fija al crear y no se vuelve a tocar, asi que solo hay que
+      // garantizar que nazca unico.
+      let s2 = base, n = 2;
+      while (slugsUsados.has(s2)) s2 = `${base}-${n++}`;
+      slugsUsados.add(s2);
+      return s2;
+    };
 
     for (const row of sheet) {
-      const hit = byInv.get(row.sku) || bySku.get(row.sku);
+      const hit = porSku.get(skuKey(row.sku));
+
       if (hit && !used.has(hit.id)) {
         used.add(hit.id);
-        linkUpserts.push({ id: hit.id, inv_sku: row.sku, stock: row.stock, price: row.price, active: row.active, inv_estado: 'vinculado', inv_synced_at: nowIso });
+        // NUNCA se escriben name ni slug: son de la pagina.
+        const patch: any = {
+          inv_sku: row.sku,
+          stock: row.stock,
+          price: row.price,
+          inv_estado: 'vinculado',
+          inv_synced_at: nowIso,
+        };
+        // "Activo Web" se maneja en los dos lados: la hoja solo pisa el activo
+        // cuando esa celda cambio de valor desde la ultima sincronizacion. Asi
+        // un cambio hecho en el admin sobrevive hasta que alguien mueva la
+        // celda a proposito en la hoja.
+        if (hit.inv_activo_hoja === null || hit.inv_activo_hoja === undefined || hit.inv_activo_hoja !== row.active) {
+          patch.active = row.active;
+        }
+        patch.inv_activo_hoja = row.active;
+        updates.push({ id: hit.id, ...patch });
         continue;
       }
-      // name / model-code match
-      const snn = normName(row.name), stk = tokens(row.name), scd = new Set(codes(row.name));
-      let best: any = null, score = -1;
-      for (const c of candIdx) {
-        if (used.has(c.p.id)) continue;
-        let sc = 0;
-        if (snn === c.nn) sc = 100;
-        else { const shared = [...scd].filter((x) => c.cd.has(x)); const j = jaccard(stk, c.tk); if (shared.length >= 2) sc = 96; else if (shared.length === 1 && j >= 0.25) sc = 92; else if (shared.length === 1) sc = 80; else sc = Math.round(j * 78); }
-        if (sc > score) { score = sc; best = c.p; }
-      }
-      if (best && score >= AUTO_MATCH_MIN) {
-        used.add(best.id);
-        linkUpserts.push({ id: best.id, inv_sku: row.sku, stock: row.stock, price: row.price, active: row.active, inv_estado: 'vinculado', inv_synced_at: nowIso });
-      } else if (best && score >= REVIEW_MIN) {
-        ambiguous.push({ id: best.id, inv_estado: 'ambiguo', inv_synced_at: nowIso });
-      } else {
-        newRows.push({ name: row.name, slug: slugify(row.name, row.sku), inv_sku: row.sku, sku: row.sku, stock: row.stock, price: row.price, active: row.active, inv_estado: 'vinculado', inv_synced_at: nowIso });
-      }
+
+      if (hit) continue; // ya lo tomo otra fila; el SKU repetido ya quedo contado
+
+      // SKU que no existe en la pagina -> se crea. Sin adivinar por nombre.
+      newRows.push({
+        name: row.name,
+        slug: slugify(row.name, row.sku),
+        inv_sku: row.sku,
+        sku: row.sku,
+        stock: row.stock,
+        price: row.price,
+        active: row.active,
+        inv_activo_hoja: row.active,
+        inv_estado: 'vinculado',
+        inv_synced_at: nowIso,
+      });
     }
 
-    // Not in the sheet -> stock 0 / sin_inventario
-    const zero = products!.filter((p) => !used.has(p.id) && !ambiguous.find((a) => a.id === p.id))
+    // Lo que no esta en la hoja se queda sin inventario. Los productos que no
+    // tienen ningun SKU no los maneja la hoja, asi que no se tocan.
+    const zero = products!
+      .filter((p) => !used.has(p.id) && (p.sku || p.inv_sku))
       .map((p) => ({ id: p.id, stock: 0, inv_estado: 'sin_inventario', inv_synced_at: nowIso }));
 
+    const sinSku = products!.filter((p) => !p.sku && !p.inv_sku).length;
+
     const errors: string[] = [];
-    // UPDATE por id (no upsert: un upsert exigiría columnas NOT NULL como slug).
-    const chunkUpsert = async (rows: any[], label: string) => {
+    // UPDATE por id (no upsert: un upsert exigiria columnas NOT NULL como slug).
+    const chunkUpdate = async (rows: any[], label: string) => {
       const seen = new Set<string>();
       for (let i = 0; i < rows.length; i += 25) {
         const slice = rows.slice(i, i + 25).filter((r) => !seen.has(r.id) && seen.add(r.id));
@@ -175,17 +223,31 @@ serve(async (req) => {
         for (const r of res) if (r.error && errors.length < 10) errors.push(`${label}: ${r.error.message}`);
       }
     };
-    await chunkUpsert(linkUpserts, 'link');
-    await chunkUpsert(ambiguous, 'ambiguo');
-    await chunkUpsert(zero, 'zero');
-    for (let i = 0; i < newRows.length; i += 300) {
-      const { error } = await admin.from('products').insert(newRows.slice(i, i + 300));
-      if (error) errors.push(`create: ${error.message}`);
+    if (!dryRun) {
+      await chunkUpdate(updates, 'update');
+      await chunkUpdate(zero, 'zero');
+      for (let i = 0; i < newRows.length; i += 300) {
+        const { error } = await admin.from('products').insert(newRows.slice(i, i + 300));
+        if (error) errors.push(`create: ${error.message}`);
+      }
     }
 
     return json({
       ok: true,
-      summary: { sheetRows: sheet.length, products: products!.length, linked: linkUpserts.length, created: newRows.length, ambiguous: ambiguous.length, zeroed: zero.length },
+      dryRun,
+      summary: {
+        sheetRows: sheet.length,
+        descartadas: descartadas.length,
+        products: products!.length,
+        actualizados: updates.length,
+        creados: newRows.length,
+        sinInventario: zero.length,
+        sinSkuNoTocados: sinSku,
+      },
+      // Las filas que la hoja trae mal formadas, para que se vean y se arreglen.
+      descartadas: descartadas.slice(0, 50),
+      // Que productos crearia, para revisarlos antes de que entren.
+      creariaEjemplos: newRows.slice(0, 50).map((r) => ({ sku: r.sku, name: r.name, stock: r.stock, price: r.price })),
       errors,
     });
   } catch (e) {
