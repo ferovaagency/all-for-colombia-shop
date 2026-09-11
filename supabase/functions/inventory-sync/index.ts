@@ -113,10 +113,14 @@ serve(async (req) => {
     const sheet: SheetRow[] = [];
     const descartadas: { fila: number; sku: string; motivo: string }[] = [];
     const vistos = new Set<string>();
+    let cortadoEnFila = 0;
     for (let r = hIdx + 1; r < grid.length; r++) {
       const cells = grid[r];
       const sku = (cells[iSku] || '').trim();
-      if (/^fecha$/i.test(sku)) break;
+      // La hoja termina con un bloque de totales que arranca con "fecha".
+      // Se corta ahi, pero se DICE en que fila y cuantas quedaron sin leer,
+      // para que no se pierdan filas en silencio.
+      if (/^fecha$/i.test(sku)) { cortadoEnFila = r + 1; break; }
       const name = (cells[iName] || '').trim();
       if (!sku && !name) continue; // fila en blanco, no es un descarte
       if (!sku) { descartadas.push({ fila: r + 1, sku: '', motivo: 'sin SKU' }); continue; }
@@ -286,6 +290,11 @@ serve(async (req) => {
         sinInventario: zero.length,
         sinSkuNoTocados: sinSku,
         conflictos: conflictos.length,
+        // Cuadre de filas: filasEnLaHoja = sheetRows + descartadas + vacias
+        //                                  + filasIgnoradasDespuesDelCorte
+        filasEnLaHoja: Math.max(0, grid.length - (hIdx + 1)),
+        cortadoEnFila,
+        filasIgnoradasDespuesDelCorte: cortadoEnFila ? Math.max(0, grid.length - cortadoEnFila) : 0,
       },
       // Las filas que la hoja trae mal formadas, para que se vean y se arreglen.
       descartadas: descartadas.slice(0, 50),
