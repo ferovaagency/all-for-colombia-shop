@@ -839,6 +839,7 @@ export type Database = {
           id: string
           images: string[] | null
           info_fabricante: string | null
+          inv_activo_hoja: boolean | null
           inv_estado: string | null
           inv_sku: string | null
           inv_synced_at: string | null
@@ -884,6 +885,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           info_fabricante?: string | null
+          inv_activo_hoja?: boolean | null
           inv_estado?: string | null
           inv_sku?: string | null
           inv_synced_at?: string | null
@@ -929,6 +931,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           info_fabricante?: string | null
+          inv_activo_hoja?: boolean | null
           inv_estado?: string | null
           inv_sku?: string | null
           inv_synced_at?: string | null
