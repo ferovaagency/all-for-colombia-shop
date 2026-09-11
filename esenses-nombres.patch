@@ -1,0 +1,294 @@
+From 75cb5a5e2b1411a4a61e2ae1f757e0767063d71c Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 7 Sep 2026 19:51:10 +0000
+Subject: [PATCH] Renombro las imagenes de Esenses a las fuentes reales y
+ consolido duplicados
+
+Mafe paso las URLs de origen de cada foto. Los espacios de imagen pasan de 17
+a 14 archivos y cada nombre respeta la extension del original, para que baste
+con descargar y renombrar sin convertir nada.
+
+- Hero: hero-1.webp, hero-2.jpg y hero-3.webp (antes .jpg/.webp cruzados).
+- Colecciones: los destacado-* se reemplazan por mh10-a, mh10-b, sp3720-a,
+  tws.jpg, reloj.webp y cables.webp. Los nombres de las colecciones quedan
+  Audifonos, Audio profesional, Parlantes, Audifonos TWS, Relojes
+  inteligentes y Cables y cargadores.
+- Insignias: sale el HP-10000 y entra el Parlante Inalambrico Bluetooth 20 W
+  Vertical SP-3720, con sus dos vistas. La diadema pasa a su nombre real,
+  Diadema Multimedia Gaming MH-10G.
+- mh10-a, mh10-b y sp3720-a se referencian dos veces cada uno, una en
+  colecciones y otra en insignias: un solo archivo, dos usos, sin duplicar.
+
+No queda ninguna referencia a los nombres viejos. Sigue todo por URL publica
+desde public/, sin imports de imagen y con onError en cada <img>. LEEME.txt
+reescrito con los 14 nombres, su URL de origen y donde se usa cada uno.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_018WxxbVUekcbsssnqMSfF9i
+---
+ public/marcas/esenses/LEEME.txt | 142 +++++++++++++++++---------------
+ src/routes/marcas.esenses.tsx   |  53 ++++++------
+ 2 files changed, 102 insertions(+), 93 deletions(-)
+
+diff --git a/public/marcas/esenses/LEEME.txt b/public/marcas/esenses/LEEME.txt
+index 64810b4..6cc2bf1 100644
+--- a/public/marcas/esenses/LEEME.txt
++++ b/public/marcas/esenses/LEEME.txt
+@@ -1,90 +1,96 @@
+ Imágenes del microsite de Esenses  —  /marcas/esenses
+ =====================================================
+ 
+-Son 17 nombres de archivo, salidos de 16 imágenes distintas del home oficial
+-(MH-10-1.webp se usa en dos sitios). NINGUNO está en el repo todavía.
+-La página está construida para funcionar sin ellos: cada <img> tiene onError y, si el archivo falta, la imagen
+-se desmonta sola y queda el degradado o el fondo sólido de marca (negro,
+-grafito, metalizado). No se importan por `import`, se referencian por URL
+-pública, para que un archivo faltante no rompa la compilación.
+-
+-Origen: home oficial de https://esenses.com.co/ — solo las imágenes de marca,
+-banner y ambiente. Las que en el sitio oficial llevan nombre de EAN
+-(7707409…) son fotos de ficha de producto y NO se usan aquí.
+-
+-Cuando se consigan los archivos, se dejan en esta carpeta con EXACTAMENTE
+-estos nombres:
+-
++Son 14 archivos y NINGUNO está en el repo todavía. La página está construida
++para funcionar sin ellos: cada <img> tiene onError y, si el archivo falta, la
++imagen se desmonta sola y queda el degradado o el fondo sólido de marca
++(negro, grafito, metalizado). No se importan por `import`, se referencian por
++URL pública, para que un archivo faltante no rompa la compilación.
++
++Origen: home oficial de https://esenses.com.co/ — solo imágenes de marca,
++banner y ambiente, más las fotos de los dos productos insignia.
++
++Cada nombre respeta la extensión del archivo original: basta con descargar y
++renombrar, no hay que convertir nada. Ojo con `tws.jpg`, que es el único
++.jpg del grupo de colecciones.
++
++Tres archivos se usan en dos sitios cada uno (mh10-a, mh10-b y sp3720-a).
++Es a propósito: un solo archivo, dos usos, sin duplicar peso.
++
++
++DESCARGA — nombre destino y URL de origen
++-----------------------------------------
++hero-1.webp            https://esenses.com.co/wp-content/uploads/2026/08/B2.webp
++hero-2.jpg             https://esenses.com.co/wp-content/uploads/2025/12/Banner-esenses-01-02.jpg
++hero-3.webp            https://esenses.com.co/wp-content/uploads/2025/12/cateparlante-scaled.webp
++banner-parlantes.webp  https://esenses.com.co/wp-content/uploads/2025/12/bannerspeaker-scaled.webp
++mh10-a.webp            https://esenses.com.co/wp-content/uploads/2024/08/MH-10-1.webp
++mh10-b.webp            https://esenses.com.co/wp-content/uploads/2024/08/MH-10-4.webp
++sp3720-a.webp          https://esenses.com.co/wp-content/uploads/2025/03/7707409105512_001.webp
++sp3720-b.webp          https://esenses.com.co/wp-content/uploads/2025/03/7707409105512_002.webp
++tws.jpg                https://esenses.com.co/wp-content/uploads/2026/01/7707409105901_002.jpg
++reloj.webp             https://esenses.com.co/wp-content/uploads/2025/07/SW-IRON-NEGRO.webp
++cables.webp            https://esenses.com.co/wp-content/uploads/2024/07/CA-010.webp
++ambiente-1.webp        https://esenses.com.co/wp-content/uploads/2024/08/DSC0077.webp
++ambiente-2.webp        https://esenses.com.co/wp-content/uploads/2024/08/DSC0083.webp
++logo.webp              https://esenses.com.co/wp-content/uploads/2025/12/logonuevo.webp
++
++
++DÓNDE SE USA CADA UNA
++---------------------
+ 
+ HERO — carrusel de 3 banners a todo el ancho
+---------------------------------------------
+-  hero-1.jpg          ← Banner-esenses-01-02.jpg
+-      Slide 1. Lleva encima el eslogan y el botón COMPRA AHORA.
+-  hero-2.jpg          ← 01.jpg
+-      Slide 2 ("Sonido y estilo en cada detalle").
+-  hero-3.jpg          ← 02-2.jpg
+-      Slide 3 ("Tecnología que acompaña tu ritmo").
+-
+-  Recomendado 2400x900. El texto va a la izquierda con un velo oscuro, así
+-  que el foco visual de la foto conviene que quede a la derecha.
++  hero-1.webp   Slide 1: banner principal de la marca. Lleva encima el logo,
++                el eslogan y el botón COMPRA AHORA.
++  hero-2.jpg    Slide 2: banner secundario ("Sonido y estilo en cada detalle").
++  hero-3.webp   Slide 3: banner de la categoría parlantes ("Tecnología que
++                acompaña tu ritmo").
+ 
++  Se recortan en object-cover sobre un bloque de 560 px de alto, con un velo
++  oscuro y el texto a la izquierda: conviene que el foco visual de la foto
++  quede a la derecha. Recomendado 2400x900.
+ 
+ LOGO
+-----
+-  logo.webp           ← logonuevo.webp
+-      Logotipo de Esenses, fondo transparente, versión clara o negativo.
+-      Uso: encima del hero. Alto de render ~40 px, subir a 2x (~80 px).
+-      Si falta, el hero escribe "ESENSES" en tipografía de marca.
+-
++  logo.webp     Encima del hero. Alto de render ~40 px, subir a 2x (~80 px).
++                Fondo transparente, versión clara o negativo.
++                Si falta, el hero escribe "ESENSES" en tipografía de marca.
+ 
+ BANNER PROMOCIONAL — línea de audio
+------------------------------------
+-  banner-parlantes.webp   ← bannerspeaker-scaled.webp
+-      Banner grande de parlantes y accesorios de audio.
+-      Recomendado 2000x700.
+-
++  banner-parlantes.webp   Banner grande de parlantes y accesorios de audio.
++                          Recomendado 2000x700, sujeto a la derecha.
+ 
+ MOSAICO DE COLECCIONES — 6 fichas, siempre visibles
+----------------------------------------------------
+-  destacado-diadema.webp    ← diadema.webp        → "Audífonos de diadema"
+-  destacado-tws.webp        ← eb-tws-91.webp      → "Audífonos TWS"
+-  destacado-parlante.webp   ← speaker.webp        → "Parlantes"
+-  destacado-reloj.webp      ← SW-IRON-NEGRO.webp  → "Relojes inteligentes"
+-  destacado-cables.webp     ← CA-010.webp         → "Cables y cargadores"
+-  destacado-audio-pro.webp  ← MH-10-1.webp        → "Audio profesional"
+-
+-      Se recortan en 4:5. Mínimo 800 px de lado. Cada ficha enlaza a
+-      /tienda?marca=esenses.
++  mh10-a.webp     → "Audífonos"              (también en Insignia, vista A)
++  mh10-b.webp     → "Audio profesional"      (también en Insignia, vista B)
++  sp3720-a.webp   → "Parlantes"              (también en Insignia, vista A)
++  tws.jpg         → "Audífonos TWS"          (EB-TWS-91)
++  reloj.webp      → "Relojes inteligentes"
++  cables.webp     → "Cables y cargadores"
+ 
++  Se recortan en 4:5, rejilla de 3 columnas (2 en móvil). Mínimo 800 px de
++  lado. Cada ficha enlaza a /tienda?marca=esenses.
+ 
+ SECCIÓN "EL MUNDO ESENSES" — fotos de ambiente
+-----------------------------------------------
+-  ambiente-1.webp     ← DSC0077.webp      → tarjeta "Para tu día"
+-  ambiente-2.webp     ← DSC0083.webp      → tarjeta "Para tu espacio"
+-
+-      Fotos de estilo de vida, a lo ancho, con el eslogan de la marca encima.
+-      Se recortan en object-cover sobre un bloque de mínimo 420 px de alto:
+-      conviene que el sujeto quede centrado y el texto entra abajo a la
+-      izquierda sobre un degradado negro. Recomendado 1600x1200 o más.
++  ambiente-1.webp   → tarjeta "Para tu día"
++  ambiente-2.webp   → tarjeta "Para tu espacio"
+ 
++  Fotos de estilo de vida, a lo ancho, bajo el eslogan de la marca. Se
++  recortan en object-cover sobre un bloque de mínimo 420 px de alto: conviene
++  el sujeto centrado, porque el texto entra abajo a la izquierda sobre un
++  degradado negro. Recomendado 1600x1200 o más.
+ 
+ SECCIÓN "PRODUCTOS INSIGNIA" — dos vistas por producto
+-------------------------------------------------------
+-  insignia-mh10-a.webp      ← MH-10-1.webp     → Diadema MH-10, vista 1
+-  insignia-mh10-b.webp      ← MH-10-4.webp     → Diadema MH-10, vista 2
+-  insignia-hp10000-a.jpg    ← HP-10000.jpg     → Parlante HP-10000, vista 1
+-  insignia-hp10000-b.jpg    ← HP-10000.1.jpg   → Parlante HP-10000, vista 2
+-
+-      Las dos vistas de cada producto se alternan al pasar el mouse o al
+-      tocar. Se recortan en 4:3, así que las dos fotos de un mismo producto
+-      deben tener el objeto más o menos del mismo tamaño y en la misma
+-      posición; si no, el cambio "salta".
++  Diadema Multimedia Gaming MH-10G
++      vista A: mh10-a.webp      vista B: mh10-b.webp
++  Parlante Inalámbrico Bluetooth 20 W Vertical SP-3720
++      vista A: sp3720-a.webp    vista B: sp3720-b.webp
+ 
+-      Nota: destacado-audio-pro.webp e insignia-mh10-a.webp salen del mismo
+-      archivo de origen (MH-10-1.webp). Se dejan duplicados a propósito, para
+-      poder cambiar uno sin tocar el otro.
++  Las dos vistas de cada producto se alternan al pasar el mouse o al tocar.
++  Se recortan en 4:3, así que las dos fotos de un mismo producto deben tener
++  el objeto más o menos del mismo tamaño y en la misma posición; si no, el
++  cambio "salta".
+ 
+ 
+ Nota: al momento de construir la página el proxy de red bloqueaba
+-esenses.com.co (403), así que ninguna imagen se pudo descargar. Hay que
+-bajarlas manualmente del home oficial o pedírselas a la marca.
++esenses.com.co (403), así que ninguna imagen se pudo descargar ni verificar.
++Las URLs de arriba las aportó Mafe desde las páginas de origen.
+diff --git a/src/routes/marcas.esenses.tsx b/src/routes/marcas.esenses.tsx
+index f23a7c7..d925d5d 100644
+--- a/src/routes/marcas.esenses.tsx
++++ b/src/routes/marcas.esenses.tsx
+@@ -52,24 +52,27 @@ const BRAND_GRADIENT = "linear-gradient(115deg,#050505 0%,#1c1f24 45%,#5b636d 10
+ const BRAND_GRADIENT_ALT = "linear-gradient(115deg,#0a0a0a 0%,#2a2f36 50%,#8d949c 100%)";
+ const SLOGAN = "Un mundo de posibilidades con tecnología innovadora";
+ 
++/**
++ * Un archivo por foto. `mh10A`, `mh10B` y `sp3720A` se referencian dos veces
++ * a propósito (colecciones e insignia): se reusa el mismo archivo, no se
++ * duplica. La extensión de cada uno es la del original de esenses.com.co,
++ * para que baste con descargar y renombrar, sin convertir nada.
++ */
+ const IMG = {
+   logo: "/marcas/esenses/logo.webp",
+-  hero1: "/marcas/esenses/hero-1.jpg",
++  hero1: "/marcas/esenses/hero-1.webp",
+   hero2: "/marcas/esenses/hero-2.jpg",
+-  hero3: "/marcas/esenses/hero-3.jpg",
++  hero3: "/marcas/esenses/hero-3.webp",
+   bannerParlantes: "/marcas/esenses/banner-parlantes.webp",
+-  diadema: "/marcas/esenses/destacado-diadema.webp",
+-  parlante: "/marcas/esenses/destacado-parlante.webp",
+-  tws: "/marcas/esenses/destacado-tws.webp",
+-  reloj: "/marcas/esenses/destacado-reloj.webp",
+-  cables: "/marcas/esenses/destacado-cables.webp",
+-  audioPro: "/marcas/esenses/destacado-audio-pro.webp",
++  mh10A: "/marcas/esenses/mh10-a.webp",
++  mh10B: "/marcas/esenses/mh10-b.webp",
++  sp3720A: "/marcas/esenses/sp3720-a.webp",
++  sp3720B: "/marcas/esenses/sp3720-b.webp",
++  tws: "/marcas/esenses/tws.jpg",
++  reloj: "/marcas/esenses/reloj.webp",
++  cables: "/marcas/esenses/cables.webp",
+   ambiente1: "/marcas/esenses/ambiente-1.webp",
+   ambiente2: "/marcas/esenses/ambiente-2.webp",
+-  mh10A: "/marcas/esenses/insignia-mh10-a.webp",
+-  mh10B: "/marcas/esenses/insignia-mh10-b.webp",
+-  hp10000A: "/marcas/esenses/insignia-hp10000-a.jpg",
+-  hp10000B: "/marcas/esenses/insignia-hp10000-b.jpg",
+ };
+ 
+ /**
+@@ -703,12 +706,12 @@ function EsensesProductCard({ product }: { product: any }) {
+ /* ============================== COLECCIONES ============================== */
+ 
+ const COLECCIONES = [
+-  { image: IMG.diadema, label: "Audífonos de diadema", tagline: "Sonido envolvente" },
+-  { image: IMG.tws, label: "Audífonos TWS", tagline: "Libertad inalámbrica" },
+-  { image: IMG.parlante, label: "Parlantes", tagline: "Potencia portátil" },
++  { image: IMG.mh10A, label: "Audífonos", tagline: "Diadema, in-ear y gaming" },
++  { image: IMG.mh10B, label: "Audio profesional", tagline: "Monitoreo y estudio" },
++  { image: IMG.sp3720A, label: "Parlantes", tagline: "Bluetooth con potencia real" },
++  { image: IMG.tws, label: "Audífonos TWS", tagline: "EB-TWS-91: libertad inalámbrica" },
+   { image: IMG.reloj, label: "Relojes inteligentes", tagline: "Tu día, medido" },
+   { image: IMG.cables, label: "Cables y cargadores", tagline: "Carga rápida y confiable" },
+-  { image: IMG.audioPro, label: "Audio profesional", tagline: "Monitoreo y estudio" },
+ ];
+ 
+ function Colecciones() {
+@@ -937,19 +940,19 @@ function MundoEsenses() {
+ 
+ const INSIGNIAS = [
+   {
+-    key: "mh10",
+-    name: "Diadema MH-10",
+-    tagline: "Audio profesional",
+-    text: "Diadema over-ear de monitoreo, con almohadillas amplias y cable desmontable. Pensada para escuchar horas sin cansancio.",
++    key: "mh10g",
++    name: "Diadema Multimedia Gaming MH-10G",
++    tagline: "Audio y juego",
++    text: "Diadema over-ear con almohadillas amplias y micrófono integrado. Sirve igual para las llamadas del trabajo y para jugar horas sin cansancio.",
+     views: [IMG.mh10A, IMG.mh10B],
+     gradient: BRAND_GRADIENT,
+   },
+   {
+-    key: "hp10000",
+-    name: "Parlante HP-10000",
+-    tagline: "Potencia para la fiesta",
+-    text: "Torre de sonido de alta potencia con conexión inalámbrica e iluminación. El equipo grande de la línea de audio Esenses.",
+-    views: [IMG.hp10000A, IMG.hp10000B],
++    key: "sp3720",
++    name: "Parlante Inalámbrico Bluetooth 20 W Vertical SP-3720",
++    tagline: "Potencia vertical",
++    text: "Formato vertical de 20 W con conexión Bluetooth. Ocupa poco en el escritorio o la sala y suena como algo del doble de su tamaño.",
++    views: [IMG.sp3720A, IMG.sp3720B],
+     gradient: BRAND_GRADIENT_ALT,
+   },
+ ];
+-- 
+2.43.0
+
