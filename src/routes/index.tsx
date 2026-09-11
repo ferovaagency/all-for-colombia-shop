@@ -12,6 +12,7 @@ import { BrandShowcase } from "@/components/shop/BrandShowcase";
 import { Reveal } from "@/components/shop/Reveal";
 import bannerCorsair from "@/assets/banner-corsair-sillas-gamer.webp";
 import bannerViewsonic from "@/assets/banner-viewsonic-proyectores.webp";
+import bannerPrimus from "@/assets/banner-primus-gaming.webp";
 import bannerMsi from "@/assets/banner-msi-juega-sin-limites.webp";
 import posterJbl from "@/assets/poster-jbl.webp";
 import { getHomeData } from "@/lib/ssr-data.functions";
@@ -61,6 +62,14 @@ const VIEWSONIC_BANNER: PromoBannerItem = {
   aspectRatio: "1983/793",
 };
 
+const PRIMUS_BANNER: PromoBannerItem = {
+  id: 5,
+  image: bannerPrimus,
+  link: "/tienda?marca=primus",
+  alt: "Primus — Equipos gaming diseñados para tu máximo rendimiento",
+  aspectRatio: "2129/738",
+};
+
 const PROMO_BANNERS: PromoBannerItem[] = [
   {
     id: 1,
@@ -80,7 +89,7 @@ const PROMO_BANNERS: PromoBannerItem[] = [
 ];
 
 // El hero lleva ademas el banner de Corsair; el slider de mitad de pagina no.
-const HERO_BANNERS: PromoBannerItem[] = [CORSAIR_BANNER, VIEWSONIC_BANNER, ...PROMO_BANNERS];
+const HERO_BANNERS: PromoBannerItem[] = [CORSAIR_BANNER, VIEWSONIC_BANNER, PRIMUS_BANNER, ...PROMO_BANNERS];
 
 const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
 const DM = { fontFamily: "'DM Sans', 'Inter', sans-serif" };
