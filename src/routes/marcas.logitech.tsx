@@ -193,6 +193,24 @@ const SERIES_AMBIENT: Record<string, string> = {
 
 const SERIE_BY_KEY = new Map(SERIES.map((s) => [s.key, s]));
 
+/**
+ * Grupos de series a los que puede apuntar un banner del hero. El filtro del
+ * catalogo trabaja normalmente con una sola serie; un grupo permite que un
+ * banner lleve a varias a la vez (por ejemplo MX + ERGO, que para el cliente
+ * son una sola linea de trabajo).
+ *
+ * Un banner apunta a un grupo con `href: "#catalogo&serie=mx,ergo"`. La clave
+ * del grupo es la lista de series separadas por coma, en ese mismo orden.
+ */
+const GRUPOS_SERIE: Record<string, string> = {
+  "mx,ergo": "MX + ERGO",
+  "gamer-pro,racing": "PRO + Sim Racing",
+};
+
+/** Las series de una seleccion: "mx,ergo" -> ["mx","ergo"], "mx" -> ["mx"]. */
+const seriesDe = (seleccion: string) =>
+  seleccion === "todas" ? [] : seleccion.split(",").map((k) => k.trim()).filter(Boolean);
+
 function classify(product: any): string | null {
   const haystack = `${product.name ?? ""} ${product.sku ?? ""}`.toLowerCase();
   for (const s of SERIES) {
@@ -229,6 +247,28 @@ function LogitechMicrosite() {
       setProducts(data || []);
       setLoading(false);
     })();
+  }, []);
+
+  /**
+   * Un banner del hero puede pedir el catalogo ya filtrado, con
+   * `#catalogo&serie=mx,ergo`. Se escucha tambien el cambio de hash para que
+   * funcione al hacer clic en otro banner sin recargar la pagina.
+   */
+  useEffect(() => {
+    const aplicar = () => {
+      const hash = window.location.hash;
+      if (!hash.startsWith("#catalogo")) return;
+      const pedido = /[?&]serie=([^&]+)/.exec(hash)?.[1];
+      if (pedido) setActiveSerie(decodeURIComponent(pedido));
+      // El ancla #catalogo por si sola no lleva a ningun lado cuando el hash
+      // trae parametros, asi que el desplazamiento se hace a mano.
+      requestAnimationFrame(() => {
+        document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    };
+    aplicar();
+    window.addEventListener("hashchange", aplicar);
+    return () => window.removeEventListener("hashchange", aplicar);
   }, []);
 
   const office = useMemo(() => products.filter((p) => !isGaming(p)), [products]);
@@ -283,7 +323,23 @@ function LogitechMicrosite() {
     [gaming],
   );
 
-  const filtered = activeSerie === "todas" ? products : (bySerie.get(activeSerie) ?? []);
+  // Una seleccion puede ser una serie o un grupo de varias. Se respeta el
+  // orden en que se pidieron las series y no se repite un producto que
+  // clasifique en dos.
+  const filtered = useMemo(() => {
+    const claves = seriesDe(activeSerie);
+    if (!claves.length) return products;
+    const vistos = new Set<string>();
+    const out: any[] = [];
+    for (const k of claves) {
+      for (const p of bySerie.get(k) ?? []) {
+        if (vistos.has(p.id)) continue;
+        vistos.add(p.id);
+        out.push(p);
+      }
+    }
+    return out;
+  }, [activeSerie, products, bySerie]);
   const enabledHeroVideos = LOGITECH_HERO_VIDEOS.filter((video) => video.enabled);
 
   return (
@@ -436,6 +492,12 @@ function LogitechMicrosite() {
               <div className="flex items-center gap-1 overflow-x-auto max-w-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {[
                   { key: "todas", label: "Todas" },
+                  // Si el filtro viene de un banner y agrupa varias series, se
+                  // muestra como una pestana propia: si no, el usuario ve el
+                  // catalogo filtrado y ninguna pestana marcada.
+                  ...(GRUPOS_SERIE[activeSerie]
+                    ? [{ key: activeSerie, label: GRUPOS_SERIE[activeSerie] }]
+                    : []),
                   ...activeSeries.map((s) => ({ key: s.key, label: s.label })),
                 ].map((t) => (
                   <button

@@ -19,16 +19,18 @@ export const LOGITECH_HERO_VIDEOS: LogitechHeroVideo[] = [
     enabled: true,
     desktopSrc: "/logitech/banners/logitech-mk880-desktop.mp4",
     poster: "/logitech/banners/logitech-mk880-poster.webp",
-    href: "#office",
-    label: "Descubre Logitech para trabajo, productividad y creatividad",
+    // Pendiente: reemplazar la pieza por una de la linea MX / ERGO.
+    href: "#catalogo&serie=mx,ergo",
+    label: "Descubre las series MX y ERGO de Logitech para trabajo y creatividad",
   },
   {
     id: "logitech-g321",
     enabled: true,
     desktopSrc: "/logitech/banners/logitech-g321-desktop.mp4",
     poster: "/logitech/banners/logitech-g321-poster.webp",
-    href: "#gaming",
-    label: "Conoce los audífonos Logitech G321 para gaming",
+    // Pendiente: reemplazar la pieza por una de la linea PRO / timones.
+    href: "#catalogo&serie=gamer-pro,racing",
+    label: "Conoce la serie PRO y los timones de simulación Logitech G",
   },
   {
     id: "logitech-gaming-mice",
