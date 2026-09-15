@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { WideProductCard } from "@/components/shop/HomeCatalog";
@@ -49,7 +48,6 @@ const SPACE = { fontFamily: "'Space Grotesk', 'Inter', sans-serif" };
 /** Identidad Esenses: negro, blanco y metalizados. */
 const SILVER = "#B8BDC4";
 const BRAND_GRADIENT = "linear-gradient(115deg,#050505 0%,#1c1f24 45%,#5b636d 100%)";
-const BRAND_GRADIENT_ALT = "linear-gradient(115deg,#0a0a0a 0%,#2a2f36 50%,#8d949c 100%)";
 const SLOGAN = "Un mundo de posibilidades con tecnología innovadora";
 
 /**
@@ -59,60 +57,13 @@ const SLOGAN = "Un mundo de posibilidades con tecnología innovadora";
  * para que baste con descargar y renombrar, sin convertir nada.
  */
 const IMG = {
-  logo: "/marcas/esenses/logo.webp",
+  /** Banner del hero. Pieza oficial terminada: trae su propio titular. */
   hero1: "/marcas/esenses/hero-1.webp",
-  hero2: "/marcas/esenses/hero-2.jpg",
-  hero3: "/marcas/esenses/hero-3.webp",
-  bannerParlantes: "/marcas/esenses/banner-parlantes.webp",
-  // Piezas oficiales de Esenses, ya diseñadas y con su propio texto.
-  // Se muestran tal cual: sin velo, sin recorte y sin nada escrito encima.
-  promoTws: "/marcas/esenses/promo-tws-91.webp",
+  /** Piezas promocionales oficiales, con precio y texto ya dibujados. */
   promoSp3720: "/marcas/esenses/promo-sp3720.webp",
+  promoTws: "/marcas/esenses/promo-tws-91.webp",
   promoMh10g: "/marcas/esenses/promo-mh10g.webp",
-  mh10A: "/marcas/esenses/mh10-a.webp",
-  mh10B: "/marcas/esenses/mh10-b.webp",
-  sp3720A: "/marcas/esenses/sp3720-a.webp",
-  sp3720B: "/marcas/esenses/sp3720-b.webp",
-  tws: "/marcas/esenses/tws.jpg",
-  reloj: "/marcas/esenses/reloj.webp",
-  cables: "/marcas/esenses/cables.webp",
-  ambiente1: "/marcas/esenses/ambiente-1.webp",
-  ambiente2: "/marcas/esenses/ambiente-2.webp",
 };
-
-/**
- * Imagen que se desmonta sola si el archivo no existe.
- * Las fotos de Esenses todavía no están en `public/marcas/esenses/`, así que
- * cualquier <img> de marca tiene que poder faltar sin dejar un ícono roto:
- * cuando falla, queda el fondo sólido/degradado del contenedor.
- */
-function BrandImage({
-  src,
-  alt,
-  className,
-  onFail,
-}: {
-  src: string;
-  alt: string;
-  className?: string;
-  onFail?: () => void;
-}) {
-  const [failed, setFailed] = useState(false);
-  if (failed) return null;
-  return (
-    <img
-      src={src}
-      alt={alt}
-      loading="lazy"
-      decoding="async"
-      className={className}
-      onError={() => {
-        setFailed(true);
-        onFail?.();
-      }}
-    />
-  );
-}
 
 /**
  * Categorías del sitio oficial de Esenses.
@@ -273,27 +224,14 @@ function EsensesMicrosite() {
       )}
 
       {/* ============ CARRUSEL DE PRODUCTOS DESTACADOS ============ */}
-      {!loading && (
+      {!loading && destacados.length > 0 && (
         <section className="bg-white">
           <div className="container mx-auto px-6 lg:px-10 py-14 md:py-20">
             <SectionHeading eyebrow="Esenses" title="Productos destacados" />
-            {destacados.length > 0 ? (
-              <DestacadosCarrusel products={destacados} />
-            ) : (
-              <EmptyState text="Los productos Esenses llegan muy pronto a la tienda." />
-            )}
+            <DestacadosCarrusel products={destacados} />
           </div>
         </section>
       )}
-
-      {/* ============ COLECCIONES (siempre visibles) ============ */}
-      <Colecciones />
-
-      {/* ============ EL MUNDO ESENSES (fotos de ambiente) ============ */}
-      <MundoEsenses />
-
-      {/* ============ PRODUCTOS INSIGNIA (dos vistas) ============ */}
-      <Insignias />
 
       {/* ============ PRODUCTOS ESTRELLA POR CATEGORÍA ============ */}
       {!loading && (
@@ -353,9 +291,6 @@ function EsensesMicrosite() {
         </section>
       )}
 
-      {/* ============ BANNER PROMOCIONAL ============ */}
-      <BannerParlantes />
-
       {/* ============ FAQ ============ */}
       <Faq />
     </div>
@@ -364,39 +299,32 @@ function EsensesMicrosite() {
 
 /* ============================== HERO ============================== */
 
-type HeroSlide = {
-  image: string;
-  gradient: string;
-  eyebrow: string;
-  title: string;
-  text: string;
-};
+/** Respaldo del hero: si la pieza no carga, queda un bloque de marca. */
+type HeroSlide = { gradient: string; eyebrow: string; title: string; text: string };
 
 /**
  * El hero es una pieza terminada de Esenses: la foto ya trae el titular y el
- * botón dibujados. Por eso va sin velo, sin recorte y SIN texto encima —
- * escribirle algo arriba se le montaría al diseño original.
- * `ratio` es el tamaño real del archivo: reserva el alto exacto antes de que
- * cargue y evita que la página salte.
+ * boton dibujados. Por eso va sin velo, sin recorte y SIN texto encima —
+ * escribirle algo arriba se le montaria al diseno original.
+ * `ratio` es el tamano real del archivo: reserva el alto exacto antes de que
+ * cargue y evita que la pagina salte.
  */
 type HeroBanner = { image: string; alt: string; ratio: string };
 
 const HERO_BANNERS: HeroBanner[] = [
   {
     image: IMG.hero1,
-    alt: "Esenses — Accesorios tecnológicos y wearables. Speakers",
+    alt: "Esenses — Accesorios tecnologicos y wearables. Speakers",
     ratio: "1828 / 656",
   },
 ];
 
-/** Respaldo: si la pieza no está, el hero sigue siendo un hero. */
 const HERO_SLIDES: HeroSlide[] = [
   {
-    image: IMG.hero2,
     gradient: BRAND_GRADIENT,
     eyebrow: "Esenses",
     title: SLOGAN,
-    text: "Audífonos, relojes inteligentes, parlantes y accesorios Esenses, disponibles en All For All con envío a todo el país.",
+    text: "Audifonos, relojes inteligentes, parlantes y accesorios Esenses, disponibles en All For All con envio a todo el pais.",
   },
 ];
 
@@ -582,34 +510,22 @@ function PromosEsenses() {
   );
 }
 
+/**
+ * Respaldo del hero. Solo se ve si la pieza oficial no carga. No pide ningun
+ * archivo: el degradado de marca y la palabra ESENSES bastan para que la
+ * pagina no se vea rota.
+ */
 function HeroEscrito() {
   const slide = HERO_SLIDES[0];
-  const [logoOk, setLogoOk] = useState(true);
   return (
     <section className="relative w-full overflow-hidden text-white" style={{ minHeight: 460 }}>
-      <div className="absolute inset-0" style={{ backgroundImage: slide.gradient }}>
-        <BrandImage
-          src={slide.image}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-70"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/20" />
-      </div>
+      <div className="absolute inset-0" style={{ backgroundImage: slide.gradient }} />
 
       <div className="relative container mx-auto px-6 lg:px-10 flex items-center min-h-[460px] md:min-h-[560px] py-16">
         <div className="z-10 max-w-2xl">
-          {logoOk ? (
-            <BrandImage
-              src={IMG.logo}
-              alt="Esenses"
-              className="h-8 md:h-10 w-auto object-contain mb-5"
-              onFail={() => setLogoOk(false)}
-            />
-          ) : (
-            <p style={SPACE} className="text-lg md:text-xl font-black tracking-[0.35em] uppercase mb-5">
-              Esenses
-            </p>
-          )}
+          <p style={SPACE} className="text-lg md:text-xl font-black tracking-[0.35em] uppercase mb-5">
+            Esenses
+          </p>
           <p className="text-[10px] md:text-xs uppercase tracking-[0.35em] text-white/60 mb-3">
             {slide.eyebrow}
           </p>
@@ -824,117 +740,6 @@ function EsensesProductCard({ product }: { product: any }) {
   );
 }
 
-/* ============================== COLECCIONES ============================== */
-
-const COLECCIONES = [
-  { image: IMG.mh10A, label: "Audífonos", tagline: "Diadema, in-ear y gaming" },
-  { image: IMG.mh10B, label: "Audio profesional", tagline: "Monitoreo y estudio" },
-  { image: IMG.sp3720A, label: "Parlantes", tagline: "Bluetooth con potencia real" },
-  { image: IMG.tws, label: "Audífonos TWS", tagline: "EB-TWS-91: libertad inalámbrica" },
-  { image: IMG.reloj, label: "Relojes inteligentes", tagline: "Tu día, medido" },
-  { image: IMG.cables, label: "Cables y cargadores", tagline: "Carga rápida y confiable" },
-];
-
-function Colecciones() {
-  return (
-    <Reveal>
-      <section className="bg-white">
-        <div className="container mx-auto px-6 lg:px-10 py-14 md:py-20">
-          <SectionHeading eyebrow="Colecciones" title="Explora Esenses" />
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
-            {COLECCIONES.map((c, i) => (
-              <motion.div
-                key={c.label}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.4, delay: (i % 4) * 0.07 }}
-              >
-                <Link
-                  to="/tienda"
-                  search={{ marca: "esenses" } as any}
-                  className="group relative block overflow-hidden rounded-2xl aspect-[4/5]"
-                  style={{ backgroundImage: BRAND_GRADIENT }}
-                >
-                  <BrandImage
-                    src={c.image}
-                    alt={c.label}
-                    className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4 md:p-5">
-                    <div className="text-white">
-                      <p
-                        style={SPACE}
-                        className="text-base md:text-xl font-bold tracking-[-0.02em] leading-tight"
-                      >
-                        {c.label}
-                      </p>
-                      <p className="text-xs md:text-sm text-white/75 leading-snug mt-0.5">
-                        {c.tagline}
-                      </p>
-                    </div>
-                    <span className="shrink-0 mb-1 text-white/90 group-hover:translate-x-1 transition-transform">
-                      <ArrowRight className="h-5 w-5" />
-                    </span>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </Reveal>
-  );
-}
-
-/* ============================== BANNER PROMOCIONAL ============================== */
-
-function BannerParlantes() {
-  return (
-    <Reveal>
-      <section className="bg-white">
-        <div className="container mx-auto px-6 lg:px-10 py-10 md:py-14">
-          <div
-            className="relative overflow-hidden rounded-3xl text-white min-h-[300px] md:min-h-[380px] flex items-center"
-            style={{ backgroundImage: BRAND_GRADIENT_ALT }}
-          >
-            <BrandImage
-              src={IMG.bannerParlantes}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover opacity-65"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent" />
-
-            <div className="relative z-10 p-8 md:p-14 max-w-xl">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-white/60">
-                Línea de audio
-              </p>
-              <h2
-                style={SPACE}
-                className="mt-3 text-2xl md:text-4xl font-bold tracking-[-0.03em] leading-[1.08]"
-              >
-                Parlantes y accesorios de audio Esenses
-              </h2>
-              <p className="mt-4 text-white/80">
-                Bluetooth portátil, torres de sonido y accesorios en acabados negros y
-                metalizados. Potencia real para la casa, la oficina y el viaje.
-              </p>
-              <Link
-                to="/tienda"
-                search={{ marca: "esenses" } as any}
-                className="mt-7 inline-flex items-center gap-2 rounded-full bg-white text-neutral-950 px-7 py-3 text-sm font-bold hover:gap-3 transition-all"
-              >
-                Ver la línea de audio <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    </Reveal>
-  );
-}
-
 /* ============================== FAQ ============================== */
 
 const FAQS = [
@@ -987,194 +792,5 @@ function Faq() {
         </div>
       </div>
     </section>
-  );
-}
-
-/* ============================== EL MUNDO ESENSES ============================== */
-
-const AMBIENTES = [
-  {
-    image: IMG.ambiente1,
-    title: "Para tu día",
-    text: "Audio y wearables que acompañan el trabajo, el gimnasio y el camino.",
-  },
-  {
-    image: IMG.ambiente2,
-    title: "Para tu espacio",
-    text: "Sonido y accesorios con acabados negros y metalizados que combinan con todo.",
-  },
-];
-
-/**
- * Fotos de ambiente de la marca con el eslogan encima.
- * No depende del catálogo: es la sección que sostiene la página mientras no
- * haya productos Esenses cargados.
- */
-function MundoEsenses() {
-  return (
-    <section className="bg-neutral-950 text-white">
-      <div className="container mx-auto px-6 lg:px-10 py-14 md:py-20">
-        <SectionHeading eyebrow="El mundo Esenses" title={SLOGAN} dark />
-
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-          {AMBIENTES.map((a, i) => (
-            <Reveal key={a.title} delay={i * 0.08}>
-              <div
-                className="relative overflow-hidden rounded-3xl min-h-[280px] md:min-h-[420px] flex items-end"
-                style={{ backgroundImage: i === 0 ? BRAND_GRADIENT : BRAND_GRADIENT_ALT }}
-              >
-                <BrandImage
-                  src={a.image}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
-                <div className="relative z-10 p-7 md:p-10">
-                  <h3
-                    style={SPACE}
-                    className="text-xl md:text-3xl font-bold tracking-[-0.02em] leading-tight"
-                  >
-                    {a.title}
-                  </h3>
-                  <p className="mt-2 text-white/75 max-w-sm">{a.text}</p>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-
-        <div className="mt-10 text-center">
-          <Link
-            to="/tienda"
-            search={{ marca: "esenses" } as any}
-            className="inline-flex items-center gap-2 rounded-full bg-white text-neutral-950 px-8 py-3.5 text-sm font-black tracking-[0.12em] uppercase hover:gap-3 transition-all"
-          >
-            Compra ahora <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ============================== PRODUCTOS INSIGNIA ============================== */
-
-const INSIGNIAS = [
-  {
-    key: "mh10g",
-    name: "Diadema Multimedia Gaming MH-10G",
-    tagline: "Audio y juego",
-    text: "Diadema over-ear con almohadillas amplias y micrófono integrado. Sirve igual para las llamadas del trabajo y para jugar horas sin cansancio.",
-    views: [IMG.mh10A, IMG.mh10B],
-    gradient: BRAND_GRADIENT,
-  },
-  {
-    key: "sp3720",
-    name: "Parlante Inalámbrico Bluetooth 20 W Vertical SP-3720",
-    tagline: "Potencia vertical",
-    text: "Formato vertical de 20 W con conexión Bluetooth. Ocupa poco en el escritorio o la sala y suena como algo del doble de su tamaño.",
-    views: [IMG.sp3720A, IMG.sp3720B],
-    gradient: BRAND_GRADIENT_ALT,
-  },
-];
-
-function Insignias() {
-  return (
-    <Reveal>
-      <section className="bg-white">
-        <div className="container mx-auto px-6 lg:px-10 py-14 md:py-20">
-          <SectionHeading eyebrow="Productos insignia" title="Míralos por los dos lados" />
-          <p className="mt-3 text-center text-neutral-500">
-            Pasa el mouse o toca la foto para ver la segunda vista.
-          </p>
-
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {INSIGNIAS.map((it) => (
-              <InsigniaCard key={it.key} item={it} />
-            ))}
-          </div>
-        </div>
-      </section>
-    </Reveal>
-  );
-}
-
-/**
- * Visor de dos vistas. No reutiliza `LogitechColorViewer` porque ese lee las
- * variantes desde `logitech-variants` y no admite fotos sueltas.
- * Las dos vistas van apiladas y se cruzan por opacidad: si un archivo falta,
- * `BrandImage` se desmonta y queda el degradado de marca, sin hueco visual.
- */
-function InsigniaCard({
-  item,
-}: {
-  item: { name: string; tagline: string; text: string; views: string[]; gradient: string };
-}) {
-  const [view, setView] = useState(0);
-  const toggle = () => setView((v) => (v === 0 ? 1 : 0));
-
-  return (
-    <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-white">
-      <button
-        type="button"
-        onClick={toggle}
-        onMouseEnter={() => setView(1)}
-        onMouseLeave={() => setView(0)}
-        aria-label={`Cambiar la vista de ${item.name}`}
-        className="relative block w-full aspect-[4/3] overflow-hidden"
-        style={{ backgroundImage: item.gradient }}
-      >
-        {item.views.map((src, i) => (
-          <span
-            key={src}
-            className={cn(
-              "absolute inset-0 transition-opacity duration-500",
-              view === i ? "opacity-100" : "opacity-0",
-            )}
-          >
-            <BrandImage
-              src={src}
-              alt={`${item.name} — vista ${i + 1}`}
-              className="h-full w-full object-cover"
-            />
-          </span>
-        ))}
-
-        <span className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
-          {item.views.map((src, i) => (
-            <span
-              key={src}
-              className={cn(
-                "h-1.5 rounded-full transition-all",
-                view === i ? "w-5 bg-white" : "w-1.5 bg-white/50",
-              )}
-            />
-          ))}
-        </span>
-      </button>
-
-      <div className="p-6 md:p-8">
-        <p
-          className="text-[10px] font-bold uppercase tracking-[0.3em]"
-          style={{ color: SILVER }}
-        >
-          {item.tagline}
-        </p>
-        <h3
-          style={SPACE}
-          className="mt-2 text-xl md:text-2xl font-bold tracking-[-0.02em] text-neutral-950"
-        >
-          {item.name}
-        </h3>
-        <p className="mt-2 text-neutral-600 leading-relaxed">{item.text}</p>
-        <Link
-          to="/tienda"
-          search={{ marca: "esenses" } as any}
-          className="mt-5 inline-flex items-center gap-2 rounded-full bg-neutral-950 text-white px-6 py-3 text-sm font-bold hover:gap-3 transition-all"
-        >
-          Ver en la tienda <ArrowUpRight className="h-4 w-4" />
-        </Link>
-      </div>
-    </div>
   );
 }
