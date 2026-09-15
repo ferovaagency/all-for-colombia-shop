@@ -18,6 +18,37 @@ Tres archivos se usan en dos sitios cada uno (mh10-a, mh10-b y sp3720-a).
 Es a propósito: un solo archivo, dos usos, sin duplicar peso.
 
 
+ESTADO — 15/09/2026
+-------------------
+YA ESTAN EN EL REPO (las aporto Mafe, son piezas oficiales ya disenadas):
+
+  hero-1.webp            1828x656   Banner del hero. Trae su propio titular
+                                    ("Accesorios tecnologicos y wearables") y
+                                    su boton. Por eso el hero lo muestra TAL
+                                    CUAL: sin velo oscuro, sin recorte y sin
+                                    texto encima. Escribirle algo arriba se le
+                                    montaria al diseno original.
+  promo-sp3720.webp      1188x600   "New Speaker! SP-3720 Black"
+  promo-tws-91.webp       594x300   "Auriculares EB-TWS-91 $54.900"
+  promo-mh10g.webp        594x300   "Ofertas MH-10G $99.900"
+
+  Las tres promo van en una rejilla propia debajo del hero, con la proporcion
+  del sitio oficial: la ancha al lado de las dos pequenas apiladas.
+
+SIGUEN FALTANDO (10). La pagina funciona sin ellas: cada bloque que las usa se
+desmonta solo o cae a su fondo de marca. Las URLs de origen estan mas abajo.
+
+  logo.webp  hero-2.jpg  hero-3.webp  banner-parlantes.webp
+  mh10-a.webp  mh10-b.webp  sp3720-a.webp  sp3720-b.webp
+  tws.jpg  reloj.webp  cables.webp
+
+  Ojo: las cuatro que SI estan llevan el texto y el precio quemados en la
+  imagen. No sirven para el mosaico de colecciones ni para los productos
+  insignia, que recortan en 4:5 y en 4:3 y les cortarian el texto. Para esos
+  bloques hacen falta fotos de producto sin texto, que son las que siguen
+  faltando.
+
+
 DESCARGA — nombre destino y URL de origen
 -----------------------------------------
 hero-1.webp            https://esenses.com.co/wp-content/uploads/2026/08/B2.webp

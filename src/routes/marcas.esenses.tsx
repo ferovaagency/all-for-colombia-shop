@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { canonicalUrl, withCanonical } from "@/lib/seo";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { WideProductCard } from "@/components/shop/HomeCatalog";
@@ -64,6 +64,11 @@ const IMG = {
   hero2: "/marcas/esenses/hero-2.jpg",
   hero3: "/marcas/esenses/hero-3.webp",
   bannerParlantes: "/marcas/esenses/banner-parlantes.webp",
+  // Piezas oficiales de Esenses, ya diseñadas y con su propio texto.
+  // Se muestran tal cual: sin velo, sin recorte y sin nada escrito encima.
+  promoTws: "/marcas/esenses/promo-tws-91.webp",
+  promoSp3720: "/marcas/esenses/promo-sp3720.webp",
+  promoMh10g: "/marcas/esenses/promo-mh10g.webp",
   mh10A: "/marcas/esenses/mh10-a.webp",
   mh10B: "/marcas/esenses/mh10-b.webp",
   sp3720A: "/marcas/esenses/sp3720-a.webp",
@@ -255,6 +260,9 @@ function EsensesMicrosite() {
       {/* ============ HERO CARRUSEL DE BANNERS ============ */}
       <HeroCarousel />
 
+      {/* ============ PIEZAS PROMOCIONALES DE LA MARCA ============ */}
+      <PromosEsenses />
+
       {/* ============ TRES PILARES DE CONFIANZA ============ */}
       <TrustBar />
 
@@ -364,34 +372,39 @@ type HeroSlide = {
   text: string;
 };
 
-const HERO_SLIDES: HeroSlide[] = [
+/**
+ * El hero es una pieza terminada de Esenses: la foto ya trae el titular y el
+ * botón dibujados. Por eso va sin velo, sin recorte y SIN texto encima —
+ * escribirle algo arriba se le montaría al diseño original.
+ * `ratio` es el tamaño real del archivo: reserva el alto exacto antes de que
+ * cargue y evita que la página salte.
+ */
+type HeroBanner = { image: string; alt: string; ratio: string };
+
+const HERO_BANNERS: HeroBanner[] = [
   {
     image: IMG.hero1,
+    alt: "Esenses — Accesorios tecnológicos y wearables. Speakers",
+    ratio: "1828 / 656",
+  },
+];
+
+/** Respaldo: si la pieza no está, el hero sigue siendo un hero. */
+const HERO_SLIDES: HeroSlide[] = [
+  {
+    image: IMG.hero2,
     gradient: BRAND_GRADIENT,
     eyebrow: "Esenses",
     title: SLOGAN,
     text: "Audífonos, relojes inteligentes, parlantes y accesorios Esenses, disponibles en All For All con envío a todo el país.",
   },
-  {
-    image: IMG.hero2,
-    gradient: BRAND_GRADIENT_ALT,
-    eyebrow: "Audio y wearables",
-    title: "Sonido y estilo en cada detalle",
-    text: "Diseño en negro, blanco y acabados metalizados. Tecnología pensada para el día a día.",
-  },
-  {
-    image: IMG.hero3,
-    gradient: BRAND_GRADIENT,
-    eyebrow: "Novedades",
-    title: "Tecnología que acompaña tu ritmo",
-    text: "Parlantes, cargadores y cables Esenses para la casa, la oficina y el camino. Garantía de 12 meses en All For All.",
-  },
 ];
 
 function HeroCarousel() {
   const [idx, setIdx] = useState(0);
-  const n = HERO_SLIDES.length;
-  const [logoOk, setLogoOk] = useState(true);
+  const [caidas, setCaidas] = useState<Record<string, boolean>>({});
+  const banners = HERO_BANNERS.filter((b) => !caidas[b.image]);
+  const n = banners.length;
 
   useEffect(() => {
     if (n < 2) return;
@@ -399,40 +412,192 @@ function HeroCarousel() {
     return () => clearInterval(t);
   }, [n]);
 
+  const i = n ? idx % n : 0;
   const go = (d: number) => setIdx((p) => (p + d + n) % n);
-  const slide = HERO_SLIDES[idx];
+
+  // Ninguna pieza cargó: se cae al hero escrito de siempre.
+  if (!n) return <HeroEscrito />;
+
+  const b = banners[i];
 
   return (
-    <section className="relative w-full overflow-hidden text-white" style={{ minHeight: 460 }}>
-      {/* Degradado de marca: es el fondo real, la foto va encima. Si la foto
-          falta, el hero se ve igual de terminado. */}
-      <AnimatePresence mode="popLayout">
-        <motion.div
-          key={idx}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
-          className="absolute inset-0"
-          style={{ backgroundImage: slide.gradient }}
-        >
-          <BrandImage
-            src={slide.image}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-70"
+    <section className="relative w-full overflow-hidden bg-black">
+      <Link
+        to="/tienda"
+        search={{ marca: "esenses" } as any}
+        aria-label="Ver los productos Esenses"
+        className="block"
+      >
+        <div className="w-full" style={{ aspectRatio: b.ratio }}>
+          <img
+            src={b.image}
+            alt={b.alt}
+            className="h-full w-full object-cover"
+            decoding="async"
+            onError={() => setCaidas((c) => ({ ...c, [b.image]: true }))}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/20" />
-        </motion.div>
-      </AnimatePresence>
+        </div>
+      </Link>
+
+      {n > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Banner anterior"
+            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/25 text-white hover:bg-black/45 backdrop-blur flex items-center justify-center transition-colors"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Banner siguiente"
+            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/25 text-white hover:bg-black/45 backdrop-blur flex items-center justify-center transition-colors"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {banners.map((_, k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setIdx(k)}
+                aria-label={`Ir al banner ${k + 1}`}
+                className={cn(
+                  "h-2 rounded-full transition-all",
+                  k === i ? "w-6 bg-white" : "w-2 bg-white/60 hover:bg-white",
+                )}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
+/**
+ * Piezas promocionales de la marca, con la proporcion del sitio oficial: la
+ * grande al lado de las dos pequenas apiladas. Las tres son 1188x600 (2:1).
+ *
+ * El alto lo fija la pieza ancha y la columna de la derecha se estira para
+ * igualarlo. Dos piezas apiladas mas el espacio entre ellas suman un poco mas
+ * que la ancha, asi que si se les deja su proporcion exacta queda una franja
+ * blanca debajo de la grande; estirarlas recorta unos pocos pixeles de los
+ * lados, que en estas piezas es margen vacio. En movil van una debajo de otra,
+ * a ancho completo y sin recorte.
+ */
+type Promo = { image: string; alt: string };
+
+const PROMO_ANCHA: Promo = {
+  image: IMG.promoSp3720,
+  alt: "New Speaker — Esenses SP-3720 Black, parlante inalambrico bluetooth",
+};
+
+const PROMOS_CHICAS: Promo[] = [
+  { image: IMG.promoTws, alt: "Auriculares Esenses EB-TWS-91 por $54.900" },
+  {
+    image: IMG.promoMh10g,
+    alt: "Ofertas — Diadema multimedia gaming Esenses MH-10G por $99.900, antes $159.900",
+  },
+];
+
+const RATIO_PROMO = "1188 / 600";
+
+function PromosEsenses() {
+  const [caidas, setCaidas] = useState<Record<string, boolean>>({});
+  const caer = (src: string) => () => setCaidas((c) => ({ ...c, [src]: true }));
+
+  const ancha = caidas[PROMO_ANCHA.image] ? null : PROMO_ANCHA;
+  const chicas = PROMOS_CHICAS.filter((p) => !caidas[p.image]);
+  if (!ancha && !chicas.length) return null;
+
+  const enlace =
+    "block overflow-hidden rounded-2xl bg-neutral-100 min-h-0 transition-transform duration-500 hover:scale-[1.01]";
+
+  // Si falta la ancha, las que queden se reparten el ancho por igual.
+  const columnas = ancha ? "md:grid-cols-3" : "md:grid-cols-2";
+
+  return (
+    <Reveal>
+      <section className="bg-white">
+        <div className="container mx-auto px-6 lg:px-10 py-10 md:py-14">
+          <div className={cn("grid grid-cols-1 gap-4 md:gap-5", columnas)}>
+            {ancha && (
+              <Link
+                to="/tienda"
+                search={{ marca: "esenses" } as any}
+                aria-label={ancha.alt}
+                className={cn(enlace, "md:col-span-2")}
+              >
+                <div className="w-full" style={{ aspectRatio: RATIO_PROMO }}>
+                  <img
+                    src={ancha.image}
+                    alt={ancha.alt}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                    onError={caer(ancha.image)}
+                  />
+                </div>
+              </Link>
+            )}
+
+            {chicas.length > 0 && (
+              <div
+                className={cn(
+                  "grid grid-cols-1 gap-4 md:gap-5",
+                  ancha && chicas.length === 2 && "md:grid-rows-2 md:h-full",
+                )}
+              >
+                {chicas.map((p) => (
+                  <Link
+                    key={p.image}
+                    to="/tienda"
+                    search={{ marca: "esenses" } as any}
+                    aria-label={p.alt}
+                    className={enlace}
+                  >
+                    <img
+                      src={p.image}
+                      alt={p.alt}
+                      loading="lazy"
+                      decoding="async"
+                      style={!ancha ? { aspectRatio: RATIO_PROMO } : undefined}
+                      className={cn(
+                        "w-full object-cover",
+                        ancha ? "aspect-[1188/600] md:aspect-auto md:h-full" : "h-full",
+                      )}
+                      onError={caer(p.image)}
+                    />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    </Reveal>
+  );
+}
+
+function HeroEscrito() {
+  const slide = HERO_SLIDES[0];
+  const [logoOk, setLogoOk] = useState(true);
+  return (
+    <section className="relative w-full overflow-hidden text-white" style={{ minHeight: 460 }}>
+      <div className="absolute inset-0" style={{ backgroundImage: slide.gradient }}>
+        <BrandImage
+          src={slide.image}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover opacity-70"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/20" />
+      </div>
 
       <div className="relative container mx-auto px-6 lg:px-10 flex items-center min-h-[460px] md:min-h-[560px] py-16">
-        <motion.div
-          key={`txt-${idx}`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="z-10 max-w-2xl"
-        >
+        <div className="z-10 max-w-2xl">
           {logoOk ? (
             <BrandImage
               src={IMG.logo}
@@ -441,25 +606,17 @@ function HeroCarousel() {
               onFail={() => setLogoOk(false)}
             />
           ) : (
-            <p
-              style={SPACE}
-              className="text-lg md:text-xl font-black tracking-[0.35em] uppercase mb-5"
-            >
+            <p style={SPACE} className="text-lg md:text-xl font-black tracking-[0.35em] uppercase mb-5">
               Esenses
             </p>
           )}
-
           <p className="text-[10px] md:text-xs uppercase tracking-[0.35em] text-white/60 mb-3">
             {slide.eyebrow}
           </p>
-          <h1
-            style={SPACE}
-            className="text-3xl md:text-6xl font-bold tracking-[-0.04em] leading-[1.05]"
-          >
+          <h1 style={SPACE} className="text-3xl md:text-6xl font-bold tracking-[-0.04em] leading-[1.05]">
             {slide.title}
           </h1>
           <p className="mt-5 text-white/80 max-w-lg text-base md:text-lg">{slide.text}</p>
-
           <Link
             to="/tienda"
             search={{ marca: "esenses" } as any}
@@ -467,44 +624,8 @@ function HeroCarousel() {
           >
             Compra ahora <ArrowRight className="h-4 w-4" />
           </Link>
-        </motion.div>
+        </div>
       </div>
-
-      {n > 1 && (
-        <>
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            aria-label="Banner anterior"
-            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur flex items-center justify-center transition-colors"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => go(1)}
-            aria-label="Banner siguiente"
-            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur flex items-center justify-center transition-colors"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            {HERO_SLIDES.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setIdx(i)}
-                aria-label={`Ir al banner ${i + 1}`}
-                className={cn(
-                  "h-2 rounded-full transition-all",
-                  i === idx ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/80",
-                )}
-              />
-            ))}
-          </div>
-        </>
-      )}
     </section>
   );
 }
