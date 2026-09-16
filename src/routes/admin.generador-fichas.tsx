@@ -131,7 +131,23 @@ function ProductGeneratorPage() {
   const [editorialInfoFab, setEditorialInfoFab] = useState('');
   const [editorialCierre, setEditorialCierre] = useState('');
 
-  const slug = slugify(name);
+  /**
+   * El slug que el producto YA tiene en la base. Solo se llena al editar.
+   *
+   * El slug es la URL publica del producto (/producto/<slug>) y NO se puede
+   * recalcular del nombre al guardar: hay 120 productos cuyo slug guardado no
+   * coincide con slugify(nombre) — muchos llevan el SKU pegado al final — y
+   * reescribirlo les cambia la URL. La ficha busca solo por slug y el sitio no
+   * tiene redirecciones, asi que la URL vieja quedaria en "no encontrado", con
+   * lo que eso se lleva por delante en Google y en Merchant Center.
+   *
+   * Regla: el slug se fija al CREAR y no se vuelve a tocar.
+   */
+  const [slugExistente, setSlugExistente] = useState('');
+
+  const slugNuevo = slugify(name);
+  /** El que se va a guardar: el de la base si se esta editando, si no el del nombre. */
+  const slug = slugExistente || slugNuevo;
   const parentCats = categories.filter(c => !c.parent_id);
   const getChildren = (id: string) => categories.filter(c => c.parent_id === id);
 
@@ -152,7 +168,7 @@ function ProductGeneratorPage() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const resetForm = () => {
-    setEditingId(null); setName(''); setPrice(''); setSalePrice('');
+    setEditingId(null); setSlugExistente(''); setName(''); setPrice(''); setSalePrice('');
     setSku(''); setCondition('Nuevo'); setWarranty('12 meses con fabricante');
     setShortDesc(''); setDescription(''); setSpecsText('');
     setSelectedCategory(''); setSelectedBrand('');
@@ -171,7 +187,7 @@ function ProductGeneratorPage() {
   };
 
   const loadProduct = (p: any) => {
-    setEditingId(p.id); setName(p.name); setPrice(String(p.price));
+    setEditingId(p.id); setSlugExistente(p.slug || ''); setName(p.name); setPrice(String(p.price));
     setSalePrice(p.sale_price ? String(p.sale_price) : '');
     setSku(p.sku || ''); setCondition(p.condition || 'Nuevo');
     setWarranty(p.warranty || '12 meses con fabricante');
@@ -316,6 +332,8 @@ function ProductGeneratorPage() {
           finalImages.push(uploaded || url);
         } else { finalImages.push(url); }
       }
+      // Editando: se conserva el slug de la base tal cual. Creando: se parte
+      // del nombre y se le busca un sufijo libre.
       let finalSlug = slug;
       if (!editingId) {
         let suffix = 1;
@@ -630,7 +648,19 @@ ${catalog}`,
                 <h2 className="font-bold text-lg">Informacion del producto</h2>
                 <div>
                   <Input placeholder="Nombre del producto *" value={name} onChange={e => setName(e.target.value)} className="h-11" />
-                  {name && <p className="mt-1 text-xs text-muted-foreground">Slug: <code className="bg-muted px-1 rounded">{slug}</code></p>}
+                  {name && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Slug: <code className="bg-muted px-1 rounded">{slug}</code>
+                      {slugExistente && (
+                        <span className="ml-2">
+                          &mdash; se conserva; la URL del producto no cambia
+                          {slugExistente !== slugNuevo && (
+                            <> (por el nombre seria <code className="bg-muted px-1 rounded">{slugNuevo}</code>)</>
+                          )}
+                        </span>
+                      )}
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <Input placeholder="Precio COP *" type="number" value={price} onChange={e => setPrice(e.target.value)} />
