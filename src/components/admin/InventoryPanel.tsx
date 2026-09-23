@@ -165,11 +165,37 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const s = (data as any)?.summary ?? {};
-      const msg = `Hoja: ${s.sheetRows ?? 0} filas · Vinculados: ${s.linked ?? 0} · Creados: ${s.created ?? 0} · Duplicados: ${s.ambiguous ?? 0} · Sin inventario: ${s.zeroed ?? 0}`;
-      setSyncResult(msg);
+      const partes = [
+        `Hoja: ${s.filasEnLaHoja ?? s.sheetRows ?? 0} filas`,
+        `Leidas: ${s.sheetRows ?? 0}`,
+        `Actualizados: ${s.actualizados ?? 0}`,
+        `Creados: ${s.creados ?? 0}`,
+        `Sin inventario: ${s.sinInventario ?? 0}`,
+      ];
+      if (s.descartadas) partes.push(`Descartadas: ${s.descartadas}`);
+      if (s.conflictos) partes.push(`Conflictos: ${s.conflictos}`);
+      if (s.filasIgnoradasDespuesDelCorte) partes.push(`Cortada en la fila ${s.cortadoEnFila}: ${s.filasIgnoradasDespuesDelCorte} filas sin leer`);
+      setSyncResult(partes.join(" · "));
+
+      // Las filas que la hoja trae mal y los SKU que chocan: se muestran, no se
+      // esconden. Cada una es un producto que no llego a la pagina.
+      const desc: { fila: number; sku: string; motivo: string }[] = (data as any)?.descartadas ?? [];
+      const conf: { sku: string; motivo: string }[] = (data as any)?.conflictos ?? [];
       const errs: string[] = (data as any)?.errors ?? [];
-      if (errs.length) toast.warning(`Sincronizado con avisos: ${errs[0]}`);
-      else toast.success("Inventario sincronizado");
+      if (desc.length) {
+        toast.warning(`${desc.length} fila(s) de la hoja no se leyeron`, {
+          description: desc.slice(0, 5).map((d) => `Fila ${d.fila} ${d.sku || "(sin SKU)"}: ${d.motivo}`).join("\n"),
+          duration: 12000,
+        });
+      }
+      if (conf.length) {
+        toast.warning(`${conf.length} SKU en conflicto`, {
+          description: conf.slice(0, 5).map((c) => `${c.sku}: ${c.motivo}`).join("\n"),
+          duration: 12000,
+        });
+      }
+      if (errs.length) toast.error(`Sincronizado con avisos: ${errs[0]}`);
+      else if (!desc.length && !conf.length) toast.success("Inventario sincronizado");
       await load();
       await onSynced?.();
     } catch (e) {
