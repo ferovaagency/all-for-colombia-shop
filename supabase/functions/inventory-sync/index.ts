@@ -208,14 +208,18 @@ serve(async (req) => {
     await chunkUpsert(linkUpserts, 'link');
     await chunkUpsert(ambiguous, 'ambiguo');
     await chunkUpsert(zero, 'zero');
-    for (let i = 0; i < newRows.length; i += 300) {
-      const { error } = await admin.from('products').insert(newRows.slice(i, i + 300));
-      if (error) errors.push(`create: ${error.message}`);
+    // Inserción fila por fila: un choque de slug no debe tumbar el resto.
+    let created = 0;
+    for (const nr of newRows) {
+      const { error } = await admin.from('products').insert(nr);
+      if (!error) { created++; continue; }
+      if (/duplicate key/i.test(error.message)) { skippedDuplicates++; continue; }
+      if (errors.length < 10) errors.push(`create: ${error.message}`);
     }
 
     return json({
       ok: true,
-      summary: { sheetRows: sheet.length, products: products!.length, linked: linkUpserts.length, created: newRows.length, reassigned, ambiguous: ambiguous.length, zeroed: zero.length },
+      summary: { sheetRows: sheet.length, products: products!.length, linked: linkUpserts.length, created, skippedDuplicates, reassigned, ambiguous: ambiguous.length, zeroed: zero.length },
       errors,
     });
   } catch (e) {
