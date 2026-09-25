@@ -108,7 +108,7 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
     let ambiguo = 0;
     let last: string | null = null;
     for (const r of rows) {
-      if (r.inv_estado === "vinculado") vinculado++;
+      if (r.inv_estado === "vinculado" || r.inv_estado === "sku_reasignado") vinculado++;
       else if (r.inv_estado === "sin_inventario") sin++;
       else if (r.inv_estado === "ambiguo") ambiguo++;
       if (r.inv_synced_at && (!last || r.inv_synced_at > last)) last = r.inv_synced_at;
