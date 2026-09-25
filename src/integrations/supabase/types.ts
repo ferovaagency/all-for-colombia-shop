@@ -1198,6 +1198,7 @@ export type Database = {
         Returns: boolean
       }
       marcar_ventas_registradas: { Args: { ids: string[] }; Returns: number }
+      normalizar_nombre_marcas: { Args: { p: string }; Returns: string }
       normalizar_nombre_producto: { Args: { p_name: string }; Returns: string }
       set_order_addi_refs: {
         Args: {
