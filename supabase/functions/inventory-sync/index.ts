@@ -146,16 +146,26 @@ serve(async (req) => {
     // clon si el producto ya existe: se revincula y se conserva su contenido
     // (imágenes, marca, categoría, descripción, medidas).
     const candIdx = products!.map((p) => ({ p, nn: normName(p.name), tk: tokens(p.name), cd: new Set(codes(p.name)) }));
+    const existingNames = new Set(products!.map((p) => normName(p.name)));
     let reassigned = 0;
+    let skippedDuplicates = 0;
+
+    const scoreOf = (snn: string, stk: string[], scd: Set<string>, c: any) => {
+      if (snn === c.nn) return 100;
+      const shared = [...scd].filter((x) => c.cd.has(x));
+      const j = jaccard(stk, c.tk);
+      if (shared.length >= 2) return 96;
+      if (shared.length === 1 && j >= 0.25) return 92;
+      if (shared.length === 1) return 80;
+      return Math.round(j * 78);
+    };
 
     for (const row of pending) {
       const snn = normName(row.name), stk = tokens(row.name), scd = new Set(codes(row.name));
       let best: any = null, score = -1;
       for (const c of candIdx) {
         if (used.has(c.p.id)) continue;
-        let sc = 0;
-        if (snn === c.nn) sc = 100;
-        else { const shared = [...scd].filter((x) => c.cd.has(x)); const j = jaccard(stk, c.tk); if (shared.length >= 2) sc = 96; else if (shared.length === 1 && j >= 0.25) sc = 92; else if (shared.length === 1) sc = 80; else sc = Math.round(j * 78); }
+        const sc = scoreOf(snn, stk, scd, c);
         if (sc > score) { score = sc; best = c.p; }
       }
       if (best && score >= REVIEW_MIN) {
@@ -171,9 +181,12 @@ serve(async (req) => {
           inv_estado: reasignado ? 'sku_reasignado' : 'vinculado',
           inv_synced_at: nowIso,
         });
-      } else {
-        newRows.push({ name: row.name, slug: slugify(row.name, row.sku), inv_sku: row.sku, sku: row.sku, stock: row.stock, price: row.price, active: row.active, inv_estado: 'vinculado', inv_synced_at: nowIso });
+        continue;
       }
+      // El producto ya existe en la web (fila repetida en la hoja con otro SKU):
+      // se ignora la fila en vez de crear un clon vacío.
+      if (existingNames.has(snn)) { skippedDuplicates++; continue; }
+      newRows.push({ name: row.name, slug: slugify(row.name, row.sku), inv_sku: row.sku, sku: row.sku, stock: row.stock, price: row.price, active: row.active, inv_estado: 'vinculado', inv_synced_at: nowIso });
     }
 
     // Not in the sheet -> stock 0 / sin_inventario
