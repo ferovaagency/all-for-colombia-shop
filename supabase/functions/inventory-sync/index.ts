@@ -128,18 +128,27 @@ serve(async (req) => {
     const slugify = (s: string, sku: string) =>
       `${strip(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'producto'}-${sku.toLowerCase()}`;
 
-    // candidates for name/code match = products without a sheet-style link
-    const cand = products!.filter((p) => !(p.inv_sku && SHEET_SKU_RE.test(String(p.inv_sku).trim())) && !(p.sku && SHEET_SKU_RE.test(String(p.sku).trim())));
-    const candIdx = cand.map((p) => ({ p, nn: normName(p.name), tk: tokens(p.name), cd: new Set(codes(p.name)) }));
-
+    // PASADA 1: coincidencia exacta por SKU para todas las filas de la hoja.
+    const pending: SheetRow[] = [];
     for (const row of sheet) {
       const hit = byInv.get(row.sku) || bySku.get(row.sku);
       if (hit && !used.has(hit.id)) {
         used.add(hit.id);
         linkUpserts.push({ id: hit.id, inv_sku: row.sku, stock: row.stock, price: row.price, active: row.active, inv_estado: 'vinculado', inv_synced_at: nowIso });
-        continue;
+      } else {
+        pending.push(row);
       }
-      // name / model-code match
+    }
+
+    // PASADA 2: para los SKU que no existen en la web (normalmente SKU reasignados
+    // en la hoja) se busca por nombre/modelo entre TODOS los productos, incluidos
+    // los que ya tenían otro SKU o quedaron en 'sin_inventario'. Nunca se crea un
+    // clon si el producto ya existe: se revincula y se conserva su contenido
+    // (imágenes, marca, categoría, descripción, medidas).
+    const candIdx = products!.map((p) => ({ p, nn: normName(p.name), tk: tokens(p.name), cd: new Set(codes(p.name)) }));
+    let reassigned = 0;
+
+    for (const row of pending) {
       const snn = normName(row.name), stk = tokens(row.name), scd = new Set(codes(row.name));
       let best: any = null, score = -1;
       for (const c of candIdx) {
@@ -149,11 +158,19 @@ serve(async (req) => {
         else { const shared = [...scd].filter((x) => c.cd.has(x)); const j = jaccard(stk, c.tk); if (shared.length >= 2) sc = 96; else if (shared.length === 1 && j >= 0.25) sc = 92; else if (shared.length === 1) sc = 80; else sc = Math.round(j * 78); }
         if (sc > score) { score = sc; best = c.p; }
       }
-      if (best && score >= AUTO_MATCH_MIN) {
+      if (best && score >= REVIEW_MIN) {
         used.add(best.id);
-        linkUpserts.push({ id: best.id, inv_sku: row.sku, stock: row.stock, price: row.price, active: row.active, inv_estado: 'vinculado', inv_synced_at: nowIso });
-      } else if (best && score >= REVIEW_MIN) {
-        ambiguous.push({ id: best.id, inv_estado: 'ambiguo', inv_synced_at: nowIso });
+        const reasignado = score < AUTO_MATCH_MIN || (best.inv_sku && String(best.inv_sku).trim() !== row.sku);
+        if (reasignado) reassigned++;
+        linkUpserts.push({
+          id: best.id,
+          inv_sku: row.sku,
+          stock: row.stock,
+          price: row.price,
+          active: row.active,
+          inv_estado: reasignado ? 'sku_reasignado' : 'vinculado',
+          inv_synced_at: nowIso,
+        });
       } else {
         newRows.push({ name: row.name, slug: slugify(row.name, row.sku), inv_sku: row.sku, sku: row.sku, stock: row.stock, price: row.price, active: row.active, inv_estado: 'vinculado', inv_synced_at: nowIso });
       }
