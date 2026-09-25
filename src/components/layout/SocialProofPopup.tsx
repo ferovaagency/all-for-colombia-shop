@@ -69,7 +69,7 @@ export function SocialProofPopup() {
     <div
       role="status"
       aria-live="polite"
-      className={`fixed right-3 bottom-[calc(max(1.5rem,env(safe-area-inset-bottom))+4.25rem)] z-40 w-[min(20rem,calc(100vw-1.5rem))] sm:right-6 transition-all duration-200 ease-out ${
+      className={`fixed left-3 bottom-[calc(max(1.5rem,env(safe-area-inset-bottom))+4.25rem)] z-40 w-[min(20rem,calc(100vw-1.5rem))] sm:left-6 transition-all duration-200 ease-out ${
         visible
           ? "translate-y-0 opacity-100"
           : "translate-y-3 opacity-0 pointer-events-none"
