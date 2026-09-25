@@ -131,20 +131,22 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
     [q],
   );
 
+  const linked = useCallback(
+    (r: InvProduct) => r.inv_estado === "vinculado" || r.inv_estado === "sku_reasignado",
+    [],
+  );
+
   const lowStock = useMemo(
     () =>
       rows
-        .filter(
-          (r) =>
-            r.inv_estado === "vinculado" && (r.stock ?? 0) >= 1 && (r.stock ?? 0) <= 3 && matches(r),
-        )
+        .filter((r) => linked(r) && (r.stock ?? 0) >= 1 && (r.stock ?? 0) <= 3 && matches(r))
         .sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0)),
-    [rows, matches],
+    [rows, matches, linked],
   );
 
   const outOfStock = useMemo(
-    () => rows.filter((r) => r.inv_estado === "vinculado" && (r.stock ?? 0) === 0 && matches(r)),
-    [rows, matches],
+    () => rows.filter((r) => linked(r) && (r.stock ?? 0) === 0 && matches(r)),
+    [rows, matches, linked],
   );
 
   const duplicateGroups = useMemo(() => {
