@@ -157,6 +157,7 @@ serve(async (req) => {
       if (shared.length >= 2) return 96;
       if (shared.length === 1 && j >= 0.25) return 92;
       if (shared.length === 1) return 80;
+      if (j >= 0.8) return 95;
       return Math.round(j * 78);
     };
 
