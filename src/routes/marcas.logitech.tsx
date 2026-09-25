@@ -254,22 +254,31 @@ function LogitechMicrosite() {
    * `#catalogo&serie=mx,ergo`. Se escucha tambien el cambio de hash para que
    * funcione al hacer clic en otro banner sin recargar la pagina.
    */
+  const [scrollPendiente, setScrollPendiente] = useState(false);
+
   useEffect(() => {
     const aplicar = () => {
       const hash = window.location.hash;
       if (!hash.startsWith("#catalogo")) return;
       const pedido = /[?&]serie=([^&]+)/.exec(hash)?.[1];
       if (pedido) setActiveSerie(decodeURIComponent(pedido));
-      // El ancla #catalogo por si sola no lleva a ningun lado cuando el hash
-      // trae parametros, asi que el desplazamiento se hace a mano.
-      requestAnimationFrame(() => {
-        document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      setScrollPendiente(true);
     };
     aplicar();
     window.addEventListener("hashchange", aplicar);
     return () => window.removeEventListener("hashchange", aplicar);
   }, []);
+
+  // El catálogo solo existe en el DOM cuando ya hay productos cargados, así que
+  // el desplazamiento que pide un banner se reintenta al terminar la carga.
+  useEffect(() => {
+    if (!scrollPendiente || loading || products.length === 0) return;
+    const id = requestAnimationFrame(() => {
+      document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      setScrollPendiente(false);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [scrollPendiente, loading, products.length]);
 
   const office = useMemo(() => products.filter((p) => !isGaming(p)), [products]);
   const gaming = useMemo(() => products.filter((p) => isGaming(p)), [products]);

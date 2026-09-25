@@ -70,7 +70,7 @@ function AdminPage() {
     const { adminListDistributors } = await import("@/lib/distributors.functions");
     const [oRes, p, c, b, cu, po, dist, payRes] = await Promise.all([
       supabase.from("orders").select("*, distributors(company_name)").neq("status", "cancelled").order("created_at", { ascending: false }).limit(500),
-      supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }),
+      supabase.from("products").select("*, categories(name), brands(name)").order("created_at", { ascending: false }).range(0, 4999),
       supabase.from("categories").select("*").order("sort_order"),
       supabase.from("brands").select("*"),
       supabase.from("customers").select("*").order("created_at", { ascending: false }),
