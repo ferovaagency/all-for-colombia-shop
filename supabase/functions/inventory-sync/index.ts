@@ -202,7 +202,7 @@ serve(async (req) => {
 
     return json({
       ok: true,
-      summary: { sheetRows: sheet.length, products: products!.length, linked: linkUpserts.length, created: newRows.length, ambiguous: ambiguous.length, zeroed: zero.length },
+      summary: { sheetRows: sheet.length, products: products!.length, linked: linkUpserts.length, created: newRows.length, reassigned, ambiguous: ambiguous.length, zeroed: zero.length },
       errors,
     });
   } catch (e) {
