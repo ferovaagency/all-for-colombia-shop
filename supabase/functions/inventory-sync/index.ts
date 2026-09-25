@@ -163,9 +163,11 @@ serve(async (req) => {
     for (const row of pending) {
       const snn = normName(row.name), stk = tokens(row.name), scd = new Set(codes(row.name));
       let best: any = null, score = -1;
+      let bestAny: any = null, scoreAny = -1;
       for (const c of candIdx) {
-        if (used.has(c.p.id)) continue;
         const sc = scoreOf(snn, stk, scd, c);
+        if (sc > scoreAny) { scoreAny = sc; bestAny = c.p; }
+        if (used.has(c.p.id)) continue;
         if (sc > score) { score = sc; best = c.p; }
       }
       if (best && score >= REVIEW_MIN) {
@@ -183,9 +185,9 @@ serve(async (req) => {
         });
         continue;
       }
-      // El producto ya existe en la web (fila repetida en la hoja con otro SKU):
-      // se ignora la fila en vez de crear un clon vacío.
-      if (existingNames.has(snn)) { skippedDuplicates++; continue; }
+      // El producto ya existe en la web (fila repetida en la hoja con otro SKU,
+      // o mismo nombre): se ignora la fila en vez de crear un clon vacío.
+      if (existingNames.has(snn) || (bestAny && scoreAny >= AUTO_MATCH_MIN)) { skippedDuplicates++; continue; }
       newRows.push({ name: row.name, slug: slugify(row.name, row.sku), inv_sku: row.sku, sku: row.sku, stock: row.stock, price: row.price, active: row.active, inv_estado: 'vinculado', inv_synced_at: nowIso });
     }
 
