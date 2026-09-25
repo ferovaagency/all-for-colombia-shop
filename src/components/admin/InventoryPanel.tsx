@@ -167,7 +167,7 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const s = (data as any)?.summary ?? {};
-      const msg = `Hoja: ${s.sheetRows ?? 0} filas · Vinculados: ${s.linked ?? 0} · Creados: ${s.created ?? 0} · Duplicados: ${s.ambiguous ?? 0} · Sin inventario: ${s.zeroed ?? 0}`;
+      const msg = `Hoja: ${s.sheetRows ?? 0} filas · Vinculados: ${s.linked ?? 0} · Creados: ${s.created ?? 0} · Repetidos omitidos: ${s.skippedDuplicates ?? 0} · Duplicados: ${s.ambiguous ?? 0} · Sin inventario: ${s.zeroed ?? 0}`;
       setSyncResult(msg);
       const errs: string[] = (data as any)?.errors ?? [];
       if (errs.length) toast.warning(`Sincronizado con avisos: ${errs[0]}`);
