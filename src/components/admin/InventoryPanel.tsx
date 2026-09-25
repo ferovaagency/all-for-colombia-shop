@@ -108,7 +108,7 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
     let ambiguo = 0;
     let last: string | null = null;
     for (const r of rows) {
-      if (r.inv_estado === "vinculado") vinculado++;
+      if (r.inv_estado === "vinculado" || r.inv_estado === "sku_reasignado") vinculado++;
       else if (r.inv_estado === "sin_inventario") sin++;
       else if (r.inv_estado === "ambiguo") ambiguo++;
       if (r.inv_synced_at && (!last || r.inv_synced_at > last)) last = r.inv_synced_at;
@@ -131,20 +131,22 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
     [q],
   );
 
+  const linked = useCallback(
+    (r: InvProduct) => r.inv_estado === "vinculado" || r.inv_estado === "sku_reasignado",
+    [],
+  );
+
   const lowStock = useMemo(
     () =>
       rows
-        .filter(
-          (r) =>
-            r.inv_estado === "vinculado" && (r.stock ?? 0) >= 1 && (r.stock ?? 0) <= 3 && matches(r),
-        )
+        .filter((r) => linked(r) && (r.stock ?? 0) >= 1 && (r.stock ?? 0) <= 3 && matches(r))
         .sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0)),
-    [rows, matches],
+    [rows, matches, linked],
   );
 
   const outOfStock = useMemo(
-    () => rows.filter((r) => r.inv_estado === "vinculado" && (r.stock ?? 0) === 0 && matches(r)),
-    [rows, matches],
+    () => rows.filter((r) => linked(r) && (r.stock ?? 0) === 0 && matches(r)),
+    [rows, matches, linked],
   );
 
   const duplicateGroups = useMemo(() => {
@@ -165,7 +167,7 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const s = (data as any)?.summary ?? {};
-      const msg = `Hoja: ${s.sheetRows ?? 0} filas · Vinculados: ${s.linked ?? 0} · Creados: ${s.created ?? 0} · Duplicados: ${s.ambiguous ?? 0} · Sin inventario: ${s.zeroed ?? 0}`;
+      const msg = `Hoja: ${s.sheetRows ?? 0} filas · Vinculados: ${s.linked ?? 0} · Creados: ${s.created ?? 0} · Repetidos omitidos: ${s.skippedDuplicates ?? 0} · Duplicados: ${s.ambiguous ?? 0} · Sin inventario: ${s.zeroed ?? 0}`;
       setSyncResult(msg);
       const errs: string[] = (data as any)?.errors ?? [];
       if (errs.length) toast.warning(`Sincronizado con avisos: ${errs[0]}`);
