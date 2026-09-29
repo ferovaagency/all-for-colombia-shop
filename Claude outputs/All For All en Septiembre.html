@@ -1,0 +1,348 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>All For All en Septiembre</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Paleta Ferova Agency
+     #3C3C3B grafito · #541014 vino · #2F2D56 azul noche
+     #6A4C30 marrón · #C0930E dorado · fondos crema del manual
+     Tipografía de marca: Nexa (geométrica). Jost como equivalente web. */
+  :root{
+    --ground:#FBF2E9;
+    --surface:#FFFDFA;
+    --ink:#3C3C3B;
+    --deep:#2F2D56;
+    --muted:#6A4C30;
+    --faint:#9C8571;
+    --rule:#E8D8C6;
+    --rule-strong:#D2BBA1;
+    --accent:#C0930E;
+    --accent-soft:#F6EBD4;
+    --wine:#541014;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#1D1A18;
+      --surface:#272320;
+      --ink:#F2E8DC;
+      --deep:#C6C3E8;
+      --muted:#C0A98F;
+      --faint:#8E7A65;
+      --rule:#3A332C;
+      --rule-strong:#4E4438;
+      --accent:#D9AC2A;
+      --accent-soft:#332A18;
+      --wine:#D98A85;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#1D1A18;
+    --surface:#272320;
+    --ink:#F2E8DC;
+    --deep:#C6C3E8;
+    --muted:#C0A98F;
+    --faint:#8E7A65;
+    --rule:#3A332C;
+    --rule-strong:#4E4438;
+    --accent:#D9AC2A;
+    --accent-soft:#332A18;
+    --wine:#D98A85;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground); color:var(--ink);
+    font-family:"Public Sans","Segoe UI",system-ui,sans-serif;
+    font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:48px 24px 96px}
+
+  .eyebrow{
+    font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-size:12.5px;font-weight:400;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--accent);margin:0 0 16px;
+  }
+  h1{
+    font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-weight:300;font-size:clamp(36px,5.4vw,56px);
+    line-height:1.08;letter-spacing:.005em;text-wrap:balance;
+    margin:0 0 18px;color:var(--deep);
+  }
+  .standfirst{
+    font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-weight:300;font-size:clamp(18px,2.2vw,22px);line-height:1.55;
+    color:var(--muted);max-width:60ch;margin:0;
+  }
+  .meta{
+    display:flex;flex-wrap:wrap;gap:8px 22px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:12px;color:var(--faint);letter-spacing:.03em;
+    margin-top:30px;padding-top:16px;border-top:1px solid var(--rule);
+  }
+
+  .figures{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:1px;background:var(--rule);border:1px solid var(--rule);margin:12px 0 8px;
+  }
+  .fig{background:var(--surface);padding:24px 20px}
+  .fig .n{
+    font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-size:38px;font-weight:300;line-height:1;
+    font-variant-numeric:tabular-nums;letter-spacing:.01em;
+    display:block;margin-bottom:10px;color:var(--accent);
+  }
+  .fig .k{font-size:13.5px;color:var(--muted);line-height:1.45}
+  .figures-note{
+    font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-size:12px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--faint);margin:48px 0 6px;
+  }
+
+  section{margin-top:60px}
+  h2{
+    font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-weight:400;font-size:30px;line-height:1.18;letter-spacing:.01em;
+    margin:0 0 8px;text-wrap:balance;color:var(--deep);
+  }
+  .sec-note{color:var(--muted);font-size:15px;margin:0 0 24px;max-width:66ch}
+
+  .items{display:flex;flex-direction:column;gap:1px;background:var(--rule);border-block:1px solid var(--rule)}
+  .item{
+    background:var(--surface);
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:0 32px;padding:22px 20px;
+  }
+  @media (max-width:720px){ .item{grid-template-columns:1fr;gap:14px} }
+  .did{margin:0}
+  .did b{
+    font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-weight:500;font-size:17px;letter-spacing:.01em;
+    display:block;margin-bottom:6px;color:var(--ink);
+  }
+  .did .detail{color:var(--muted);font-size:14.5px;display:block}
+  .means{margin:0;font-size:15px;padding-left:18px;border-left:2px solid var(--accent)}
+  @media (max-width:720px){ .means{padding-left:14px} }
+  .means .lbl{
+    display:block;font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-size:10.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:6px;
+  }
+
+  .verdict{background:var(--surface);border:1px solid var(--rule-strong);padding:28px 26px;margin-top:16px}
+  .verdict p{margin:0 0 15px;max-width:66ch}
+  .verdict p:last-child{margin-bottom:0}
+
+  ul.plain{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:13px}
+  ul.plain li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:13px;align-items:start;font-size:15px}
+  .tag{
+    font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+    padding:4px 8px;border:1px solid currentColor;white-space:nowrap;margin-top:2px;
+  }
+  .t-mafe{color:var(--wine)} .t-dec{color:var(--deep)} .t-cont{color:var(--accent)}
+
+  .closing{margin-top:60px;padding-top:24px;border-top:2px solid var(--accent)}
+  .closing h2{font-size:23px}
+  .closing ul{margin:0;padding-left:20px;color:var(--muted);font-size:14.5px}
+  .closing li{margin-bottom:10px}
+  .closing li::marker{color:var(--accent)}
+
+  .firma{
+    margin-top:56px;padding-top:20px;border-top:1px solid var(--rule);
+    display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;
+  }
+  .firma .marca{
+    font-family:"Jost","Century Gothic",system-ui,sans-serif;
+    font-weight:400;font-size:17px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);
+  }
+  .firma .nota{font-size:13px;color:var(--faint)}
+
+  code{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em;
+    background:var(--accent-soft);color:var(--ink);padding:1px 5px;
+  }
+  .num{font-variant-numeric:tabular-nums}
+  strong{font-weight:600}
+  a{color:var(--deep)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Ferova Agency &nbsp;·&nbsp; Informe de resultados</p>
+  <h1>All For All &mdash; en qué mejoramos en septiembre</h1>
+  <p class="standfirst">La tienda se mostró un tercio más en Google, subió 87 búsquedas al top 3 y cuadruplicó sus visitantes. Se cargaron 128 fichas de producto, se cerraron seis fallos técnicos que Google no perdonaba y se cazó un error de inventario que estaba borrando el trabajo hecho. Queda un cabo suelto grande: el precio.</p>
+  <div class="meta">
+    <span>Septiembre 2026</span>
+    <span>Todo publicado y en vivo</span>
+    <span>Search Console 1&ndash;28 sep</span>
+    <span>Analytics 31 ago&ndash;27 sep</span>
+    <span>Merchant Center 5814727481</span>
+  </div>
+
+  <p class="figures-note">En qué mejoramos, en números:</p>
+  <div class="figures">
+    <div class="fig">
+      <span class="n num">13.696</span>
+      <span class="k">Veces que la tienda apareció en Google. En agosto fueron 10.309: <strong>+33&nbsp;%</strong>, y la posición media se mantuvo en primera página.</span>
+    </div>
+    <div class="fig">
+      <span class="n num">231</span>
+      <span class="k">Búsquedas en el top 3 de Google, frente a las <span class="num">144</span> de agosto. <strong>87 más</strong> en los tres primeros puestos.</span>
+    </div>
+    <div class="fig">
+      <span class="n num">1.046</span>
+      <span class="k">Visitantes en el mes, contra <span class="num">248</span> en agosto. <strong>Cuatro veces más gente</strong> entrando a la tienda.</span>
+    </div>
+  </div>
+
+  <!-- ============ LO QUE MEJORO ============ -->
+  <section>
+    <h2>Lo que mejoró</h2>
+    <p class="sec-note">Cinco frentes que estaban abiertos en el informe de agosto y que en septiembre se movieron.</p>
+
+    <div class="items">
+
+      <div class="item">
+        <p class="did">
+          <b>128 productos pasaron a tener foto y ficha</b>
+          <span class="detail">El catálogo empezó el mes con <span class="num">274</span> productos sin foto y lo cerró con <span class="num">146</span>. Hoy <strong><span class="num">706</span> de <span class="num">852</span> productos tienen imagen</strong>, un 83&nbsp;%. Cada uno se cargó a mano, con su foto, su marca, su categoría y su descripción.</span>
+        </p>
+        <p class="means"><span class="lbl">Para el negocio</span>Un producto sin foto no se vende ni entra a Google Shopping. Este era el cuello de botella señalado en agosto y es el que más se movió: <strong>casi la mitad del pendiente quedó resuelto.</strong></p>
+      </div>
+
+      <div class="item">
+        <p class="did">
+          <b>Seis correcciones técnicas que Google sí ve</b>
+          <span class="detail">Las etiquetas que le dicen a Google cuál es la página buena (<code>canonical</code>, <code>og:url</code>) ahora se emiten desde el servidor: antes se escribían después de cargar y los buscadores no alcanzaban a verlas. Se unificó en un solo bloque la ficha técnica que Google lee de cada producto, se corrigió el enlace de precio que salía vacío, y se ordenó el <code>robots.txt</code>.</span>
+        </p>
+        <p class="means"><span class="lbl">Para el negocio</span>Eran las seis mejoras que en agosto quedaron &laquo;listas, pendientes de publicar&raquo;. Ya están en vivo. El salto de <span class="num">144</span> a <span class="num">231</span> búsquedas en el top 3 es el primer efecto visible.</p>
+      </div>
+
+      <div class="item">
+        <p class="did">
+          <b>Las fichas de Google Shopping rinden 43&nbsp;% más</b>
+          <span class="detail">Las fichas de comerciantes pasaron de <span class="num">28</span> a <span class="num">40</span> clics, con posición media <strong>1,6</strong>. Sumando los tres formatos enriquecidos &mdash; fichas, precio en el resultado y estrellas de reseña &mdash; aportaron <span class="num">90</span> de los <span class="num">237</span> clics del mes: <strong>el 38&nbsp;%</strong>, contra el 31&nbsp;% de agosto.</span>
+        </p>
+        <p class="means"><span class="lbl">Para el negocio</span>Es el espacio de Google donde la gente llega con la tarjeta en la mano, y la tienda está compitiendo cada vez mejor ahí. Con más catálogo con precio, este número sube solo.</p>
+      </div>
+
+      <div class="item">
+        <p class="did">
+          <b>Se cazó un error que estaba borrando el trabajo</b>
+          <span class="detail">Cuando la hoja de inventario le cambiaba el código a un producto, el sistema no lo reconocía: creaba un producto nuevo y vacío &mdash; sin fotos, sin marca, sin categoría &mdash; y archivaba el bueno. Se detectó, se corrigió el sistema y <strong>los dos casos que alcanzaron a ocurrir quedaron reparados</strong>, con sus fotos y su dirección web intactas.</span>
+        </p>
+        <p class="means"><span class="lbl">Para el negocio</span>Sin esto, cada ficha cargada a mano tenía fecha de vencimiento. Era una fuga silenciosa: el producto reaparecía sin fotos al día siguiente y parecía que el trabajo se había perdido.</p>
+      </div>
+
+      <div class="item">
+        <p class="did">
+          <b>Las direcciones web de los productos quedaron fijas</b>
+          <span class="detail">La dirección de cada producto se escribe al crearlo y ya no se vuelve a tocar. Antes se recalculaba cada vez que se editaba el nombre, y eso habría cambiado la URL de <strong><span class="num">120</span> productos</strong>, dejándolos en página de error.</span>
+        </p>
+        <p class="means"><span class="lbl">Para el negocio</span>La posición que un producto gana en Google va pegada a su dirección. Cambiarla es empezar de cero. Se detectó antes de que pasara.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ LO QUE SE SUMO ============ -->
+  <section>
+    <h2>Lo que se sumó</h2>
+    <p class="sec-note">Piezas nuevas que en agosto no existían.</p>
+
+    <div class="items">
+
+      <div class="item">
+        <p class="did">
+          <b>El modelo de Logitech se replicó, y se afinó</b>
+          <span class="detail">El microsite de Logitech ganó banners de video que llevan directo al catálogo <strong>ya filtrado por línea</strong>: uno a MX y ERGO, otro a la serie PRO y los timones de simulación. Y se montó el microsite de <strong>Esenses</strong>, con su enlace propio en el menú.</span>
+        </p>
+        <p class="means"><span class="lbl">Para el negocio</span>Era la decisión número dos del informe de agosto: darle a cada marca fuerte su propia página. Empezó a ejecutarse. El de Esenses está publicado pero <strong>le faltan las imágenes</strong>, que quedaron listas y sin subir.</p>
+      </div>
+
+      <div class="item">
+        <p class="did">
+          <b>ChatGPT trae casi el doble de visitas</b>
+          <span class="detail">Las visitas desde asistentes de inteligencia artificial pasaron de <span class="num">10</span> a <span class="num">19</span> sesiones. Poco en volumen, pero es un canal que hace cuatro meses no existía y crece solo.</span>
+        </p>
+        <p class="means"><span class="lbl">Para el negocio</span>Cada vez más gente le pregunta a una IA dónde comprar antes de ir a Google. Que la tienda aparezca ahí, sin pagar por ello, vale la pena cuidarlo.</p>
+      </div>
+
+      <div class="item">
+        <p class="did">
+          <b>Banners de Corsair y ViewSonic en la portada</b>
+          <span class="detail">Espacio de marca en el inicio, donde entran <span class="num">1.442</span> vistas al mes.</span>
+        </p>
+        <p class="means"><span class="lbl">Para el negocio</span>La portada es la página que mejor convierte de todo el sitio: <strong>122 clics con 8,2&nbsp;% de CTR</strong>. Es el mejor lugar para una marca.</p>
+      </div>
+
+      <div class="item">
+        <p class="did">
+          <b>El administrador dejó de cortar la lista de productos</b>
+          <span class="detail">Al guardar un cambio, el listado volvía a cargar recortado y los productos sincronizados desaparecían de la vista. Corregido. También se puede crear y editar categorías y marcas desde el panel.</span>
+        </p>
+        <p class="means"><span class="lbl">Para el negocio</span>Menos fricción para quien administra la tienda todos los días, y una fuente menos de &laquo;el producto se perdió&raquo;.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ RESULTADOS ============ -->
+  <section>
+    <h2>Lo que eso está produciendo</h2>
+    <p class="sec-note">Los números de Google y de Analytics del mes, comparados con agosto.</p>
+    <div class="verdict">
+      <p><strong>La visibilidad creció un tercio y la calidad de la posición mejoró.</strong> La tienda apareció <span class="num">13.696</span> veces contra <span class="num">10.309</span> en agosto, con <span class="num">237</span> clics contra <span class="num">214</span>. Y lo más importante: <span class="num">231</span> búsquedas ya están en los tres primeros puestos, <strong>87 más que el mes pasado</strong>.</p>
+      <p><strong>Llegó cuatro veces más gente.</strong> <span class="num">1.046</span> visitantes contra <span class="num">248</span>, con <span class="num">1.416</span> sesiones y una interacción media de <strong>2 min 34 s</strong>, que es alta. Bogotá aporta <span class="num">550</span> usuarios, más de la mitad. El empuje vino de la pauta en redes (<span class="num">298</span> sesiones), el tráfico directo (<span class="num">442</span>) y la búsqueda orgánica (<span class="num">280</span>).</p>
+      <p><strong>El interés casi se duplicó, y se fue a WhatsApp.</strong> Los clics a WhatsApp pasaron de <span class="num">88</span> a <span class="num">165</span>, un <strong>+88&nbsp;%</strong>. Y <span class="num">49</span> personas llegaron a iniciar el pago, un 29&nbsp;% más que en agosto.</p>
+      <p><strong>Pero ninguna compra se cerró en el sitio en septiembre.</strong> El último pedido registrado sigue siendo el del <strong>18 de agosto</strong>. La demanda existe y está llegando; se está yendo por WhatsApp o se está cayendo en el camino. La sección siguiente explica por qué, y no es un misterio.</p>
+    </div>
+  </section>
+
+  <!-- ============ OPORTUNIDAD ============ -->
+  <section>
+    <h2>El cabo suelto de septiembre: el precio</h2>
+    <p class="sec-note">Un solo dato explica el checkout vacío, el rechazo en Shopping y buena parte del CTR bajo.</p>
+    <div class="verdict">
+      <p><strong>256 productos activos están publicados con precio cero.</strong> En agosto eran <span class="num">16</span>. La regla que se acordó &mdash; que la hoja de inventario manda en el precio, y si dice cero es cero &mdash; está funcionando exactamente como se pidió, y al hacerlo <strong>destapó que la hoja no trae precio para buena parte del catálogo</strong>.</p>
+      <p><strong>Eso arrastra tres consecuencias, todas medibles.</strong> Primera: <span class="num">125</span> productos de <span class="num">557</span> están <strong>rechazados en Merchant Center</strong>, y el motivo es literalmente &laquo;falta el precio&raquo;; no pueden aparecer en Google Shopping, que es el formato que mejor convierte. Segunda: <strong><span class="num">13</span> de esos productos tienen existencias y su botón de compra está activo</strong>, así que hoy se pueden comprar por $0. Tercera: los productos sin precio no pueden competir por un clic en Google.</p>
+      <p><strong>Y sigue en pie el diagnóstico de agosto sobre el título y la descripción.</strong> Las páginas <code>/tienda</code> y <code>/tienda?categoria=accesorios-pc</code> juntas aparecieron <span class="num">6.098</span> veces y consiguieron <strong>6 clics</strong>. Aparecen mucho, en buena posición, y lo que el comprador lee en Google no lo invita a entrar. <span class="num">446</span> productos siguen sin descripción propia.</p>
+      <p><strong>El dato que ordena la prioridad:</strong> de los <span class="num">237</span> clics del mes, <span class="num">104</span> vinieron de gente que ya escribía &laquo;All For All&raquo; &mdash; con un <strong>CTR del 28&nbsp;%</strong>. Los otros <span class="num">133</span> salieron de <span class="num">13.330</span> apariciones del catálogo, un CTR del 1&nbsp;%. <strong>La marca convierte diez veces mejor que el catálogo.</strong> Ahí está el margen.</p>
+    </div>
+  </section>
+
+  <!-- ============ QUE SIGUE ============ -->
+  <section>
+    <h2>Qué sigue, en orden</h2>
+    <p class="sec-note">Ordenado por lo que más mueve la aguja, no por lo que más rápido se hace.</p>
+    <ul class="plain">
+      <li><span class="tag t-cont">Lo más urgente</span><span><b>Cerrar la compra de productos sin precio</b> y completar los precios que faltan en la hoja. Quita el riesgo de una venta a $0, destraba los 125 productos rechazados en Shopping y devuelve al catálogo la posibilidad de competir por un clic. Un solo arreglo, tres problemas.</span></li>
+      <li><span class="tag t-mafe">Solo Mafe</span><span><b>Responder las 9 solicitudes de disponibilidad</b> que dejó el mes, todas sin atender. <strong>Siete son monitores</strong> &mdash; AOC Q27G4XN, MSI MAG255FX24, Samsung LS24F330, ASUS VA259HGA &mdash; pedidos con nombre y referencia. Es la demanda más concreta que hay hoy, y dice qué reponer.</span></li>
+      <li><span class="tag t-cont">Lo más grande</span><span><b>Escribir títulos y descripciones propias</b>, empezando por <code>/tienda</code> y <code>/tienda?categoria=accesorios-pc</code>: 6.098 apariciones y 6 clics entre las dos. Es donde menos esfuerzo cuesta ganar visitas, porque el tráfico ya está llegando hasta la puerta.</span></li>
+      <li><span class="tag t-dec">Decisión</span><span><b>Seguir replicando el modelo de marca.</b> Logitech y Esenses ya tienen página propia; falta subir las imágenes de Esenses, que están listas, y decidir qué marcas siguen. Es lo que reparte las apariciones de <code>/tienda</code> en páginas con nombre propio.</span></li>
+      <li><span class="tag t-dec">Decisión</span><span><b>Entender por qué se caen los 49 checkouts</b> y montar una recuperación por WhatsApp para quien deja el pago a medias. Con 165 contactos al mes, el canal ya está caliente.</span></li>
+    </ul>
+  </section>
+
+  <div class="closing">
+    <h2>Para tener en cuenta</h2>
+    <ul>
+      <li><b>16 productos quedaron agotados sin estarlo.</b> El sistema de inventario descarta las filas cuyo código lleva tilde o espacio (<code>CÁM-0357</code>, <code>HP -0240</code>) y deja el producto en cero. Once son cámaras Vta+ con fotos completas. Hay que revisar qué stock declara la hoja para esos códigos.</li>
+      <li><b>Casi la mitad de las apariciones del mes no son de compradores.</b> Las dos búsquedas que más mostraron la tienda fueron <code>product</code> (664 veces, 0 clics) y <code>all</code> (635, 0 clics), seguidas de decenas de códigos de proveedor. Inflan las impresiones y bajan el CTR: por eso el CTR cae aunque la visibilidad real mejore.</li>
+      <li><b>810 de las 890 direcciones del sitio siguen sin revisar por Google</b>, y 18 están marcadas como no indexadas. Es normal en un sitio que creció rápido, pero conviene empujarlo.</li>
+      <li><b>146 productos siguen sin foto y 446 sin descripción propia.</b> Son los mismos que no pueden entrar bien a Shopping ni ganarse un clic.</li>
+      <li>Los datos de Search Console corresponden al 1&ndash;28 de septiembre; los de Analytics, del 31 de agosto al 27 de septiembre. La comparación con agosto usa las cifras publicadas en el informe del mes pasado.</li>
+    </ul>
+  </div>
+
+
+  <div class="firma">
+    <span class="marca">Ferova Agency</span>
+    <span class="nota">Informe de septiembre 2026 &middot; allforall.com.co &middot; Datos de Google Search Console, Google Analytics, Merchant Center y Ubersuggest.</span>
+  </div>
+
+</div>
+
+</body></html>
