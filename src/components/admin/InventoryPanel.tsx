@@ -13,7 +13,15 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { formatCOP } from "@/lib/cart";
-import { RefreshCw, AlertTriangle, CheckCircle2, PackageX, Clock, CloudDownload } from "lucide-react";
+import {
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+  PackageX,
+  Clock,
+  CloudDownload,
+  ArrowLeftRight,
+} from "lucide-react";
 
 type InvProduct = {
   id: string;
@@ -86,6 +94,8 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
   const [q, setQ] = useState("");
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
+  const [reasignados, setReasignados] = useState<{ de: string; a: string; name: string }[]>([]);
+  const [conflictos, setConflictos] = useState<{ sku: string; motivo: string }[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -106,14 +116,16 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
     let vinculado = 0;
     let sin = 0;
     let ambiguo = 0;
+    let reasignado = 0;
     let last: string | null = null;
     for (const r of rows) {
       if (r.inv_estado === "vinculado" || r.inv_estado === "sku_reasignado") vinculado++;
       else if (r.inv_estado === "sin_inventario") sin++;
       else if (r.inv_estado === "ambiguo") ambiguo++;
+      if (r.inv_estado === "sku_reasignado") reasignado++;
       if (r.inv_synced_at && (!last || r.inv_synced_at > last)) last = r.inv_synced_at;
     }
-    return { vinculado, sin, ambiguo, last };
+    return { vinculado, sin, ambiguo, reasignado, last };
   }, [rows]);
 
   const stale =
@@ -167,10 +179,23 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const s = (data as any)?.summary ?? {};
-      const msg = `Hoja: ${s.sheetRows ?? 0} filas · Vinculados: ${s.linked ?? 0} · Creados: ${s.created ?? 0} · Repetidos omitidos: ${s.skippedDuplicates ?? 0} · Duplicados: ${s.ambiguous ?? 0} · Sin inventario: ${s.zeroed ?? 0}`;
+      const msg =
+        `Hoja: ${s.sheetRows ?? 0} filas · Actualizados: ${s.actualizados ?? s.linked ?? 0}` +
+        ` · SKU reasignados: ${s.reasignados ?? 0} · Creados: ${s.creados ?? s.created ?? 0}` +
+        ` · Sin inventario: ${s.sinInventario ?? s.zeroed ?? 0} · Conflictos: ${s.conflictos ?? 0}` +
+        ` · Filas descartadas: ${s.descartadas ?? 0}`;
       setSyncResult(msg);
+      // La hoja le cambio el codigo a productos que ya existian. No es un
+      // error, pero tiene que verse: antes esto se resolvia a ciegas.
+      const reasg: { de: string; a: string; name: string }[] = (data as any)?.reasignados ?? [];
+      setReasignados(reasg);
+      // Lo que la funcion NO pudo resolver sin adivinar. Se mira a mano.
+      const confl: { sku: string; motivo: string }[] = (data as any)?.conflictos ?? [];
+      setConflictos(confl);
       const errs: string[] = (data as any)?.errors ?? [];
       if (errs.length) toast.warning(`Sincronizado con avisos: ${errs[0]}`);
+      else if (confl.length) toast.warning(`Sincronizado. ${confl.length} SKU quedaron sin resolver, revisalos abajo.`);
+      else if (reasg.length) toast.success(`Inventario sincronizado. ${reasg.length} producto(s) cambiaron de SKU.`);
       else toast.success("Inventario sincronizado");
       await load();
       await onSynced?.();
@@ -239,10 +264,10 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
           icon={<PackageX className="h-4 w-4 text-muted-foreground" />}
         />
         <MetricCard
-          label="Duplicados por revisar"
-          value={counts.ambiguo}
-          warn={counts.ambiguo > 0}
-          icon={<AlertTriangle className="h-4 w-4 text-amber-600" />}
+          label="SKU reasignados por la hoja"
+          value={counts.reasignado}
+          warn={counts.reasignado > 0}
+          icon={<ArrowLeftRight className="h-4 w-4 text-amber-600" />}
         />
         <MetricCard label="Última sincronización" icon={<Clock className="h-4 w-4" />} warn={stale}>
           <p className={`text-lg font-bold ${stale ? "text-destructive" : ""}`}>
@@ -277,6 +302,48 @@ export function InventoryPanel({ onSynced }: { onSynced?: () => void | Promise<v
         <p className="text-xs text-muted-foreground bg-muted/50 border rounded-lg px-3 py-2">
           {syncResult}
         </p>
+      )}
+
+      {/* La hoja le cambio el codigo a productos que ya existian. */}
+      {reasignados.length > 0 && (
+        <div className="border rounded-xl bg-amber-50 border-amber-300 p-4 space-y-2">
+          <p className="text-sm font-semibold flex items-center gap-2 text-amber-900">
+            <ArrowLeftRight className="h-4 w-4" />
+            {reasignados.length} producto(s) cambiaron de SKU en la hoja
+          </p>
+          <p className="text-xs text-amber-900/80">
+            Se les reasignó el código al producto que ya existía. Las fotos, la marca, la
+            categoría y la URL no cambiaron.
+          </p>
+          <ul className="text-xs space-y-1">
+            {reasignados.map((r) => (
+              <li key={`${r.de}-${r.a}`} className="font-mono">
+                {r.de} → {r.a} <span className="font-sans text-muted-foreground">· {r.name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Lo que la sincronización no pudo resolver sin adivinar. */}
+      {conflictos.length > 0 && (
+        <div className="border rounded-xl bg-destructive/5 border-destructive/40 p-4 space-y-2">
+          <p className="text-sm font-semibold flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-4 w-4" />
+            {conflictos.length} SKU sin resolver
+          </p>
+          <p className="text-xs text-muted-foreground">
+            No se escribió nada para estos. Hay que mirarlos a mano.
+          </p>
+          <ul className="text-xs space-y-1">
+            {conflictos.map((c, i) => (
+              <li key={`${c.sku}-${i}`}>
+                <span className="font-mono">{c.sku}</span>
+                <span className="text-muted-foreground"> · {c.motivo}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       <Tabs defaultValue="low">

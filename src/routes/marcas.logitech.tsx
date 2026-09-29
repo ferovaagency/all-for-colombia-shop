@@ -271,10 +271,17 @@ function LogitechMicrosite() {
 
   // El catálogo solo existe en el DOM cuando ya hay productos cargados, así que
   // el desplazamiento que pide un banner se reintenta al terminar la carga.
+  //
+  // Y el salto es INSTANTANEO a proposito. Comprobado en el sitio publicado el
+  // 29-09-2026: en esta pagina `behavior: "smooth"` no llega nunca — el scroll
+  // suave se cancela mientras las secciones animadas entran y cambian la altura
+  // del documento, y el visitante se queda arriba. Con `auto` aterriza siempre.
+  //   scrollIntoView({behavior:'auto'})   -> scrollY 5691
+  //   scrollIntoView({behavior:'smooth'}) -> scrollY 0
   useEffect(() => {
     if (!scrollPendiente || loading || products.length === 0) return;
     const id = requestAnimationFrame(() => {
-      document.getElementById("catalogo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("catalogo")?.scrollIntoView({ behavior: "auto", block: "start" });
       setScrollPendiente(false);
     });
     return () => cancelAnimationFrame(id);
@@ -457,7 +464,7 @@ function LogitechMicrosite() {
                       setActiveSerie(s.key);
                       document
                         .getElementById("catalogo")
-                        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        ?.scrollIntoView({ behavior: "auto", block: "start" });
                     }}
                   />
                 ))}
@@ -474,7 +481,7 @@ function LogitechMicrosite() {
                         setActiveSerie(s.key);
                         document
                           .getElementById("catalogo")
-                          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                          ?.scrollIntoView({ behavior: "auto", block: "start" });
                       }}
                     />
                   ))}
